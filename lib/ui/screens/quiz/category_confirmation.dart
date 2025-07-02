@@ -149,6 +149,11 @@ class CategoryConfirmationPage extends StatelessWidget {
                             ),
                           );
                         },
+                        onQuestionResult: (result) {
+                          // 🔁 À adapter selon ce que tu veux faire avec les résultats.
+                          print('📊 Résultat question reçu : $result');
+                          // Tu peux aussi appeler une méthode du controller, provider ou state.
+                        },
                         onError: (message) {
                           Navigator.pop(context); // Ferme le dialog
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -156,6 +161,32 @@ class CategoryConfirmationPage extends StatelessWidget {
                           );
                         },
                       );
+
+
+                      // SocketClient().connect(
+                      //   username: username,
+                      //   categoryId: categoryId,
+                      //   onStartGame: (data) {
+                      //     Navigator.pop(context); // Ferme le dialog d’attente
+                      //
+                      //     Navigator.pushReplacement(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (_) => QuizPlayPage(
+                      //           categoryId: categoryId,
+                      //           mode: mode,
+                      //           versusData: data,
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      //   onError: (message) {
+                      //     Navigator.pop(context); // Ferme le dialog
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(content: Text('Erreur : $message')),
+                      //     );
+                      //   },
+                      // );
                     }
                   },
                   child: const Text('Start', style: TextStyle(fontSize: 18)),

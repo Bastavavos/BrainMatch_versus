@@ -12,6 +12,7 @@ class SocketClient {
     required String username,
     required String categoryId,
     required Function(dynamic data) onStartGame,
+    required Function(Map<String, dynamic>) onQuestionResult,
     Function(String)? onError,
   }) {
     socket = IO.io('http://192.168.1.67:3000', <String, dynamic>{
@@ -32,18 +33,37 @@ class SocketClient {
 
     socket.on('start_game', (data) {
       print('🎮 Partie lancée ! Données reçues : $data');
-      onStartGame(data); // callback pour passer les données à l’UI
+      onStartGame(data);
+    });
+
+    socket.on('question_result', (data) {
+      print('📩 Résultat question reçu : $data');
+      onQuestionResult(Map<String, dynamic>.from(data));
     });
 
     socket.on('error', (data) {
       print('⚠️ Erreur socket : $data');
       if (onError != null) {
-        onError(data['message']);
+        onError(data['message'] ?? 'Erreur inconnue');
       }
     });
 
     socket.onDisconnect((_) {
       print('🔌 Déconnecté du serveur socket');
+    });
+  }
+
+  void sendAnswer({
+    required String roomId,
+    required int questionIndex,
+    required String answer,
+    required String username,
+  }) {
+    socket.emit('player_answer', {
+      'roomId': roomId,
+      'questionIndex': questionIndex,
+      'answer': answer,
+      'username': username,
     });
   }
 
