@@ -1,0 +1,100 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.melos_tool/
+generated_plugin_registrant.dart
+
+# Objets d'analyse
+analysis_options.yaml
+# Pour éviter d'ajouter les fichiers temporaires générés lors de la compilation
+*.log
+
+# Env files
+.env
+.env.*
+
+# IDEs
+## VS Code
+.vscode/
+.history/
+
+## IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+*.swp
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Android
+android/.gradle/
+android/app/build/
+android/local.properties
+android/.idea/
+android/.settings/
+android/captures/
+android/gradle.properties
+android/gradlew
+android/gradlew.bat
+
+# iOS
+ios/Pods/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.framework
+ios/Flutter/engine/
+ios/Runner.xcworkspace/
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcodeproj/project.xcsettings
+ios/build/
+ios/.symlinks/
+ios/.flutter-plugins
+ios/.flutter-plugins-dependencies
+
+# Web
+web/.dart_tool/
+web/build/
+
+# Misc
+*.lock
+*.tmp
+*.bak
+*.old
+*.orig
+*.rej
+*.swo
+
+# Firebase
+firebase.json
+.firebaserc
+.firebase/
+
+# Coverage
+coverage/
+lcov.info
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+
+# Symbols
+symbols/
+
+# Packages à ignorer manuellement
+example/
+test_driver/
