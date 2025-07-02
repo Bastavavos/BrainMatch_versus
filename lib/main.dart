@@ -7,9 +7,19 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+// Future<void> main() async {
+//   dotenv.load(fileName: ".env");
+//   runApp(ProviderScope(child: MyApp()));
+// }
+
 Future<void> main() async {
-  dotenv.load(fileName: ".env");
-  runApp(ProviderScope(child: MyApp()));
+  WidgetsFlutterBinding.ensureInitialized(); // **TRÈS IMPORTANT pour les opérations async avant runApp**
+  await dotenv.load(fileName: ".env");    // **Utilisez await ici**
+  runApp(
+    ProviderScope( // Enveloppez avec ProviderScope si vous utilisez Riverpod
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
