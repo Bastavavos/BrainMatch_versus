@@ -52,7 +52,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     if (widget.mode == 'Versus' && widget.versusData != null) {
       SocketClient().connect(
         token: widget.token,
-        username: widget.currentUser,
         categoryId: widget.categoryId,
         currentUser: widget.currentUser,
         isHost: widget.versusData!['isHost'],
