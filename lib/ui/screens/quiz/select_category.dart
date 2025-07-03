@@ -8,7 +8,13 @@ import 'category_confirmation.dart';
 
 class CategorySelectionPage extends StatefulWidget {
   final String selectedMode;
-  const CategorySelectionPage({super.key, required this.selectedMode});
+  final String token;
+
+  const CategorySelectionPage({
+    super.key,
+    required this.selectedMode,
+    required this.token,
+  });
 
   @override
   State<CategorySelectionPage> createState() => _CategorySelectionPageState();
@@ -91,7 +97,7 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                                 logoUrl: category['logo'],
                                 mode: widget.selectedMode,
                                 currentUser: 'username',
-                                token: 'token',
+                                token: widget.token,
                               ),
                             ),
                           );

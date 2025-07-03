@@ -33,12 +33,26 @@ class MyApp extends StatelessWidget {
       theme: appTheme,
       initialRoute: '/',
       onGenerateRoute: (settings) {
+        // if (settings.name == '/confirm') {
+        //   final selectedMode = settings.arguments as String;
+        //   return MaterialPageRoute(
+        //     builder: (context) => CategorySelectionPage(selectedMode: selectedMode),
+        //   );
+        // }
+
         if (settings.name == '/confirm') {
-          final selectedMode = settings.arguments as String;
+          final args = settings.arguments as Map<String, dynamic>;
+          final selectedMode = args['selectedMode'] as String;
+          final token = args['token'] as String;
+
           return MaterialPageRoute(
-            builder: (context) => CategorySelectionPage(selectedMode: selectedMode),
+            builder: (context) => CategorySelectionPage(
+              selectedMode: selectedMode,
+              token: token,
+            ),
           );
         }
+
 
         switch (settings.name) {
           case '/':

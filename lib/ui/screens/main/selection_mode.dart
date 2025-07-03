@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../provider/user_provider.dart';
+
 class SelectionModePage extends ConsumerWidget {
   const SelectionModePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    final user = ref.watch(userProvider);
+    final token = user != null && user.containsKey('token') ? user['token'] as String : '';
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -22,6 +27,7 @@ class SelectionModePage extends ConsumerWidget {
               icon: LucideIcons.user,
               color: colorScheme.primary,
               routeName: 'Solo',
+              token: token,
             ),
             const SizedBox(height: 20),
             _buildModeCard(
@@ -30,6 +36,7 @@ class SelectionModePage extends ConsumerWidget {
               icon: LucideIcons.users,
               color: colorScheme.secondary,
               routeName: 'Versus',
+              token: token,
             ),
           ],
         ),
@@ -43,15 +50,33 @@ class SelectionModePage extends ConsumerWidget {
         required IconData icon,
         required Color color,
         required String routeName,
+        required String token,
       }) {
     return Center(
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
+        // onTap: () {
+        //   Navigator.pushNamed(
+        //     context,
+        //     '/confirm',
+        //     arguments: routeName,
+        //   );
+        // },
+
         onTap: () {
+          if (token.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Token manquant, veuillez vous reconnecter')),
+            );
+            return;
+          }
           Navigator.pushNamed(
             context,
             '/confirm',
-            arguments: routeName,
+            arguments: {
+              'selectedMode': routeName,
+              'token': token,
+            },
           );
         },
         child: Container(

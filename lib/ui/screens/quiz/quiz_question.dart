@@ -41,86 +41,124 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
   Timer? countdownTimer;
   double timeLeft = 10.0;
 
+  // @override
+  // void initState() {
+  //   // super.initState();
+  //   // fetchQuestionData().then((_) {
+  //   //   if (questions.isNotEmpty) startTimer();
+  //   // });
+  //   super.initState();
+  //
+  //   if (widget.mode == 'Versus' && widget.versusData != null) {
+  //     SocketClient().connect(
+  //       token: widget.token,
+  //       categoryId: widget.categoryId,
+  //       currentUser: widget.currentUser,
+  //       isHost: widget.versusData!['isHost'],
+  //       onStartGame: (data) {
+  //         setState(() {
+  //           questions = List<Map<String, dynamic>>.from(data['quiz']['subTheme']['questions']);
+  //           isLoading = false;
+  //         });
+  //         startTimer();
+  //       },
+  //       onQuestionResult: (data) {
+  //         setState(() {
+  //           timeLeft = 0;
+  //         });
+  //
+  //         // if (data['username'] == widget.currentUser) {
+  //         //   hasAnswered = true;
+  //         //   if (data['isCorrect']) correctAnswers++;
+  //         // }
+  //         final myScoreObj = (data['playersScores'] as List).firstWhere(
+  //               (player) => player['username'] == widget.currentUser,
+  //           orElse: () => null,
+  //         );
+  //
+  //         if (myScoreObj != null) {
+  //           setState(() {
+  //             hasAnswered = true;
+  //             correctAnswers = myScoreObj['score'];
+  //           });
+  //         } else {
+  //           opponentHasAnswered = true;
+  //         }
+  //
+  //         Future.delayed(const Duration(seconds: 2), () {
+  //           if (data['nextQuestionIndex'] < questions.length) {
+  //             setState(() {
+  //               currentQuestionIndex = data['nextQuestionIndex'];
+  //               hasAnswered = false;
+  //               selectedIndex = null;
+  //               startTimer();
+  //             });
+  //           } else {
+  //             Navigator.pushReplacement(
+  //               context,
+  //               MaterialPageRoute(
+  //                 builder: (_) => QuizResultPage(
+  //                   totalQuestions: questions.length,
+  //                   correctAnswers: correctAnswers,
+  //                   mode: widget.mode,
+  //                 ),
+  //               ),
+  //             );
+  //           }
+  //         });
+  //       },
+  //     );
+  //   }
+  //   if (widget.mode == 'Versus' && widget.versusData != null) {
+  //     setState(() {
+  //       questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
+  //       isLoading = false;
+  //     });
+  //     startTimer();
+  //   } else {
+  //     fetchQuestionData().then((_) {
+  //       if (questions.isNotEmpty) startTimer();
+  //     });
+  //   }
+  // }
+
   @override
   void initState() {
-    // super.initState();
-    // fetchQuestionData().then((_) {
-    //   if (questions.isNotEmpty) startTimer();
-    // });
     super.initState();
 
     if (widget.mode == 'Versus' && widget.versusData != null) {
+      // Utiliser les données initiales reçues via versusData
+      setState(() {
+        questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
+        isLoading = false;
+      });
+
+      // Lancer le timer
+      startTimer();
+
+      // Connexion socket uniquement pour recevoir les résultats et autres events
       SocketClient().connect(
         token: widget.token,
         categoryId: widget.categoryId,
         currentUser: widget.currentUser,
         isHost: widget.versusData!['isHost'],
-        onStartGame: (data) {
-          setState(() {
-            questions = List<Map<String, dynamic>>.from(data['quiz']['subTheme']['questions']);
-            isLoading = false;
-          });
-          startTimer();
-        },
-        onQuestionResult: (data) {
-          setState(() {
-            timeLeft = 0;
-          });
-
-          // if (data['username'] == widget.currentUser) {
-          //   hasAnswered = true;
-          //   if (data['isCorrect']) correctAnswers++;
-          // }
-          final myScoreObj = (data['playersScores'] as List).firstWhere(
-                (player) => player['username'] == widget.currentUser,
-            orElse: () => null,
-          );
-
-          if (myScoreObj != null) {
-            setState(() {
-              hasAnswered = true;
-              correctAnswers = myScoreObj['score'];
-            });
-          } else {
-            opponentHasAnswered = true;
+        onStartGame: (_) {}, // inutile ici car déjà commencé
+        onQuestionResult: handleQuestionResult,
+        onError: (message) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Erreur socket : $message')),
+            );
           }
-
-          Future.delayed(const Duration(seconds: 2), () {
-            if (data['nextQuestionIndex'] < questions.length) {
-              setState(() {
-                currentQuestionIndex = data['nextQuestionIndex'];
-                hasAnswered = false;
-                selectedIndex = null;
-                startTimer();
-              });
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => QuizResultPage(
-                    totalQuestions: questions.length,
-                    correctAnswers: correctAnswers,
-                    mode: widget.mode,
-                  ),
-                ),
-              );
-            }
-          });
         },
       );
-    }
-    if (widget.mode == 'Versus' && widget.versusData != null) {
-      setState(() {
-        questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
-        isLoading = false;
-      });
-      startTimer();
     } else {
       fetchQuestionData().then((_) {
         if (questions.isNotEmpty) startTimer();
       });
     }
   }
+
 
   @override
   void dispose() {
@@ -203,6 +241,51 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
       );
     }
   }
+
+  void handleQuestionResult(data) {
+    if (!mounted) return; // <- Très important
+    setState(() {
+      timeLeft = 0;
+    });
+
+    final myScoreObj = (data['playersScores'] as List).firstWhere(
+          (player) => player['username'] == widget.currentUser,
+      orElse: () => null,
+    );
+
+    if (myScoreObj != null) {
+      setState(() {
+        hasAnswered = true;
+        correctAnswers = myScoreObj['score'];
+      });
+    } else {
+      opponentHasAnswered = true;
+    }
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      if (data['nextQuestionIndex'] < questions.length) {
+        setState(() {
+          currentQuestionIndex = data['nextQuestionIndex'];
+          hasAnswered = false;
+          selectedIndex = null;
+          startTimer();
+        });
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => QuizResultPage(
+              totalQuestions: questions.length,
+              correctAnswers: correctAnswers,
+              mode: widget.mode,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
