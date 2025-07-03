@@ -90,6 +90,8 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                                 imageUrl: category['image'],
                                 logoUrl: category['logo'],
                                 mode: widget.selectedMode,
+                                currentUser: 'username',
+                                token: 'token',
                               ),
                             ),
                           );

@@ -10,10 +10,14 @@ class SocketClient {
 
   void connect({
     required String username,
+    required String token,
     required String categoryId,
     required Function(dynamic data) onStartGame,
     required Function(Map<String, dynamic>) onQuestionResult,
     Function(String)? onError,
+    bool isHost = false,
+    bool opponentHasAnswered = false,
+    required String currentUser,
   }) {
     socket = IO.io('http://192.168.1.67:3000', <String, dynamic>{
       'transports': ['websocket'],
@@ -26,14 +30,20 @@ class SocketClient {
       print('✅ Connecté au serveur socket');
 
       socket.emit('join_game', {
-        'username': username,
+        'token': token,
         'categoryId': categoryId,
+        'isHost': isHost, // important pour initier une seule fois
       });
     });
 
     socket.on('start_game', (data) {
       print('🎮 Partie lancée ! Données reçues : $data');
       onStartGame(data);
+    });
+
+    socket.on('opponent_has_answered', (data) {
+      print('Opponent has answered : $data');
+      opponentHasAnswered = true;
     });
 
     socket.on('question_result', (data) {
@@ -71,32 +81,3 @@ class SocketClient {
     socket.disconnect();
   }
 }
-
-
-// import 'package:socket_io_client/socket_io_client.dart' as io;
-//
-// void connectToSocket() {
-//   final socket = io.io('http://192.168.1.67:3000', <String, dynamic>{
-//     'transports': ['websocket'],
-//     'autoConnect': false,
-//   });
-//
-//   socket.connect();
-//
-//   socket.onConnect((_) {
-//     print('Connected to the socket server');
-//   });
-//
-//   socket.onDisconnect((_) {
-//     print('Disconnected from the socket server');
-//   });
-//
-//   socket.on('message', (data) {
-//     print('Received message: $data');
-//   });
-//
-//   // Add more event listeners and functionality as needed.
-//
-//   // To send a message to the server, use:
-//   // socket.emit('eventName', 'message data');
-// }

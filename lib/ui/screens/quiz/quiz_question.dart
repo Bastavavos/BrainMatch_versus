@@ -12,6 +12,8 @@ class QuizPlayPage extends StatefulWidget {
   final String categoryId;
   final String mode;
   final Map<String, dynamic>? versusData;
+  final String currentUser;
+  final String token;
 
 
   const QuizPlayPage({
@@ -19,6 +21,8 @@ class QuizPlayPage extends StatefulWidget {
     required this.categoryId,
     required this.mode,
     this.versusData,
+    required this.currentUser,
+    required this.token,
   });
 
   @override
@@ -32,6 +36,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
   int? selectedIndex;
   bool hasAnswered = false;
   int correctAnswers = 0;
+  bool opponentHasAnswered = false;
 
   Timer? countdownTimer;
   double timeLeft = 10.0;
@@ -46,8 +51,11 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
 
     if (widget.mode == 'Versus' && widget.versusData != null) {
       SocketClient().connect(
-        username: widget.versusData!['players'][0]['username'], // ou joueur courant
+        token: widget.token,
+        username: widget.currentUser,
         categoryId: widget.categoryId,
+        currentUser: widget.currentUser,
+        isHost: widget.versusData!['isHost'],
         onStartGame: (data) {
           setState(() {
             questions = List<Map<String, dynamic>>.from(data['quiz']['subTheme']['questions']);
@@ -58,9 +66,25 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
         onQuestionResult: (data) {
           setState(() {
             timeLeft = 0;
-            hasAnswered = true;
-            // mettre à jour le score et autres infos
           });
+
+          // if (data['username'] == widget.currentUser) {
+          //   hasAnswered = true;
+          //   if (data['isCorrect']) correctAnswers++;
+          // }
+          final myScoreObj = (data['playersScores'] as List).firstWhere(
+                (player) => player['username'] == widget.currentUser,
+            orElse: () => null,
+          );
+
+          if (myScoreObj != null) {
+            setState(() {
+              hasAnswered = true;
+              correctAnswers = myScoreObj['score'];
+            });
+          } else {
+            opponentHasAnswered = true;
+          }
 
           Future.delayed(const Duration(seconds: 2), () {
             if (data['nextQuestionIndex'] < questions.length) {
@@ -86,19 +110,17 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
         },
       );
     }
-
-
-    // if (widget.mode == 'Versus' && widget.versusData != null) {
-    //   setState(() {
-    //     questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
-    //     isLoading = false;
-    //   });
-    //   startTimer();
-    // } else {
-    //   fetchQuestionData().then((_) {
-    //     if (questions.isNotEmpty) startTimer();
-    //   });
-    // }
+    if (widget.mode == 'Versus' && widget.versusData != null) {
+      setState(() {
+        questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
+        isLoading = false;
+      });
+      startTimer();
+    } else {
+      fetchQuestionData().then((_) {
+        if (questions.isNotEmpty) startTimer();
+      });
+    }
   }
 
   @override
@@ -247,6 +269,15 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
               ),
               textAlign: TextAlign.center,
             ),
+            if (!hasAnswered && opponentHasAnswered)
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: Text(
+                  "L'adversaire a répondu",
+                  style: TextStyle(color: Colors.redAccent),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             const SizedBox(height: 24),
             ...List.generate(
               questions[currentQuestionIndex]['options'].length,
