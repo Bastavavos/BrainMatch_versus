@@ -17,10 +17,19 @@ class SocketClient {
     Function(String)? onError,
     bool isHost = false,
   }) {
-    socket = IO.io('http://192.168.1.67:3000', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
+    // socket = IO.io('http://192.168.1.67:3000', <String, dynamic>{
+    //   'transports': ['websocket'],
+    //   'autoConnect': false,
+    // });
+    socket = IO.io(
+      'http://192.168.1.67:3000',
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .enableAutoConnect()
+          .setExtraHeaders({'Authorization': 'Bearer $token'}) // <- important !
+          .build(),
+    );
+
 
     socket.connect();
 
