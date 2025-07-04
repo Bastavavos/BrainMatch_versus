@@ -59,7 +59,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
 
   Future<void> _fetchUserData() async {
     final user = ref.read(userProvider);
-    if (user == null || user['userId'] == null) {
+    if (user == null || user['id'] == null) {
       setState(() {
         _isLoading = false;
         _error = "Utilisateur non connecté.";
@@ -68,7 +68,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
     }
 
     final String baseUrl = dotenv.env['API_KEY']!;
-    final String userId = user['userId'];
+    final String userId = user['id'];
     final String? token = user['token'];
 
     try {
