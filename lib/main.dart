@@ -3,21 +3,39 @@ import 'package:brain_match/ui/layout/main_layout.dart';
 import 'package:brain_match/ui/screens/quiz/select_category.dart';
 import 'package:brain_match/ui/screens/auth/register.dart';
 import 'package:brain_match/ui/theme.dart';
+import 'package:brain_match/view_models/user_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart' as provider;
 
 // Future<void> main() async {
 //   dotenv.load(fileName: ".env");
 //   runApp(ProviderScope(child: MyApp()));
 // }
 
+// Future<void> main() async {
+//   WidgetsFlutterBinding.ensureInitialized(); // **TRÈS IMPORTANT pour les opérations async avant runApp**
+//   await dotenv.load(fileName: ".env");    // **Utilisez await ici**
+//   runApp(
+//     ProviderScope( // Enveloppez avec ProviderScope si vous utilisez Riverpod
+//       child: MyApp(),
+//     ),
+//   );
+// }
+
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // **TRÈS IMPORTANT pour les opérations async avant runApp**
-  await dotenv.load(fileName: ".env");    // **Utilisez await ici**
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(
-    ProviderScope( // Enveloppez avec ProviderScope si vous utilisez Riverpod
-      child: MyApp(),
+    provider.MultiProvider(
+      providers: [
+        provider.ChangeNotifierProvider(create: (_) => UserViewModel()),
+      ],
+      child: ProviderScope( // Enveloppez avec ProviderScope si vous utilisez Riverpod
+        child: MyApp(),
+      ),
+      // child: MyApp(),
     ),
   );
 }

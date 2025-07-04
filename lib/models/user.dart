@@ -5,7 +5,6 @@ class User {
   final int score;
   final String? picture;
   final List<String> friendIds;
-  // final String? token;
 
   User({
     required this.id,
@@ -14,7 +13,6 @@ class User {
     required this.email,
     this.picture,
     this.friendIds = const [],
-    // this.token,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -25,7 +23,6 @@ class User {
       email: json['email'],
       picture: json['picture'],
       friendIds: List<String>.from(json['friends'] ?? []),
-      // token: json['token'],
     );
   }
 }

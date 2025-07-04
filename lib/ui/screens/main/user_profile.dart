@@ -20,10 +20,10 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   List<Map<String, dynamic>> _friendsData = [];
 
   Future<void> _fetchFriendsData(
-    List<dynamic> friendIds,
-    String baseUrl,
-    String? token,
-  ) async {
+      List<dynamic> friendIds,
+      String baseUrl,
+      String? token,
+      ) async {
     List<Map<String, dynamic>> friends = [];
 
     for (var friendId in friendIds) {

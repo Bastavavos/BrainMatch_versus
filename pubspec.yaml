@@ -49,6 +49,7 @@ dependencies:
   lucide_icons: ^0.257.0
   image_picker: ^1.0.4
   socket_io_client: ^3.1.2
+  provider: ^6.1.5
 
 dev_dependencies:
   flutter_test:

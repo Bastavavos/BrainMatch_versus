@@ -1,46 +1,24 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'package:cached_network_image/cached_network_image.dart';
-
-import '../../../models/user.dart';
+import 'package:provider/provider.dart';
+import '../../../view_models/user_view_model.dart';
+import '../../widgets/user_widget.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
 
   @override
-  _LeaderboardScreenState createState() => _LeaderboardScreenState();
+  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
-  List<User> users = [];
-  bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    fetchLeaderboard();
-  }
 
-  Future<void> fetchLeaderboard() async {
-    final String baseUrl = dotenv.env['API_KEY']!;
-    final response = await http.get(Uri.parse('$baseUrl/user'));
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      List<User> loadedUsers = data.map((e) => User.fromJson(e)).toList();
-
-      // Trier par score décroissant
-      loadedUsers.sort((a, b) => b.score.compareTo(a.score));
-
-      setState(() {
-        users = loadedUsers;
-        isLoading = false;
-      });
-    } else {
-      throw Exception('Erreur lors de la récupération des utilisateurs');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+      userViewModel.fetchUsers();
+    });
   }
 
   Color _getRankColor(int index) {
@@ -52,170 +30,201 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       case 2:
         return const Color(0xFFCD7F32); // Bronze
       default:
-        return Colors.white;
+        return Colors.transparent; // Pour les autres, ou une couleur par défaut
     }
-  }
-
-  void _sendFriendRequest(String userId, String username) {
-    // add api call add friends
-    // await http.post(Uri.parse('$baseUrl/api/friends/add'), body: {'friendId': userId});
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Friend request send to : $username")),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final podiumUsers = users.take(3).toList();
-    final otherUsers = users.skip(3).toList();
+    return Consumer<UserViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (viewModel.errorMessage != null) {
+          return Center(child: Text('Erreur : ${viewModel.errorMessage!}'));
+        } else if (viewModel.users.isEmpty) {
+          return const Center(child: Text('Aucun utilisateur trouvé.'));
+        }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F5FD),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            const Text(
-              '🏆 Big brainers',
-              style: TextStyle(
-                fontSize: 26,
+        final podiumUsers = viewModel.users.take(3).toList();
+        final otherUsers = viewModel.users.skip(3).toList();
+
+        return CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                child: Text(
+                  'Leader board',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent, // Couleur thématique du jeu
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-            _buildPodium(podiumUsers),
-            const Divider(thickness: 2),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: otherUsers.length,
-              itemBuilder: (context, index) {
-                final user = otherUsers[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 6),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 26,
-                      backgroundImage: user.picture != null
-                          ? CachedNetworkImageProvider(user.picture!)
-                          : null,
-                      child: user.picture == null
-                          ? const Icon(Icons.person, size: 26)
-                          : null,
-                    ),
-                    title: Text(
-                      user.username,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    subtitle: Text(
-                      'Score : ${user.score}',
-                      style: const TextStyle(
-                          color: Colors.deepPurple, fontSize: 14),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "#${index + 4}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.person_add),
-                          onPressed: () => _sendFriendRequest(
-                              user.id, user.username),
-                        ),
-                      ],
-                    ),
+            SliverToBoxAdapter(
+              child: _buildPodium(context, podiumUsers),
+            ),
+            if (otherUsers.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                sliver: SliverToBoxAdapter(
+                  child: Divider(
+                    color: Colors.grey[400],
+                    thickness: 2,
                   ),
-                );
-              },
+                ),
+              ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                    child: UserWidget(user: otherUsers[index]), // user widget
+                  );
+                },
+                childCount: otherUsers.length,
+              ),
             ),
           ],
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPodium(BuildContext context, List<dynamic> podiumUsers) {
+    if (podiumUsers.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    double getHeightForRank(int rank) {
+      switch (rank) {
+        case 0: // 1er
+          return 180.0;
+        case 1: // 2ème
+          return 150.0;
+        case 2: // 3ème
+          return 120.0;
+        default:
+          return 100.0;
+      }
+    }
+
+    List<dynamic> orderedPodiumUsers = [];
+    if (podiumUsers.length > 1) orderedPodiumUsers.add(podiumUsers[1]);
+    if (podiumUsers.isNotEmpty) orderedPodiumUsers.add(podiumUsers[0]);
+    if (podiumUsers.length > 2) orderedPodiumUsers.add(podiumUsers[2]);
+
+    if (podiumUsers.length == 1) {
+      orderedPodiumUsers = [podiumUsers[0]];
+    } else if (podiumUsers.length == 2) {
+      orderedPodiumUsers = [podiumUsers[1], podiumUsers[0]];
+    }
+
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: List.generate(orderedPodiumUsers.length, (indexInRow) {
+          final user = orderedPodiumUsers[indexInRow];
+          final originalRank = podiumUsers.indexOf(user);
+
+          return _buildPodiumItem(
+            context,
+            user,
+            originalRank,
+            getHeightForRank(originalRank),
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildPodium(List<User> topUsers) {
-    List<Widget> podiumWidgets = [];
+  Widget _buildPodiumItem(BuildContext context, dynamic user, int rank, double height) {
+    final color = _getRankColor(rank);
+    final trophyIcon = _getTrophyIcon(rank);
 
-    for (int i = 0; i < 3; i++) {
-      final user = topUsers.length > i ? topUsers[i] : null;
-      podiumWidgets.add(
-        Expanded(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (trophyIcon != null)
+          Icon(trophyIcon, color: color, size: 30),
+        const SizedBox(height: 8),
+        Text(
+          '#${rank + 1}',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          height: height,
+          width: MediaQuery.of(context).size.width / 3.5,
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(color: color, width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                _rankLabel(i),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: _getRankColor(i),
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: color.withOpacity(0.3),
+                child: Text(
+                  user.username[0].toUpperCase(),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey[700]),
                 ),
               ),
               const SizedBox(height: 8),
-              CircleAvatar(
-                radius: i == 0 ? 40 : 30,
-                backgroundColor: _getRankColor(i),
-                backgroundImage: user?.picture != null
-                    ? CachedNetworkImageProvider(user!.picture!)
-                    : null,
-                child: user?.picture == null
-                    ? Icon(Icons.person,
-                    size: i == 0 ? 40 : 30, color: Colors.deepPurple)
-                    : null,
-              ),
-              const SizedBox(height: 6),
               Text(
-                user?.username ?? "-",
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              Text(
-                user != null ? '${user.score} pts' : '',
+                user.username,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
-                    fontSize: 14),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                'Score: ${user.score}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
               ),
             ],
           ),
         ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          podiumWidgets[1],
-          podiumWidgets[0], // Le 1er est au centre
-          podiumWidgets[2],
-        ],
-      ),
+      ],
     );
   }
 
-  String _rankLabel(int index) {
-    switch (index) {
+  IconData? _getTrophyIcon(int rank) {
+    switch (rank) {
       case 0:
-        return '🥇 1er';
+        return Icons.emoji_events;
       case 1:
-        return '🥈 2e';
+        return Icons.military_tech;
       case 2:
-        return '🥉 3e';
+        return Icons.star_border;
       default:
-        return '';
+        return null;
     }
   }
 }
