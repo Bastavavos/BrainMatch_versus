@@ -44,10 +44,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (response.statusCode == 200) {
         final user = {
-          'userId': data['userId'],
-          'username': data['username'],
-          'email': data['email'],
-          'token': data['token'],
+          "id": data["user"]["_id"],
+          "username": data["user"]["username"],
+          "email": data["user"]["email"],
+          "score": data["user"]["score"],
+          "picture": data["user"]["picture"],
+          "token": data["token"],
         };
         if (kDebugMode) {
           print("$user");
