@@ -97,7 +97,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          questions = List<Map<String, dynamic>>.from(data['subTheme']['questions']);
+          questions = List<Map<String, dynamic>>.from(data['question']);
           isLoading = false;
         });
       } else {
@@ -224,27 +224,27 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (!isSolo && widget.versusData != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        const Icon(Icons.person, color: Colors.deepPurple),
-                        Text(widget.versusData!['players'][0]['username']),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const Icon(Icons.person_outline, color: Colors.redAccent),
-                        Text(widget.versusData!['players'][1]['username']),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+            // if (!isSolo && widget.versusData != null)
+            //   Padding(
+            //     padding: const EdgeInsets.symmetric(vertical: 8.0),
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //       children: [
+            //         Column(
+            //           children: [
+            //             const Icon(Icons.person, color: Colors.deepPurple),
+            //             Text(widget.versusData!['players'][0]['username']),
+            //           ],
+            //         ),
+            //         Column(
+            //           children: [
+            //             const Icon(Icons.person_outline, color: Colors.redAccent),
+            //             Text(widget.versusData!['players'][1]['username']),
+            //           ],
+            //         ),
+            //       ],
+            //     ),
+            //   ),
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
