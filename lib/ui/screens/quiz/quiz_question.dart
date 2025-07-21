@@ -29,7 +29,8 @@ class QuizPlayPage extends StatefulWidget {
 }
 
 class _QuizPlayPageState extends State<QuizPlayPage> {
-  List<dynamic> questions = [];
+  // List<dynamic> questions = [];
+  List<Map<String, dynamic>> questions = [];
   int currentQuestionIndex = 0;
   bool isLoading = true;
   int? selectedIndex;
@@ -46,26 +47,84 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
 
     if (widget.mode == 'Versus' && widget.versusData != null) {
 
-      setState(() {
-        questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
-        isLoading = false;
-      });
+      // setState(() {
+      //   questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
+      //   isLoading = false;
+      // });
 
-      startTimer();
+      // setState(() {
+      //   questions = [widget.versusData!['question']]; // Une seule question au départ
+      //   currentQuestionIndex = widget.versusData!['questionIndex'] ?? 0;
+      //   isLoading = false;
+      // });
+
+      // startTimer();
 
       // Connexion socket uniquement pour recevoir les résultats et autres events
+
+
+    //   SocketClient().connect(
+    //     token: widget.token,
+    //     categoryId: widget.categoryId,
+    //     currentUser: widget.currentUser,
+    //
+    //
+    //     // isHost: widget.versusData!['isHost'],
+    //     isHost: widget.versusData?['isHost'] == true, //NEW with default value
+    //     // isHost: widget.versusData?['isHost'] is bool ? widget.versusData!['isHost'] : false,  // defensif
+    //
+    //     onStartGame: (_) {},
+    //     onQuestionResult: handleQuestionResult,
+    //     onError: (message) {
+    //       if (mounted) {
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(content: Text('Erreur socket : $message')),
+    //         );
+    //       }
+    //     },
+    //   );
+    // } else {
+    //   fetchQuestionData().then((_) {
+    //     if (questions.isNotEmpty) startTimer();
+    //   });
+
       SocketClient().connect(
         token: widget.token,
         categoryId: widget.categoryId,
         currentUser: widget.currentUser,
-
-
-        // isHost: widget.versusData!['isHost'],
-        isHost: widget.versusData?['isHost'] == true, //NEW with default value
-        // isHost: widget.versusData?['isHost'] is bool ? widget.versusData!['isHost'] : false,  // defensif
-
-        onStartGame: (_) {},
-        onQuestionResult: handleQuestionResult,
+        isHost: widget.versusData?['isHost'] == true,
+        onStartGame: (data) {
+          setState(() {
+            questions = [data['question']];
+            currentQuestionIndex = data['questionIndex'] ?? 0;
+            isLoading = false;
+          });
+          startTimer();
+        },
+        onNewQuestion: (data) {
+          if (!mounted) return;
+          setState(() {
+            questions.add(data['question']);
+            currentQuestionIndex = data['questionIndex'];
+            hasAnswered = false;
+            selectedIndex = null;
+            opponentHasAnswered = false;
+          });
+          startTimer();
+        },
+        onAnswerFeedback: handleAnswerFeedback,
+        onGameOver: (data) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => QuizResultPage(
+                totalQuestions: questions.length,
+                correctAnswers: correctAnswers,
+                mode: widget.mode,
+              ),
+            ),
+          );
+        },
         onError: (message) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -74,10 +133,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
           }
         },
       );
-    } else {
-      fetchQuestionData().then((_) {
-        if (questions.isNotEmpty) startTimer();
-      });
     }
   }
 
@@ -87,6 +142,19 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     countdownTimer?.cancel();
     super.dispose();
   }
+
+  void handleAnswerFeedback(data) {
+    if (!mounted) return;
+
+    final yourScore = data['yourScore'] ?? 0;
+
+    setState(() {
+      hasAnswered = true;
+      correctAnswers = yourScore;
+      timeLeft = 0;
+    });
+  }
+
 
   Future<void> fetchQuestionData() async {
     final baseUrl = dotenv.env['API_KEY'];
@@ -164,49 +232,49 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     }
   }
 
-  void handleQuestionResult(data) {
-    if (!mounted) return; // <- Très important
-    setState(() {
-      timeLeft = 0;
-    });
-
-    final myScoreObj = (data['playersScores'] as List).firstWhere(
-          (player) => player['username'] == widget.currentUser,
-      orElse: () => null,
-    );
-
-    if (myScoreObj != null) {
-      setState(() {
-        hasAnswered = true;
-        correctAnswers = myScoreObj['score'];
-      });
-    } else {
-      opponentHasAnswered = true;
-    }
-
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      if (data['nextQuestionIndex'] < questions.length) {
-        setState(() {
-          currentQuestionIndex = data['nextQuestionIndex'];
-          hasAnswered = false;
-          selectedIndex = null;
-          startTimer();
-        });
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => QuizResultPage(
-              totalQuestions: questions.length,
-              correctAnswers: correctAnswers,
-              mode: widget.mode,
-            ),
-          ),
-        );
-      }
-    });
-  }
+  // void handleQuestionResult(data) {
+  //   if (!mounted) return; // <- Très important
+  //   setState(() {
+  //     timeLeft = 0;
+  //   });
+  //
+  //   final myScoreObj = (data['playersScores'] as List).firstWhere(
+  //         (player) => player['username'] == widget.currentUser,
+  //     orElse: () => null,
+  //   );
+  //
+  //   if (myScoreObj != null) {
+  //     setState(() {
+  //       hasAnswered = true;
+  //       correctAnswers = myScoreObj['score'];
+  //     });
+  //   } else {
+  //     opponentHasAnswered = true;
+  //   }
+  //
+  //   Future.delayed(const Duration(seconds: 2), () {
+  //     if (!mounted) return;
+  //     if (data['nextQuestionIndex'] < questions.length) {
+  //       setState(() {
+  //         currentQuestionIndex = data['nextQuestionIndex'];
+  //         hasAnswered = false;
+  //         selectedIndex = null;
+  //         startTimer();
+  //       });
+  //     } else {
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (_) => QuizResultPage(
+  //             totalQuestions: questions.length,
+  //             correctAnswers: correctAnswers,
+  //             mode: widget.mode,
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //   });
+  // }
 
 
   @override
@@ -312,23 +380,29 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
 
                 return GestureDetector(
                   onTap: () {
-                    if (!hasAnswered) {
-                      setState(() {
-                        selectedIndex = index;
-                        hasAnswered = true;
-                        if (isCorrect) correctAnswers++;
-                      });
-                      countdownTimer?.cancel();
-
-                      if (widget.mode == 'Versus' && widget.versusData != null) {
-                        SocketClient().sendAnswer(
-                          roomId: widget.versusData!['roomId'],
-                          questionIndex: currentQuestionIndex,
-                          answer: option,
-                          username: widget.versusData!['players'][0]['username'], // ou autre si joueur 2
-                        );
-                      }
-                    }
+                    // if (!hasAnswered) {
+                    //   setState(() {
+                    //     selectedIndex = index;
+                    //     hasAnswered = true;
+                    //     if (isCorrect) correctAnswers++;
+                    //   });
+                    //   countdownTimer?.cancel();
+                    //
+                    //   if (widget.mode == 'Versus' && widget.versusData != null) {
+                    //     SocketClient().sendAnswer(
+                    //       roomId: widget.versusData!['roomId'],
+                    //       questionIndex: currentQuestionIndex,
+                    //       answer: option,
+                    //       username: widget.versusData!['players'][0]['username'], // ou autre si joueur 2
+                    //     );
+                    //   }
+                    // }
+                    SocketClient().sendAnswer(
+                      roomId: widget.versusData!['roomId'],
+                      questionIndex: currentQuestionIndex,
+                      answer: option,
+                      username: widget.versusData!['players'][0]['username'],
+                    );
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
@@ -363,7 +437,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
               },
             ),
             const SizedBox(height: 30),
-            if (hasAnswered)
+            if (hasAnswered && widget.mode == 'Solo')
               ElevatedButton(
                 onPressed: goToNextQuestion,
                 style: ElevatedButton.styleFrom(
@@ -384,3 +458,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     );
   }
 }
+
+
+
