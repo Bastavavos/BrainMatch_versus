@@ -15,7 +15,6 @@ class QuizPlayPage extends StatefulWidget {
   final String currentUser;
   final String token;
 
-
   const QuizPlayPage({
     super.key,
     required this.categoryId,
@@ -59,7 +58,12 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
         token: widget.token,
         categoryId: widget.categoryId,
         currentUser: widget.currentUser,
-        isHost: widget.versusData!['isHost'],
+
+
+        // isHost: widget.versusData!['isHost'],
+        isHost: widget.versusData?['isHost'] == true, //NEW with default value
+        // isHost: widget.versusData?['isHost'] is bool ? widget.versusData!['isHost'] : false,  // defensif
+
         onStartGame: (_) {},
         onQuestionResult: handleQuestionResult,
         onError: (message) {

@@ -33,6 +33,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final baseUrl = dotenv.env['API_KEY'];
       final response = await http.post(
         Uri.parse("$baseUrl/user/login"),
+        // Uri.parse("$baseUrl/login"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "identifier": _identifierController.text.trim(),

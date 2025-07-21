@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketClient {
@@ -21,8 +22,10 @@ class SocketClient {
     //   'transports': ['websocket'],
     //   'autoConnect': false,
     // });
+    final baseUrl = dotenv.env['API_KEY'];
     socket = IO.io(
-      'http://192.168.1.67:3000',
+      '$baseUrl',
+      // 'http://192.168.1.74:3000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
@@ -31,7 +34,6 @@ class SocketClient {
       })
           .build(),
     );
-
 
     socket.connect();
 

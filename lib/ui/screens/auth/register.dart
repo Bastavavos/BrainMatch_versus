@@ -34,6 +34,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
       final registerResponse = await http.post(
         Uri.parse("$baseUrl/user/register"),
+        // Uri.parse("$baseUrl/register"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": _usernameController.text.trim(),
