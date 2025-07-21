@@ -22,10 +22,10 @@ class SocketClient {
     //   'transports': ['websocket'],
     //   'autoConnect': false,
     // });
-    final baseUrl = dotenv.env['API_KEY'];
+    // final baseUrl = dotenv.env['API_KEY'];
     socket = IO.io(
-      '$baseUrl',
-      // 'http://192.168.1.74:3000',
+      // '$baseUrl',
+      'http://192.168.1.74:3000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
