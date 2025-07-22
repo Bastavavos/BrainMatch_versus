@@ -180,7 +180,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     if (question == null) return;
 
     setState(() {
-      currentQuestionIndex = data['questionIndex'] ?? 0;
+      currentQuestionIndex = data['questionIndex'];
       questions = [question];
       selectedIndex = null;
       hasAnswered = false;
