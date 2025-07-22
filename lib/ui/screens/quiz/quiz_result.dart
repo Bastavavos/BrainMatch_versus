@@ -46,7 +46,7 @@ class QuizResultPage extends StatelessWidget {
             SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.pushNamed(context, '/main');
               },
               child: Text('Retour à l\'accueil'),
             ),
