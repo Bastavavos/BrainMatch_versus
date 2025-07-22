@@ -45,9 +45,12 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     super.initState();
 
     if (widget.mode == 'Versus' && widget.versusData != null) {
-      questions = List<Map<String, dynamic>>.from(widget.versusData!['subTheme']['questions']);
+      final question = widget.versusData!['question'];
+      if (question != null) {
+        questions = [question]; // On initialise avec UNE question
+      }
       isLoading = false;
-      startTimer();
+      // startTimer();
 
       // Connexion socket avec callbacks adaptés
       SocketClient().connect(
@@ -75,7 +78,8 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
           }
         },
       );
-    } else {
+    }
+    else {
       fetchQuestionData().then((_) {
         if (questions.isNotEmpty) startTimer();
       });
@@ -144,6 +148,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
 
   void goToNextQuestion() {
     countdownTimer?.cancel();
+    if (widget.mode == 'Versus') return;
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
@@ -170,14 +175,23 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
   // Gestion nouvelle question reçue via socket (versus)
   void handleNewQuestion(Map<String, dynamic> data) {
     if (!mounted) return;
+
+    final question = data['question'];
+    if (question == null) return;
+
     setState(() {
-      currentQuestionIndex = data['questionIndex'] ?? currentQuestionIndex;
+      currentQuestionIndex = data['questionIndex'] ?? 0;
+      questions = [question];
       selectedIndex = null;
       hasAnswered = false;
       opponentHasAnswered = false;
       timeLeft = 10;
     });
-    startTimer();
+    if (widget.mode == 'Versus') {
+      startTimer();
+    }
+
+    debugPrint("Nouvelle question reçue: ${jsonEncode(data)}");
   }
 
   // Gestion feedback réponse (versus)
