@@ -180,7 +180,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     if (question == null) return;
 
     setState(() {
-      currentQuestionIndex = 0;
+      currentQuestionIndex =  data['questionIndex'] ?? 0;
       questions = [question];
       selectedIndex = null;
       hasAnswered = false;
@@ -250,7 +250,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
-                questions[currentQuestionIndex]['image'],
+                questions.first['image'],
                 height: 220,
                 fit: BoxFit.cover,
               ),
@@ -267,7 +267,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              questions[currentQuestionIndex]['question'],
+              questions.first['question'],
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -286,10 +286,10 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
               ),
             const SizedBox(height: 24),
             ...List.generate(
-              questions[currentQuestionIndex]['options'].length,
+              questions.first['options'].length,
                   (index) {
-                final option = questions[currentQuestionIndex]['options'][index];
-                final correctAnswer = questions[currentQuestionIndex]['answer'];
+                final option = questions.first['options'][index];
+                final correctAnswer = questions.first['answer'];
                 final isCorrect = option == correctAnswer;
                 final isSelected = index == selectedIndex;
 
