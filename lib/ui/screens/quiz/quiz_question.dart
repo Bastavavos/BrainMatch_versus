@@ -45,7 +45,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     super.initState();
 
     if (widget.mode == 'Versus' && widget.versusData != null) {
-      questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
+      questions = List<Map<String, dynamic>>.from(widget.versusData!['subTheme']['questions']);
       isLoading = false;
       startTimer();
 
