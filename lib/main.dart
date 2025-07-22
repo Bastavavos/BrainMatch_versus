@@ -9,21 +9,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart' as provider;
 
-// Future<void> main() async {
-//   dotenv.load(fileName: ".env");
-//   runApp(ProviderScope(child: MyApp()));
-// }
-
-// Future<void> main() async {
-//   WidgetsFlutterBinding.ensureInitialized(); // **TRÈS IMPORTANT pour les opérations async avant runApp**
-//   await dotenv.load(fileName: ".env");    // **Utilisez await ici**
-//   runApp(
-//     ProviderScope( // Enveloppez avec ProviderScope si vous utilisez Riverpod
-//       child: MyApp(),
-//     ),
-//   );
-// }
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
@@ -51,13 +36,6 @@ class MyApp extends StatelessWidget {
       theme: appTheme,
       initialRoute: '/',
       onGenerateRoute: (settings) {
-        // if (settings.name == '/confirm') {
-        //   final selectedMode = settings.arguments as String;
-        //   return MaterialPageRoute(
-        //     builder: (context) => CategorySelectionPage(selectedMode: selectedMode),
-        //   );
-        // }
-
         if (settings.name == '/confirm') {
           final args = settings.arguments as Map<String, dynamic>;
           final selectedMode = args['selectedMode'] as String;
@@ -70,7 +48,6 @@ class MyApp extends StatelessWidget {
             ),
           );
         }
-
 
         switch (settings.name) {
           case '/':
