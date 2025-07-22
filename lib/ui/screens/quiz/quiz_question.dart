@@ -232,13 +232,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     );
   }
 
-  String fixImageUrl(String url) {
-    if (url.contains('localhost') || url.contains('127.0.0.1')) {
-      return url.replaceAll(RegExp(r'localhost|127\.0\.0\.1'), '10.0.2.2');
-    }
-    return url;
-  }
-
   @override
   Widget build(BuildContext context) {
     final bool isSolo = widget.mode == 'Solo';
@@ -257,7 +250,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
-                fixImageUrl(questions[currentQuestionIndex]['image']),
+                questions[currentQuestionIndex]['image'],
                 height: 220,
                 fit: BoxFit.cover,
               ),
