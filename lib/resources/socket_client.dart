@@ -1,4 +1,3 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketClient {
@@ -12,27 +11,21 @@ class SocketClient {
   void connect({
     required String token,
     required String categoryId,
-    required String currentUser,
     required Function(dynamic data) onStartGame,
-    required Function(Map<String, dynamic>) onQuestionResult,
+    required Function(Map<String, dynamic>) onNewQuestion,
+    required Function(Map<String, dynamic>) onAnswerFeedback,
+    required Function(Map<String, dynamic>) onGameOver,
     Function(String)? onError,
-    bool isHost = false,
+    Function()? onOpponentLeft,
   }) {
-    // socket = IO.io('http://192.168.1.67:3000', <String, dynamic>{
-    //   'transports': ['websocket'],
-    //   'autoConnect': false,
-    // });
-    // final baseUrl = dotenv.env['API_KEY'];
     socket = IO.io(
-      // '$baseUrl',
       'http://192.168.1.74:3000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
           .setAuth({
         'token': token,
-      })
-          .build(),
+      }).build(),
     );
 
     socket.connect();
@@ -42,7 +35,6 @@ class SocketClient {
 
       socket.emit('join_game', {
         'categoryId': categoryId,
-        'isHost': isHost,
       });
     });
 
@@ -51,9 +43,26 @@ class SocketClient {
       onStartGame(data);
     });
 
-    socket.on('question_result', (data) {
-      print('📩 Résultat question reçu : $data');
-      onQuestionResult(Map<String, dynamic>.from(data));
+    socket.on('new_question', (data) {
+      print('❓ Nouvelle question : $data');
+      onNewQuestion(Map<String, dynamic>.from(data));
+    });
+
+    socket.on('answer_feedback', (data) {
+      print('✅ Feedback de réponse : $data');
+      onAnswerFeedback(Map<String, dynamic>.from(data));
+    });
+
+    socket.on('game_over', (data) {
+      print('🏁 Fin de partie : $data');
+      onGameOver(Map<String, dynamic>.from(data));
+    });
+
+    socket.on('opponent_left', (data) {
+      print('🚪 Adversaire a quitté : $data');
+      if (onOpponentLeft != null) {
+        onOpponentLeft();
+      }
     });
 
     socket.on('error', (data) {
@@ -70,13 +79,11 @@ class SocketClient {
     required String roomId,
     required int questionIndex,
     required String answer,
-    required String username,
   }) {
     socket.emit('player_answer', {
       'roomId': roomId,
       'questionIndex': questionIndex,
       'answer': answer,
-      'username': username,
     });
   }
 

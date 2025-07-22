@@ -86,6 +86,7 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(16),
                         onTap: () {
+                          // Navigation adaptée selon le mode sélectionné
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -96,7 +97,7 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                                 imageUrl: category['image'],
                                 logoUrl: category['logo'],
                                 mode: widget.selectedMode,
-                                currentUser: 'username',
+                                currentUser: 'username',  // À remplacer par vrai utilisateur
                                 token: widget.token,
                               ),
                             ),

@@ -30,7 +30,6 @@ class QuizPlayPage extends StatefulWidget {
 
 class _QuizPlayPageState extends State<QuizPlayPage> {
   List<dynamic> questions = [];
-  // List<Map<String, dynamic>> questions = [];
   int currentQuestionIndex = 0;
   bool isLoading = true;
   int? selectedIndex;
@@ -46,29 +45,33 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     super.initState();
 
     if (widget.mode == 'Versus' && widget.versusData != null) {
-
-      setState(() {
-        questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
-        isLoading = false;
-      });
-
+      questions = List<Map<String, dynamic>>.from(widget.versusData!['quiz']['subTheme']['questions']);
+      isLoading = false;
       startTimer();
 
-      // Connexion socket uniquement pour recevoir les résultats et autres events
+      // Connexion socket avec callbacks adaptés
       SocketClient().connect(
         token: widget.token,
         categoryId: widget.categoryId,
-        currentUser: widget.currentUser,
-        isHost: widget.versusData!['isHost'],
-        // isHost: widget.versusData?['isHost'] == true, //NEW with default value
-        // isHost: widget.versusData?['isHost'] is bool ? widget.versusData!['isHost'] : false,  // defensif
-        onStartGame: (_) {},
-        onQuestionResult: handleQuestionResult,
+        onStartGame: (_) {
+          // Pas besoin d'action ici, questions déjà chargées
+        },
+        onNewQuestion: handleNewQuestion,
+        onAnswerFeedback: handleAnswerFeedback,
+        onGameOver: handleGameOver,
         onError: (message) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Erreur socket : $message')),
             );
+          }
+        },
+        onOpponentLeft: () {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Votre adversaire a quitté la partie.')),
+            );
+            Navigator.pop(context);
           }
         },
       );
@@ -82,6 +85,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
   @override
   void dispose() {
     countdownTimer?.cancel();
+    SocketClient().disconnect();
     super.dispose();
   }
 
@@ -95,7 +99,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
         final data = jsonDecode(response.body);
         setState(() {
           questions = List<Map<String, dynamic>>.from(data['subTheme']['questions']);
-          // questions = [data['question']];
           isLoading = false;
         });
       } else {
@@ -133,6 +136,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
       } else {
         setState(() {
           timeLeft -= 0.1;
+          if (timeLeft < 0) timeLeft = 0;
         });
       }
     });
@@ -145,6 +149,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
         currentQuestionIndex++;
         selectedIndex = null;
         hasAnswered = false;
+        opponentHasAnswered = false;
         timeLeft = 10;
       });
       startTimer();
@@ -162,50 +167,56 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     }
   }
 
-  void handleQuestionResult(data) {
-    if (!mounted) return; // <- Très important
+  // Gestion nouvelle question reçue via socket (versus)
+  void handleNewQuestion(Map<String, dynamic> data) {
+    if (!mounted) return;
     setState(() {
-      timeLeft = 0;
+      currentQuestionIndex = data['questionIndex'] ?? currentQuestionIndex;
+      selectedIndex = null;
+      hasAnswered = false;
+      opponentHasAnswered = false;
+      timeLeft = 10;
     });
-
-    final myScoreObj = (data['playersScores'] as List).firstWhere(
-          (player) => player['username'] == widget.currentUser,
-      orElse: () => null,
-    );
-
-    if (myScoreObj != null) {
-      setState(() {
-        hasAnswered = true;
-        correctAnswers = myScoreObj['score'];
-      });
-    } else {
-      opponentHasAnswered = true;
-    }
-
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      if (data['nextQuestionIndex'] < questions.length) {
-        setState(() {
-          currentQuestionIndex = data['nextQuestionIndex'];
-          hasAnswered = false;
-          selectedIndex = null;
-          startTimer();
-        });
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => QuizResultPage(
-              totalQuestions: questions.length,
-              correctAnswers: correctAnswers,
-              mode: widget.mode,
-            ),
-          ),
-        );
-      }
-    });
+    startTimer();
   }
 
+  // Gestion feedback réponse (versus)
+  void handleAnswerFeedback(Map<String, dynamic> data) {
+    if (!mounted) return;
+
+    final player = data['player'];
+    final bool isCurrentUser = player == widget.currentUser;
+    final bool correct = data['correct'] ?? false;
+
+    setState(() {
+      if (isCurrentUser) {
+        hasAnswered = true;
+        if (correct) correctAnswers++;
+      } else {
+        opponentHasAnswered = true;
+      }
+    });
+
+    // Si tous ont répondu, avancer ? (à adapter selon logique serveur)
+  }
+
+  // Gestion fin de partie (versus)
+  void handleGameOver(Map<String, dynamic> data) {
+    if (!mounted) return;
+
+    countdownTimer?.cancel();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => QuizResultPage(
+          totalQuestions: questions.length,
+          correctAnswers: correctAnswers,
+          mode: widget.mode,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -286,6 +297,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
                     );
                   }
                 }
+
                 return GestureDetector(
                   onTap: () {
                     if (!hasAnswered) {
@@ -301,7 +313,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
                           roomId: widget.versusData!['roomId'],
                           questionIndex: currentQuestionIndex,
                           answer: option,
-                          username: widget.versusData!['players'][0]['username'], // ou autre si joueur 2
                         );
                       }
                     }
@@ -360,6 +371,3 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     );
   }
 }
-
-
-

@@ -142,6 +142,7 @@ class CategoryConfirmationPage extends StatelessWidget {
     }
 
     if (mode == 'Solo') {
+      // Mode Solo: navigation directe vers Quiz sans socket
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -154,6 +155,7 @@ class CategoryConfirmationPage extends StatelessWidget {
         ),
       );
     } else {
+      // Mode Versus: connexion socket + attente d'un autre joueur
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -172,9 +174,8 @@ class CategoryConfirmationPage extends StatelessWidget {
       SocketClient().connect(
         token: token,
         categoryId: categoryId,
-        currentUser: currentUser,
         onStartGame: (data) {
-          Navigator.pop(context);
+          Navigator.pop(context); // Ferme la boîte d'attente
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -188,13 +189,28 @@ class CategoryConfirmationPage extends StatelessWidget {
             ),
           );
         },
-        onQuestionResult: (result) {
-          print('📊 Résultat question reçu : $result');
+        onNewQuestion: (questionData) {
+          print('Nouvelle question reçue : $questionData');
+          // Optionnel: gérer mise à jour question
         },
-        onError: (message) {
+        onAnswerFeedback: (feedbackData) {
+          print('Feedback réponse reçue : $feedbackData');
+          // Optionnel: gérer feedback réponse
+        },
+        onGameOver: (gameOverData) {
+          print('Partie terminée : $gameOverData');
+          // Optionnel: gérer fin de partie
+        },
+        onError: (errorMessage) {
+          Navigator.pop(context); // Ferme la boîte d'attente
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erreur : $errorMessage')),
+          );
+        },
+        onOpponentLeft: () {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur : $message')),
+            const SnackBar(content: Text('L\'adversaire a quitté la partie.')),
           );
         },
       );
