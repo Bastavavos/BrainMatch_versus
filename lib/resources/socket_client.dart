@@ -146,9 +146,9 @@ class SocketClient {
       'http://192.168.1.74:3000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
-          // .enableAutoConnect()
-          .disableAutoConnect()
-          .enableForceNewConnection()
+          .enableAutoConnect()
+          // .disableAutoConnect()
+          // .enableForceNewConnection()
           .setAuth({'token': token})
           .build(),
     );
