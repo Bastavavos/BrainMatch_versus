@@ -84,33 +84,33 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
   }
 
   ///////////////////// ajout reco socket /////////////////
-  void reconnectSocket() {
-    SocketClient().reconnect(
-      token: widget.token,
-      categoryId: widget.categoryId,
-      onStartGame: (_) {
-        // Si nécessaire
-      },
-      onNewQuestion: handleNewQuestion,
-      onAnswerFeedback: handleAnswerFeedback,
-      onGameOver: handleGameOver,
-      onError: (message) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur socket : $message')),
-          );
-        }
-      },
-      onOpponentLeft: () {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Votre adversaire a quitté la partie.')),
-          );
-          Navigator.pop(context);
-        }
-      },
-    );
-  }
+  // void reconnectSocket() {
+  //   SocketClient().reconnect(
+  //     token: widget.token,
+  //     categoryId: widget.categoryId,
+  //     onStartGame: (_) {
+  //       // Si nécessaire
+  //     },
+  //     onNewQuestion: handleNewQuestion,
+  //     onAnswerFeedback: handleAnswerFeedback,
+  //     onGameOver: handleGameOver,
+  //     onError: (message) {
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Erreur socket : $message')),
+  //         );
+  //       }
+  //     },
+  //     onOpponentLeft: () {
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(content: Text('Votre adversaire a quitté la partie.')),
+  //         );
+  //         Navigator.pop(context);
+  //       }
+  //     },
+  //   );
+  // }
 
   //////////////////////////////////////////////
 
@@ -330,21 +330,21 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
 
 
             //////////////// ajout reconnexion socket
-            if (widget.mode == 'Versus')
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: ElevatedButton(
-                  onPressed: reconnectSocket,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: const Text('🔌 Reconnexion'),
-                ),
-              ),
+            // if (widget.mode == 'Versus')
+            //   Padding(
+            //     padding: const EdgeInsets.only(top: 12.0),
+            //     child: ElevatedButton(
+            //       onPressed: reconnectSocket,
+            //       style: ElevatedButton.styleFrom(
+            //         backgroundColor: Colors.redAccent,
+            //         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(20),
+            //         ),
+            //       ),
+            //       child: const Text('🔌 Reconnexion'),
+            //     ),
+            //   ),
 
             ///////////////////////////////////////////
 
