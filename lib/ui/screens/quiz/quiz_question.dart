@@ -117,6 +117,22 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     }
   }
 
+  // Méthode générique pour accéder aux données selon le mode
+  dynamic getQuestionValue(String key) {
+    if (questions.isEmpty) return null;
+    if (widget.mode == 'Solo') {
+      return questions[currentQuestionIndex][key];
+    } else {
+      return questions.first[key];
+    }
+  }
+
+// Getters pratiques
+  String get questionText => getQuestionValue('question') ?? '';
+  String get imageUrl => getQuestionValue('image') ?? '';
+  List get options => (getQuestionValue('options') as List?) ?? [];
+  String get correctAnswer => getQuestionValue('answer') ?? '';
+
   void startTimer() {
     countdownTimer?.cancel();
     setState(() {
@@ -225,6 +241,159 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     );
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   final bool isSolo = widget.mode == 'Solo';
+  //   final Color primaryColor = isSolo ? Colors.deepPurple : Colors.redAccent;
+  //
+  //   return SpeLayout(
+  //     child: isLoading
+  //         ? const Center(child: CircularProgressIndicator())
+  //         : questions.isEmpty
+  //         ? const Center(child: Text("Aucune question disponible"))
+  //         : SingleChildScrollView(
+  //       padding: const EdgeInsets.all(16.0),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.stretch,
+  //         children: [
+  //           ClipRRect(
+  //             borderRadius: BorderRadius.circular(20),
+  //             child: Image.network(
+  //               questions.first['image'],
+  //               height: 220,
+  //               fit: BoxFit.cover,
+  //             ),
+  //           ),
+  //           const SizedBox(height: 16),
+  //           ClipRRect(
+  //             borderRadius: BorderRadius.circular(10),
+  //             child: LinearProgressIndicator(
+  //               value: timeLeft / 10,
+  //               backgroundColor: Colors.grey[300],
+  //               color: primaryColor,
+  //               minHeight: 10,
+  //             ),
+  //           ),
+  //           const SizedBox(height: 24),
+  //           Text(
+  //             questions.first['question'],
+  //             style: TextStyle(
+  //               fontSize: 24,
+  //               fontWeight: FontWeight.bold,
+  //               color: primaryColor,
+  //             ),
+  //             textAlign: TextAlign.center,
+  //           ),
+  //           if (!hasAnswered && opponentHasAnswered)
+  //             Padding(
+  //               padding: const EdgeInsets.only(top: 12.0),
+  //               child: Text(
+  //                 "L'adversaire a répondu",
+  //                 style: TextStyle(color: Colors.redAccent),
+  //                 textAlign: TextAlign.center,
+  //               ),
+  //             ),
+  //           const SizedBox(height: 24),
+  //           ...List.generate(
+  //             questions.first['options'].length,
+  //                 (index) {
+  //               final option = questions.first['options'][index];
+  //               final correctAnswer = questions.first['answer'];
+  //               final isCorrect = option == correctAnswer;
+  //               final isSelected = index == selectedIndex;
+  //
+  //               Color borderColor = Colors.grey.shade300;
+  //               Icon? trailingIcon;
+  //
+  //               if (hasAnswered) {
+  //                 if (isSelected) {
+  //                   borderColor = isCorrect ? Colors.green : Colors.red;
+  //                   trailingIcon = Icon(
+  //                     isCorrect ? Icons.check_circle : Icons.cancel,
+  //                     color: isCorrect ? Colors.green : Colors.red,
+  //                   );
+  //                 } else if (isCorrect) {
+  //                   borderColor = Colors.green;
+  //                   trailingIcon = const Icon(
+  //                     Icons.check_circle,
+  //                     color: Colors.green,
+  //                   );
+  //                 }
+  //               }
+  //
+  //               return GestureDetector(
+  //                 onTap: () {
+  //                   if (!hasAnswered) {
+  //                     setState(() {
+  //                       selectedIndex = index;
+  //                       hasAnswered = true;
+  //                       if (isCorrect) correctAnswers++;
+  //                     });
+  //                     countdownTimer?.cancel();
+  //
+  //                     if (widget.mode == 'Versus' && widget.versusData != null) {
+  //                       SocketClient().sendAnswer(
+  //                         roomId: widget.versusData!['roomId'],
+  //                         questionIndex: currentQuestionIndex,
+  //                         answer: option,
+  //                       );
+  //                     }
+  //                   }
+  //                 },
+  //                 child: AnimatedContainer(
+  //                   duration: const Duration(milliseconds: 300),
+  //                   margin: const EdgeInsets.symmetric(vertical: 8),
+  //                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+  //                   decoration: BoxDecoration(
+  //                     color: Colors.white,
+  //                     borderRadius: BorderRadius.circular(16),
+  //                     border: Border.all(color: borderColor, width: 3),
+  //                     boxShadow: [
+  //                       BoxShadow(
+  //                         color: Colors.black.withOpacity(0.05),
+  //                         blurRadius: 8,
+  //                         offset: const Offset(0, 4),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                   child: Row(
+  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                     children: [
+  //                       Expanded(
+  //                         child: Text(
+  //                           option,
+  //                           style: const TextStyle(fontSize: 18),
+  //                         ),
+  //                       ),
+  //                       if (trailingIcon != null) trailingIcon,
+  //                     ],
+  //                   ),
+  //                 ),
+  //               );
+  //             },
+  //           ),
+  //           const SizedBox(height: 30),
+  //           if (hasAnswered && widget.mode == 'Solo')
+  //             ElevatedButton(
+  //               onPressed: goToNextQuestion,
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: primaryColor,
+  //                 padding: const EdgeInsets.symmetric(vertical: 16),
+  //                 shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(30),
+  //                 ),
+  //               ),
+  //               child: const Text(
+  //                 'Next',
+  //                 style: TextStyle(fontSize: 18, color: Colors.white),
+  //               ),
+  //             ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     final bool isSolo = widget.mode == 'Solo';
@@ -243,7 +412,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
-                questions.first['image'],
+                imageUrl,
                 height: 220,
                 fit: BoxFit.cover,
               ),
@@ -258,9 +427,15 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
                 minHeight: 10,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Text(
-              questions.first['question'],
+              "Question ${currentQuestionIndex + 1} / ${isSolo ? questions.length : '?'}",
+              style: TextStyle(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              questionText,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -273,91 +448,89 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
                 padding: const EdgeInsets.only(top: 12.0),
                 child: Text(
                   "L'adversaire a répondu",
-                  style: TextStyle(color: Colors.redAccent),
+                  style: const TextStyle(color: Colors.redAccent),
                   textAlign: TextAlign.center,
                 ),
               ),
             const SizedBox(height: 24),
-            ...List.generate(
-              questions.first['options'].length,
-                  (index) {
-                final option = questions.first['options'][index];
-                final correctAnswer = questions.first['answer'];
-                final isCorrect = option == correctAnswer;
-                final isSelected = index == selectedIndex;
+            ...List.generate(options.length, (index) {
+              final option = options[index];
+              final isCorrect = option == correctAnswer;
+              final isSelected = index == selectedIndex;
 
-                Color borderColor = Colors.grey.shade300;
-                Icon? trailingIcon;
+              Color borderColor = Colors.grey.shade300;
+              Icon? trailingIcon;
 
-                if (hasAnswered) {
-                  if (isSelected) {
-                    borderColor = isCorrect ? Colors.green : Colors.red;
-                    trailingIcon = Icon(
-                      isCorrect ? Icons.check_circle : Icons.cancel,
-                      color: isCorrect ? Colors.green : Colors.red,
-                    );
-                  } else if (isCorrect) {
-                    borderColor = Colors.green;
-                    trailingIcon = const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                    );
-                  }
+              if (hasAnswered) {
+                if (isSelected) {
+                  borderColor = isCorrect ? Colors.green : Colors.red;
+                  trailingIcon = Icon(
+                    isCorrect ? Icons.check_circle : Icons.cancel,
+                    color: isCorrect ? Colors.green : Colors.red,
+                  );
+                } else if (isCorrect) {
+                  borderColor = Colors.green;
+                  trailingIcon = const Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                  );
                 }
+              }
 
-                return GestureDetector(
-                  onTap: () {
-                    if (!hasAnswered) {
-                      setState(() {
-                        selectedIndex = index;
-                        hasAnswered = true;
-                        if (isCorrect) correctAnswers++;
-                      });
-                      countdownTimer?.cancel();
+              return GestureDetector(
+                onTap: () {
+                  if (!hasAnswered) {
+                    setState(() {
+                      selectedIndex = index;
+                      hasAnswered = true;
+                      if (isCorrect) correctAnswers++;
+                    });
+                    countdownTimer?.cancel();
 
-                      if (widget.mode == 'Versus' && widget.versusData != null) {
-                        SocketClient().sendAnswer(
-                          roomId: widget.versusData!['roomId'],
-                          questionIndex: currentQuestionIndex,
-                          answer: option,
-                        );
-                      }
+                    if (widget.mode == 'Versus' &&
+                        widget.versusData != null) {
+                      SocketClient().sendAnswer(
+                        roomId: widget.versusData!['roomId'],
+                        questionIndex: currentQuestionIndex,
+                        answer: option,
+                      );
                     }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: borderColor, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            option,
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ),
-                        if (trailingIcon != null) trailingIcon,
-                      ],
-                    ),
+                  }
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          option,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      if (trailingIcon != null) trailingIcon,
+                    ],
+                  ),
+                ),
+              );
+            }),
             const SizedBox(height: 30),
-            if (hasAnswered && widget.mode == 'Solo')
+            if (hasAnswered && isSolo)
               ElevatedButton(
                 onPressed: goToNextQuestion,
                 style: ElevatedButton.styleFrom(
@@ -377,4 +550,5 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
       ),
     );
   }
+
 }
