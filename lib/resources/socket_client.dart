@@ -75,6 +75,33 @@ class SocketClient {
     });
   }
 
+  /////////////////// ajout reco
+  void reconnect({
+    required String token,
+    required String categoryId,
+    required Function(dynamic data) onStartGame,
+    required Function(Map<String, dynamic>) onNewQuestion,
+    required Function(Map<String, dynamic>) onAnswerFeedback,
+    required Function(Map<String, dynamic>) onGameOver,
+    Function(String)? onError,
+    Function()? onOpponentLeft,
+  }) {
+    print('🔄 Reconnexion au serveur socket...');
+    socket.disconnect();
+    connect(
+      token: token,
+      categoryId: categoryId,
+      onStartGame: onStartGame,
+      onNewQuestion: onNewQuestion,
+      onAnswerFeedback: onAnswerFeedback,
+      onGameOver: onGameOver,
+      onError: onError,
+      onOpponentLeft: onOpponentLeft,
+    );
+  }
+
+  ///////////////////////////////////////////
+
   void sendAnswer({
     required String roomId,
     required int questionIndex,
