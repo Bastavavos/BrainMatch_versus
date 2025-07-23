@@ -133,6 +133,11 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
           setState(() {
             hasAnswered = true;
           });
+          // Future.delayed(const Duration(seconds: 1), () {
+          //   goToNextQuestion();
+          // });
+        }
+        if (widget.mode != 'Versus') {
           Future.delayed(const Duration(seconds: 1), () {
             goToNextQuestion();
           });
