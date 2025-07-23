@@ -25,8 +25,6 @@ class SocketClient {
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
-          // .disableAutoConnect()
-          // .enableForceNewConnection()
           .setAuth({'token': token})
           .build(),
     );
@@ -71,35 +69,6 @@ class SocketClient {
     socket!.onDisconnect((_) {
       print('🔌 Déconnecté du serveur socket');
     });
-  }
-
-  void reconnect({
-    required String token,
-    required String categoryId,
-    required Function(dynamic data) onStartGame,
-    required Function(Map<String, dynamic>) onNewQuestion,
-    required Function(Map<String, dynamic>) onAnswerFeedback,
-    required Function(Map<String, dynamic>) onGameOver,
-    Function(String)? onError,
-    Function()? onOpponentLeft,
-  }) {
-    print('🔄 Tentative de reconnexion...');
-
-    // Vérifie si le socket existe et est connecté
-    if (socket?.connected ?? false) {
-      socket!.disconnect();
-    }
-
-    connect(
-      token: token,
-      categoryId: categoryId,
-      onStartGame: onStartGame,
-      onNewQuestion: onNewQuestion,
-      onAnswerFeedback: onAnswerFeedback,
-      onGameOver: onGameOver,
-      onError: onError,
-      onOpponentLeft: onOpponentLeft,
-    );
   }
 
   void sendAnswer({
