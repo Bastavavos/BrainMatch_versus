@@ -243,8 +243,7 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
-                // questions.first['image'],
-                questions[currentQuestionIndex]['image'],
+                questions.first['image'],
                 height: 220,
                 fit: BoxFit.cover,
               ),
@@ -261,19 +260,12 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              // questions.first['question'],
-              questions[currentQuestionIndex]['question'],
+              questions.first['question'],
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: primaryColor,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Question ${currentQuestionIndex + 1} / ${questions.length}",
-              style: TextStyle(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             if (!hasAnswered && opponentHasAnswered)
@@ -287,13 +279,10 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
               ),
             const SizedBox(height: 24),
             ...List.generate(
-              // questions.first['options'].length,
-              questions[currentQuestionIndex]['options'].length,
+              questions.first['options'].length,
                   (index) {
-                // final option = questions.first['options'][index];
-                    final option = questions[currentQuestionIndex]['options'][index];
-                // final correctAnswer = questions.first['answer'];
-                    final correctAnswer = questions[currentQuestionIndex]['answer'];
+                final option = questions.first['options'][index];
+                final correctAnswer = questions.first['answer'];
                 final isCorrect = option == correctAnswer;
                 final isSelected = index == selectedIndex;
 
