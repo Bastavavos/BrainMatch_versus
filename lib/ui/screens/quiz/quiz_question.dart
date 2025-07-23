@@ -47,17 +47,14 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     if (widget.mode == 'Versus' && widget.versusData != null) {
       final question = widget.versusData!['question'];
       if (question != null) {
-        questions = [question]; // On initialise avec UNE question
+        questions = [question]; // initialize just one question
       }
       isLoading = false;
-      // startTimer();
 
-      // Connexion socket avec callbacks adaptés
       SocketClient().connect(
         token: widget.token,
         categoryId: widget.categoryId,
         onStartGame: (_) {
-          // Pas besoin d'action ici, questions déjà chargées
         },
         onNewQuestion: handleNewQuestion,
         onAnswerFeedback: handleAnswerFeedback,
@@ -133,9 +130,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
           setState(() {
             hasAnswered = true;
           });
-          // Future.delayed(const Duration(seconds: 1), () {
-          //   goToNextQuestion();
-          // });
         }
         if (widget.mode != 'Versus') {
           Future.delayed(const Duration(seconds: 1), () {
@@ -177,7 +171,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     }
   }
 
-  // Gestion nouvelle question reçue via socket (versus)
   void handleNewQuestion(Map<String, dynamic> data) {
     if (!mounted) return;
 
@@ -195,11 +188,9 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     if (widget.mode == 'Versus') {
       startTimer();
     }
-
     debugPrint("Nouvelle question reçue: ${jsonEncode(data)}");
   }
 
-  // Gestion feedback réponse (versus)
   void handleAnswerFeedback(Map<String, dynamic> data) {
     if (!mounted) return;
 
@@ -215,11 +206,8 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
         opponentHasAnswered = true;
       }
     });
-
-    // Si tous ont répondu, avancer ? (à adapter selon logique serveur)
   }
 
-  // Gestion fin de partie (versus)
   void handleGameOver(Map<String, dynamic> data) {
     if (!mounted) return;
 
@@ -255,7 +243,8 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
-                questions.first['image'],
+                // questions.first['image'],
+                questions[currentQuestionIndex]['image'],
                 height: 220,
                 fit: BoxFit.cover,
               ),
@@ -272,12 +261,19 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              questions.first['question'],
+              // questions.first['question'],
+              questions[currentQuestionIndex]['question'],
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: primaryColor,
               ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Question ${currentQuestionIndex + 1} / ${questions.length}",
+              style: TextStyle(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             if (!hasAnswered && opponentHasAnswered)
@@ -291,10 +287,13 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
               ),
             const SizedBox(height: 24),
             ...List.generate(
-              questions.first['options'].length,
+              // questions.first['options'].length,
+              questions[currentQuestionIndex]['options'].length,
                   (index) {
-                final option = questions.first['options'][index];
-                final correctAnswer = questions.first['answer'];
+                // final option = questions.first['options'][index];
+                    final option = questions[currentQuestionIndex]['options'][index];
+                // final correctAnswer = questions.first['answer'];
+                    final correctAnswer = questions[currentQuestionIndex]['answer'];
                 final isCorrect = option == correctAnswer;
                 final isSelected = index == selectedIndex;
 
