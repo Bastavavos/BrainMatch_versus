@@ -1,5 +1,6 @@
 import 'package:brain_match/ui/screens/auth/login.dart';
 import 'package:brain_match/ui/layout/main_layout.dart';
+import 'package:brain_match/ui/screens/chess/chess.dart';
 import 'package:brain_match/ui/screens/quiz/select_category.dart';
 import 'package:brain_match/ui/screens/auth/register.dart';
 import 'package:brain_match/ui/theme.dart';
@@ -46,6 +47,15 @@ class MyApp extends StatelessWidget {
               selectedMode: selectedMode,
               token: token,
             ),
+          );
+        }
+
+        if (settings.name == '/chess') {
+          final args = settings.arguments as Map<String, dynamic>;
+          final token = args['token'] as String;
+
+          return MaterialPageRoute(
+            builder: (context) => ChessGamePage(token: token),
           );
         }
 

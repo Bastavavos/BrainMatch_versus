@@ -38,6 +38,15 @@ class SelectionModePage extends ConsumerWidget {
               routeName: 'Versus',
               token: token,
             ),
+            const SizedBox(height: 20),
+            _buildModeCard(
+              context,
+              title: "Chess",
+              icon: LucideIcons.crown,
+              color: Colors.deepPurple,
+              routeName: 'Chess',
+              token: token,
+            ),
           ],
         ),
       ),
@@ -70,14 +79,37 @@ class SelectionModePage extends ConsumerWidget {
             );
             return;
           }
-          Navigator.pushNamed(
-            context,
-            '/confirm',
-            arguments: {
-              'selectedMode': routeName,
-              'token': token,
-            },
-          );
+
+          if (routeName == 'Chess') {
+
+            Navigator.pushNamed(
+              context,
+              '/chess',
+              arguments: {
+                'token': token,
+              },
+            );
+          } else {
+
+            Navigator.pushNamed(
+              context,
+              '/confirm',
+              arguments: {
+                'selectedMode': routeName,
+                'token': token,
+              },
+            );
+          }
+
+          // Navigator.pushNamed(
+          //   context,
+          //   '/confirm',
+          //   arguments: {
+          //     'selectedMode': routeName,
+          //     'token': token,
+          //   },
+          // );
+
         },
         child: Container(
           width: MediaQuery.of(context).size.width * 0.85,

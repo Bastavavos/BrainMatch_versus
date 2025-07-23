@@ -90,4 +90,65 @@ class SocketClient {
   void disconnect() {
     socket.disconnect();
   }
+
+  // CHESS //
+  void connectToChessGame({
+    required String token,
+    required Function(String roomId, bool youPlayWhite) onStartGame,
+    required Function(String from, String to) onMovePlayed,
+    Function()? onOpponentLeft,
+    Function(String)? onError,
+  }) {
+    socket = IO.io(
+      'http://192.168.1.74:5000', // ⚠️ adapte l'IP à ton backend
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .enableAutoConnect()
+          .setAuth({'token': token})
+          .build(),
+    );
+
+    socket.connect();
+
+    socket.onConnect((_) {
+      print('✅ [CHESS] Connecté au serveur');
+      socket.emit('join_game', {'categoryId': 'chess'});
+    });
+
+    socket.on('start_game', (data) {
+      print('♟️ Partie d’échecs démarrée : $data');
+      final roomId = data['roomId'] as String;
+      final youPlayWhite = data['youPlayWhite'] ?? true;
+      onStartGame(roomId, youPlayWhite);
+    });
+
+    socket.on('move_played', (data) {
+      final move = data['move'];
+      onMovePlayed(move['from'], move['to']);
+    });
+
+    socket.on('opponent_left', (_) {
+      onOpponentLeft?.call();
+    });
+
+    socket.on('error', (data) {
+      onError?.call(data['message'] ?? 'Erreur inconnue');
+    });
+
+    socket.onDisconnect((_) {
+      print('🔌 [CHESS] Déconnecté');
+    });
+  }
+
+  void sendChessMove({
+    required String roomId,
+    required String from,
+    required String to,
+  }) {
+    socket.emit('move', {
+      'roomId': roomId,
+      'move': {'from': from, 'to': to}
+    });
+  }
+
 }
