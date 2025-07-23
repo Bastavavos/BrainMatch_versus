@@ -76,9 +76,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
       //   },
       // );
 
-
-
-
     }
     else {
       fetchQuestionData().then((_) {

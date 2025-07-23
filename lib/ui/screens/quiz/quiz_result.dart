@@ -21,7 +21,6 @@ class QuizResultPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    /// NEW
     if (mode == 'Versus') {
       SocketClient().disconnect(); // ← évite les résidus de connexion
     }
