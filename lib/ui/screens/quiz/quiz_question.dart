@@ -241,10 +241,16 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     );
   }
 
+  String versusImageUrl(String url) {
+    return url.replaceAll("localhost", "192.168.1.74"); // ← remplace par l'IP de ton backend
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isSolo = widget.mode == 'Solo';
     final Color primaryColor = isSolo ? Colors.deepPurple : Colors.redAccent;
+
+
 
     return SpeLayout(
       child: isLoading
@@ -259,10 +265,17 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
-                imageUrl,
+                widget.mode == 'Solo' ? imageUrl : versusImageUrl(imageUrl),
                 height: 220,
                 fit: BoxFit.cover,
               ),
+
+
+              // child: Image.network(
+              //   imageUrl,
+              //   height: 220,
+              //   fit: BoxFit.cover,
+              // ),
             ),
             const SizedBox(height: 16),
             ClipRRect(
