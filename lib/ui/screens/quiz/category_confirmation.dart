@@ -133,6 +133,91 @@ class CategoryConfirmationPage extends StatelessWidget {
     );
   }
 
+  // void _handleStartPressed(BuildContext context) {
+  //   if (token.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Token invalide. Veuillez vous reconnecter.')),
+  //     );
+  //     return;
+  //   }
+  //
+  //   if (mode == 'Solo') {
+  //     // Mode Solo: navigation directe vers Quiz sans socket
+  //     Navigator.pushReplacement(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (_) => QuizPlayPage(
+  //           categoryId: categoryId,
+  //           mode: mode,
+  //           currentUser: currentUser,
+  //           token: token,
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //
+  //     // Mode Versus: connexion socket + attente d'un autre joueur
+  //     showDialog(
+  //       context: context,
+  //       barrierDismissible: false,
+  //       builder: (_) => const AlertDialog(
+  //         title: Text('En attente d’un autre joueur...'),
+  //         content: Row(
+  //           children: [
+  //             CircularProgressIndicator(),
+  //             SizedBox(width: 20),
+  //             Expanded(child: Text('Recherche en cours...')),
+  //           ],
+  //         ),
+  //       ),
+  //     );
+  //
+  //     SocketClient().connect(
+  //       token: token,
+  //       categoryId: categoryId,
+  //       onStartGame: (data) {
+  //         Navigator.pop(context); // Ferme la boîte d'attente
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (_) => QuizPlayPage(
+  //               categoryId: categoryId,
+  //               mode: mode,
+  //               versusData: data,
+  //               currentUser: currentUser,
+  //               token: token,
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //       onNewQuestion: (questionData) {
+  //         print('Nouvelle question reçue : $questionData');
+  //         // Optionnel: gérer mise à jour question
+  //       },
+  //       onAnswerFeedback: (feedbackData) {
+  //         print('Feedback réponse reçue : $feedbackData');
+  //         // Optionnel: gérer feedback réponse
+  //       },
+  //       onGameOver: (gameOverData) {
+  //         print('Partie terminée : $gameOverData');
+  //         // Optionnel: gérer fin de partie
+  //       },
+  //       onError: (errorMessage) {
+  //         Navigator.pop(context); // Ferme la boîte d'attente
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Erreur : $errorMessage')),
+  //         );
+  //       },
+  //       onOpponentLeft: () {
+  //         Navigator.pop(context);
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(content: Text('L\'adversaire a quitté la partie.')),
+  //         );
+  //       },
+  //     );
+  //   }
+  // }
+
   void _handleStartPressed(BuildContext context) {
     if (token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +227,6 @@ class CategoryConfirmationPage extends StatelessWidget {
     }
 
     if (mode == 'Solo') {
-      // Mode Solo: navigation directe vers Quiz sans socket
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -155,8 +239,10 @@ class CategoryConfirmationPage extends StatelessWidget {
         ),
       );
     } else {
+      // 🆕 Étape 1 : Déconnecter toute socket existante
+      SocketClient().disconnect(); // <-- Ajout important ici
 
-      // Mode Versus: connexion socket + attente d'un autre joueur
+      // Étape 2 : Afficher boîte d'attente
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -172,6 +258,7 @@ class CategoryConfirmationPage extends StatelessWidget {
         ),
       );
 
+      // Étape 3 : Connexion socket fraîche
       SocketClient().connect(
         token: token,
         categoryId: categoryId,
@@ -192,18 +279,15 @@ class CategoryConfirmationPage extends StatelessWidget {
         },
         onNewQuestion: (questionData) {
           print('Nouvelle question reçue : $questionData');
-          // Optionnel: gérer mise à jour question
         },
         onAnswerFeedback: (feedbackData) {
           print('Feedback réponse reçue : $feedbackData');
-          // Optionnel: gérer feedback réponse
         },
         onGameOver: (gameOverData) {
           print('Partie terminée : $gameOverData');
-          // Optionnel: gérer fin de partie
         },
         onError: (errorMessage) {
-          Navigator.pop(context); // Ferme la boîte d'attente
+          Navigator.pop(context); // Ferme boîte attente
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Erreur : $errorMessage')),
           );
@@ -217,4 +301,7 @@ class CategoryConfirmationPage extends StatelessWidget {
       );
     }
   }
+
+
+
 }

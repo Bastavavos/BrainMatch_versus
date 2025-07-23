@@ -4,9 +4,11 @@
 //   static final SocketClient _instance = SocketClient._internal();
 //   factory SocketClient() => _instance;
 //
-//   late IO.Socket socket;
+//   IO.Socket? socket; // rendue nullable
 //
 //   SocketClient._internal();
+//
+//   bool get isConnected => socket?.connected ?? false;
 //
 //   void connect({
 //     required String token,
@@ -23,59 +25,54 @@
 //       IO.OptionBuilder()
 //           .setTransports(['websocket'])
 //           .enableAutoConnect()
-//           .setAuth({
-//         'token': token,
-//       }).build(),
+//           // .disableAutoConnect()
+//           // .enableForceNewConnection()
+//           .setAuth({'token': token})
+//           .build(),
 //     );
 //
-//     socket.connect();
+//     socket!.connect();
 //
-//     socket.onConnect((_) {
+//     socket!.onConnect((_) {
 //       print('✅ Connecté au serveur');
-//
-//       socket.emit('join_game', {
-//         'categoryId': categoryId,
-//       });
+//       socket!.emit('join_game', {'categoryId': categoryId});
 //     });
 //
-//     socket.on('start_game', (data) {
+//     socket!.on('start_game', (data) {
 //       print('🎮 Partie lancée ! Données reçues : $data');
 //       onStartGame(data);
 //     });
 //
-//     socket.on('new_question', (data) {
+//     socket!.on('new_question', (data) {
 //       print('❓ Nouvelle question : $data');
 //       onNewQuestion(Map<String, dynamic>.from(data));
 //     });
 //
-//     socket.on('answer_feedback', (data) {
+//     socket!.on('answer_feedback', (data) {
 //       print('✅ Feedback de réponse : $data');
 //       onAnswerFeedback(Map<String, dynamic>.from(data));
 //     });
 //
-//     socket.on('game_over', (data) {
+//     socket!.on('game_over', (data) {
 //       print('🏁 Fin de partie : $data');
 //       onGameOver(Map<String, dynamic>.from(data));
 //     });
 //
-//     socket.on('opponent_left', (data) {
-//       print('🚪 Adversaire a quitté : $data');
-//       if (onOpponentLeft != null) {
-//         onOpponentLeft();
-//       }
+//     socket!.on('opponent_left', (_) {
+//       print('🚪 Adversaire a quitté');
+//       onOpponentLeft?.call();
 //     });
 //
-//     socket.on('error', (data) {
+//     socket!.on('error', (data) {
 //       print('⚠️ Erreur socket : $data');
 //       onError?.call(data['message'] ?? 'Erreur inconnue');
 //     });
 //
-//     socket.onDisconnect((_) {
+//     socket!.onDisconnect((_) {
 //       print('🔌 Déconnecté du serveur socket');
 //     });
 //   }
 //
-//   /////////////////// ajout reco
 //   void reconnect({
 //     required String token,
 //     required String categoryId,
@@ -86,8 +83,13 @@
 //     Function(String)? onError,
 //     Function()? onOpponentLeft,
 //   }) {
-//     print('🔄 Reconnexion au serveur socket...');
-//     socket.disconnect();
+//     print('🔄 Tentative de reconnexion...');
+//
+//     // Vérifie si le socket existe et est connecté
+//     if (socket?.connected ?? false) {
+//       socket!.disconnect();
+//     }
+//
 //     connect(
 //       token: token,
 //       categoryId: categoryId,
@@ -100,14 +102,12 @@
 //     );
 //   }
 //
-//   ///////////////////////////////////////////
-//
 //   void sendAnswer({
 //     required String roomId,
 //     required int questionIndex,
 //     required String answer,
 //   }) {
-//     socket.emit('player_answer', {
+//     socket?.emit('player_answer', {
 //       'roomId': roomId,
 //       'questionIndex': questionIndex,
 //       'answer': answer,
@@ -115,10 +115,12 @@
 //   }
 //
 //   void disconnect() {
-//     socket.disconnect();
+//     socket?.disconnect();
 //   }
 // }
+//
 
+import 'dart:ui';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -126,7 +128,7 @@ class SocketClient {
   static final SocketClient _instance = SocketClient._internal();
   factory SocketClient() => _instance;
 
-  IO.Socket? socket; // rendue nullable
+  IO.Socket? socket;
 
   SocketClient._internal();
 
@@ -142,13 +144,18 @@ class SocketClient {
     Function(String)? onError,
     Function()? onOpponentLeft,
   }) {
+    // 🔁 Si déjà connecté, on nettoie l'ancien socket
+    if (socket != null) {
+      socket!.clearListeners();
+      socket!.disconnect();
+      socket = null;
+    }
+
     socket = IO.io(
       'http://192.168.1.74:3000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
-          // .disableAutoConnect()
-          // .enableForceNewConnection()
           .setAuth({'token': token})
           .build(),
     );
@@ -195,6 +202,42 @@ class SocketClient {
     });
   }
 
+  ////////// NEW
+  void setListeners({
+    Function(Map<String, dynamic>)? onNewQuestion,
+    Function(Map<String, dynamic>)? onAnswerFeedback,
+    Function(Map<String, dynamic>)? onGameOver,
+    Function(String)? onError,
+    VoidCallback? onOpponentLeft,
+  }) {
+    if (socket == null) return;
+
+    if (onNewQuestion != null) {
+      socket!.off('newQuestion');
+      socket!.on('newQuestion', (data) => onNewQuestion(data));
+    }
+
+    if (onAnswerFeedback != null) {
+      socket!.off('answerFeedback');
+      socket!.on('answerFeedback', (data) => onAnswerFeedback(data));
+    }
+
+    if (onGameOver != null) {
+      socket!.off('gameOver');
+      socket!.on('gameOver', (data) => onGameOver(data));
+    }
+
+    if (onError != null) {
+      socket!.off('error');
+      socket!.on('error', (data) => onError(data.toString()));
+    }
+
+    if (onOpponentLeft != null) {
+      socket!.off('opponentLeft');
+      socket!.on('opponentLeft', (_) => onOpponentLeft());
+    }
+  }
+
   void reconnect({
     required String token,
     required String categoryId,
@@ -206,12 +249,6 @@ class SocketClient {
     Function()? onOpponentLeft,
   }) {
     print('🔄 Tentative de reconnexion...');
-
-    // Vérifie si le socket existe et est connecté
-    if (socket?.connected ?? false) {
-      socket!.disconnect();
-    }
-
     connect(
       token: token,
       categoryId: categoryId,
@@ -237,7 +274,9 @@ class SocketClient {
   }
 
   void disconnect() {
+    socket?.clearListeners(); // 🧹 nettoyage complet
     socket?.disconnect();
+    socket = null;
   }
 }
 

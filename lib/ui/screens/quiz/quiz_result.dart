@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../resources/socket_client.dart';
+
 class QuizResultPage extends StatelessWidget {
   final int totalQuestions;
   final int correctAnswers;
@@ -18,6 +20,12 @@ class QuizResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    /// NEW
+    if (mode == 'Versus') {
+      SocketClient().disconnect(); // ← évite les résidus de connexion
+    }
+
     String message = "Vous avez terminé le quiz en mode ${mode == 'Solo' ? 'Solo' : 'Versus'}!";
     if (mode == 'Versus' && opponentDisconnected) {
       message = "Votre adversaire s'est déconnecté. Voici votre score.";

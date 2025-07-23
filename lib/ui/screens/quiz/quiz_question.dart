@@ -51,30 +51,34 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
       }
       isLoading = false;
 
-      SocketClient().connect(
-        token: widget.token,
-        categoryId: widget.categoryId,
-        onStartGame: (_) {
-        },
-        onNewQuestion: handleNewQuestion,
-        onAnswerFeedback: handleAnswerFeedback,
-        onGameOver: handleGameOver,
-        onError: (message) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erreur socket : $message')),
-            );
-          }
-        },
-        onOpponentLeft: () {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Votre adversaire a quitté la partie.')),
-            );
-            Navigator.pop(context);
-          }
-        },
-      );
+      // SocketClient().connect(
+      //   token: widget.token,
+      //   categoryId: widget.categoryId,
+      //   onStartGame: (_) {
+      //   },
+      //   onNewQuestion: handleNewQuestion,
+      //   onAnswerFeedback: handleAnswerFeedback,
+      //   onGameOver: handleGameOver,
+      //   onError: (message) {
+      //     if (mounted) {
+      //       ScaffoldMessenger.of(context).showSnackBar(
+      //         SnackBar(content: Text('Erreur socket : $message')),
+      //       );
+      //     }
+      //   },
+      //   onOpponentLeft: () {
+      //     if (mounted) {
+      //       ScaffoldMessenger.of(context).showSnackBar(
+      //         const SnackBar(content: Text('Votre adversaire a quitté la partie.')),
+      //       );
+      //       Navigator.pop(context);
+      //     }
+      //   },
+      // );
+
+
+
+
     }
     else {
       fetchQuestionData().then((_) {
