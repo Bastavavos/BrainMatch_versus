@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:brain_match/ui/screens/quiz/quiz_question.dart';
 import 'package:brain_match/ui/layout/special_layout.dart';
-import '../../../resources/socket_client.dart';
+// import '../../../resources/socket_client.dart';
+import '../../../view_manager/versus_router.dart';
 
 class CategoryConfirmationPage extends StatelessWidget {
   final String categoryId;
@@ -156,65 +157,82 @@ class CategoryConfirmationPage extends StatelessWidget {
       );
     } else {
 
-      // Mode Versus: connexion socket + attente d'un autre joueur
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => const AlertDialog(
-          title: Text('En attente d’un autre joueur...'),
-          content: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Expanded(child: Text('Recherche en cours...')),
-            ],
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => VersusRouter(
+            categoryId: categoryId,
+            // currentUser: currentUser,
+            token: token,
           ),
         ),
       );
 
-      SocketClient().connect(
-        token: token,
-        categoryId: categoryId,
-        onStartGame: (data) {
-          Navigator.pop(context); // Ferme la boîte d'attente
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => QuizPlayPage(
-                categoryId: categoryId,
-                mode: mode,
-                versusData: data,
-                currentUser: currentUser,
-                token: token,
-              ),
-            ),
-          );
-        },
-        onNewQuestion: (questionData) {
-          print('Nouvelle question reçue : $questionData');
-          // Optionnel: gérer mise à jour question
-        },
-        onAnswerFeedback: (feedbackData) {
-          print('Feedback réponse reçue : $feedbackData');
-          // Optionnel: gérer feedback réponse
-        },
-        onGameOver: (gameOverData) {
-          print('Partie terminée : $gameOverData');
-          // Optionnel: gérer fin de partie
-        },
-        onError: (errorMessage) {
-          Navigator.pop(context); // Ferme la boîte d'attente
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur : $errorMessage')),
-          );
-        },
-        onOpponentLeft: () {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('L\'adversaire a quitté la partie.')),
-          );
-        },
-      );
+      // Mode Versus: connexion socket + attente d'un autre joueur
+
+      ///// OLD ////////
+
+      // showDialog(
+      //   context: context,
+      //   barrierDismissible: false,
+      //   builder: (_) => const AlertDialog(
+      //     title: Text('En attente d’un autre joueur...'),
+      //     content: Row(
+      //       children: [
+      //         CircularProgressIndicator(),
+      //         SizedBox(width: 20),
+      //         Expanded(child: Text('Recherche en cours...')),
+      //       ],
+      //     ),
+      //   ),
+      // );
+
+      // SocketClient().connect(
+      //   token: token,
+      //   categoryId: categoryId,
+      //   onStartGame: (data) {
+      //     Navigator.pop(context); // Ferme la boîte d'attente
+      //     Navigator.pushReplacement(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (_) => QuizPlayPage(
+      //           categoryId: categoryId,
+      //           mode: mode,
+      //           versusData: data,
+      //           currentUser: currentUser,
+      //           token: token,
+      //         ),
+      //       ),
+      //     );
+      //   },
+      //   onNewQuestion: (questionData) {
+      //     print('Nouvelle question reçue : $questionData');
+      //     // Optionnel: gérer mise à jour question
+      //   },
+      //   onAnswerFeedback: (feedbackData) {
+      //     print('Feedback réponse reçue : $feedbackData');
+      //     // Optionnel: gérer feedback réponse
+      //   },
+      //   onGameOver: (gameOverData) {
+      //     print('Partie terminée : $gameOverData');
+      //     // Optionnel: gérer fin de partie
+      //   },
+      //   onError: (errorMessage) {
+      //     Navigator.pop(context); // Ferme la boîte d'attente
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(content: Text('Erreur : $errorMessage')),
+      //     );
+      //   },
+      //   onOpponentLeft: () {
+      //     Navigator.pop(context);
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       const SnackBar(content: Text('L\'adversaire a quitté la partie.')),
+      //     );
+      //   },
+      // );
+
+
+
     }
   }
 }

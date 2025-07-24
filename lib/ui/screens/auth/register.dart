@@ -33,7 +33,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       final baseUrl = dotenv.env['API_KEY'];
 
       final registerResponse = await http.post(
-        Uri.parse("$baseUrl/user/register"),
+        Uri.parse("$baseUrl/register"),
         // Uri.parse("$baseUrl/register"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({

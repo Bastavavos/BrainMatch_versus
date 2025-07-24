@@ -22,6 +22,7 @@ class SocketClient {
   }) {
     socket = IO.io(
       'http://192.168.1.74:3000',
+
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()

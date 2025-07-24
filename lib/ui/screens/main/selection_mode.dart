@@ -72,7 +72,7 @@ class SelectionModePage extends ConsumerWidget {
           }
           Navigator.pushNamed(
             context,
-            '/confirm',
+            '/confirm',  //categ
             arguments: {
               'selectedMode': routeName,
               'token': token,
