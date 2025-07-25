@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:brain_match/ui/screens/quiz/quiz_question.dart';
 import 'package:brain_match/ui/layout/special_layout.dart';
-// import '../../../resources/socket_client.dart';
+import '../../../view_manager/solo_router.dart';
 import '../../../view_manager/versus_router.dart';
 
 class CategoryConfirmationPage extends StatelessWidget {
@@ -143,26 +142,21 @@ class CategoryConfirmationPage extends StatelessWidget {
     }
 
     if (mode == 'Solo') {
-      // Mode Solo: navigation directe vers Quiz sans socket
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => QuizPlayPage(
+          builder: (_) => SoloRouter(
             categoryId: categoryId,
-            mode: mode,
-            currentUser: currentUser,
             token: token,
           ),
         ),
       );
     } else {
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => VersusRouter(
             categoryId: categoryId,
-            // currentUser: currentUser,
             token: token,
           ),
         ),

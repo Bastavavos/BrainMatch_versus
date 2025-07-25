@@ -44,6 +44,12 @@ class _VersusRouterState extends State<VersusRouter> {
   late String roomId;
   int totalQuestions = 0;
 
+  int timeLeft = 10;
+  Timer? countdownTimer;
+
+  String? selectedAnswer;
+  String? correctAnswer;
+
   @override
   void initState() {
     super.initState();
@@ -56,34 +62,68 @@ class _VersusRouterState extends State<VersusRouter> {
       onGameStart: (data) {
         roomId = data['roomId'];
         totalQuestions = data['totalQuestions'];
+
+        setState(() {
+          timeLeft = 100;
+          selectedAnswer = null;
+          correctAnswer = null;
+        });
+        startTimer();
+
         _controller.add(VersusEvent(state: VersusState.question, data: data));
       },
       onNewQuestion: (data) {
+        setState(() {
+          timeLeft = 100;
+          selectedAnswer = null;
+          correctAnswer = null;
+        });
+        startTimer();
+
         _controller.add(VersusEvent(state: VersusState.question, data: {
           ...data,
-          'totalQuestions': totalQuestions, // injecter manuellement
+          'totalQuestions': totalQuestions,
         }));
       },
       onAnswerFeedback: (data) {
-        // Optionnel : afficher feedback dans la UI avec local state
+        setState(() {
+          correctAnswer = data['correctAnswer'];
+        });
       },
       onGameOver: (data) {
+        countdownTimer?.cancel();
         _controller.add(VersusEvent(state: VersusState.result, data: data));
       },
       onOpponentLeft: (data) {
+        countdownTimer?.cancel();
         _controller.add(VersusEvent(state: VersusState.opponentLeft, data: data));
       },
     );
 
-    // Lance la recherche d'adversaire
     _socket.joinGameVersus(widget.categoryId);
-
-    // Affiche vue d’attente
     _controller.add(VersusEvent(state: VersusState.waiting));
+  }
+
+  void startTimer() {
+    countdownTimer?.cancel();
+    setState(() {
+      timeLeft = 100;
+    });
+
+    countdownTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (timeLeft <= 0) {
+        timer.cancel();
+      } else {
+        setState(() {
+          timeLeft--;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    countdownTimer?.cancel();
     _controller.close();
     _socket.disconnect();
     super.dispose();
@@ -109,7 +149,14 @@ class _VersusRouterState extends State<VersusRouter> {
               questionData: event.data['question'],
               questionIndex: event.data['questionIndex'],
               totalQuestions: event.data['totalQuestions'],
+              timeLeft: timeLeft,
+              selectedAnswer: selectedAnswer,
+              correctAnswer: correctAnswer,
               onAnswer: (answer) {
+                setState(() {
+                  selectedAnswer = answer;
+                });
+
                 _socket.sendAnswer(
                   roomId: roomId,
                   questionIndex: event.data['questionIndex'],

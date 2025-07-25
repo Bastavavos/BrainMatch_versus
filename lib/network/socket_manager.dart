@@ -18,7 +18,8 @@ class SocketClient {
     required Function(dynamic data) onOpponentLeft,
   }) {
     socket = IO.io(
-      'http://192.168.1.74:3000',
+      // 'http://192.168.1.74:3000',
+      'http://192.168.1.17:3000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()

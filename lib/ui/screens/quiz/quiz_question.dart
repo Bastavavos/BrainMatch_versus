@@ -282,8 +282,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
     final bool isSolo = widget.mode == 'Solo';
     final Color primaryColor = isSolo ? Colors.deepPurple : Colors.redAccent;
 
-
-
     return SpeLayout(
       child: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -328,27 +326,6 @@ class _QuizPlayPageState extends State<QuizPlayPage> {
               ),
               textAlign: TextAlign.center,
             ),
-
-
-            //////////////// ajout reconnexion socket
-            // if (widget.mode == 'Versus')
-            //   Padding(
-            //     padding: const EdgeInsets.only(top: 12.0),
-            //     child: ElevatedButton(
-            //       onPressed: reconnectSocket,
-            //       style: ElevatedButton.styleFrom(
-            //         backgroundColor: Colors.redAccent,
-            //         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            //         shape: RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(20),
-            //         ),
-            //       ),
-            //       child: const Text('🔌 Reconnexion'),
-            //     ),
-            //   ),
-
-            ///////////////////////////////////////////
-
 
             if (!hasAnswered && opponentHasAnswered)
               Padding(

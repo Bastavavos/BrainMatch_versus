@@ -1,0 +1,175 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+
+import '../network/socket_manager.dart';
+import '../ui/screens/new_screen/error_view.dart';
+import '../ui/screens/new_screen/question_view.dart';
+import '../ui/screens/new_screen/result_view.dart';
+import '../ui/screens/new_screen/waiting_view.dart';
+
+enum SoloState {
+  waiting,
+  question,
+  result,
+  error,
+}
+
+class SoloEvent {
+  final SoloState state;
+  final dynamic data;
+
+  SoloEvent({required this.state, this.data});
+}
+
+class SoloRouter extends StatefulWidget {
+  final String token;
+  final String categoryId;
+
+  const SoloRouter({
+    super.key,
+    required this.token,
+    required this.categoryId,
+  });
+
+  @override
+  State<SoloRouter> createState() => _SoloRouterState();
+}
+
+class _SoloRouterState extends State<SoloRouter> {
+  final _controller = StreamController<SoloEvent>.broadcast();
+  final _socket = SocketClient();
+
+  late String roomId;
+  int totalQuestions = 0;
+
+  int timeLeft = 10;
+  Timer? countdownTimer;
+
+  String? selectedAnswer;
+  String? correctAnswer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _socket.connect(
+      token: widget.token,
+      onError: (msg) {
+        _controller.add(SoloEvent(state: SoloState.error, data: msg));
+      },
+      onGameStart: (data) {
+        roomId = data['roomId'];
+        totalQuestions = data['totalQuestions'];
+
+        setState(() {
+          timeLeft = 100;
+          selectedAnswer = null;
+          correctAnswer = null;
+        });
+        startTimer();
+
+        _controller.add(SoloEvent(
+          state: SoloState.question,
+          data: data,
+        ));
+      },
+      onNewQuestion: (data) {
+        setState(() {
+          timeLeft = 100;
+          selectedAnswer = null;
+          correctAnswer = null;
+        });
+        startTimer();
+
+        _controller.add(SoloEvent(state: SoloState.question, data: {
+          ...data,
+          'totalQuestions': totalQuestions,
+        }));
+      },
+      onAnswerFeedback: (data) {
+        setState(() {
+          correctAnswer = data['correctAnswer'];
+        });
+      },
+      onGameOver: (data) {
+        countdownTimer?.cancel();
+        _controller.add(SoloEvent(state: SoloState.result, data: data));
+      },
+      onOpponentLeft: (_) {},
+    );
+
+    _socket.joinGameSolo(widget.categoryId);
+    _controller.add(SoloEvent(state: SoloState.waiting));
+  }
+
+  void startTimer() {
+    countdownTimer?.cancel();
+    setState(() {
+      timeLeft = 100;
+    });
+
+    countdownTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (timeLeft <= 0) {
+        timer.cancel();
+      } else {
+        setState(() {
+          timeLeft--;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    countdownTimer?.cancel();
+    _controller.close();
+    _socket.disconnect();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<SoloEvent>(
+      stream: _controller.stream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final event = snapshot.data!;
+
+        switch (event.state) {
+          case SoloState.waiting:
+            return const WaitingView();
+
+          case SoloState.question:
+            return QuestionView(
+              questionData: event.data['question'],
+              questionIndex: event.data['questionIndex'],
+              totalQuestions: event.data['totalQuestions'],
+              timeLeft: timeLeft,
+              selectedAnswer: selectedAnswer,
+              correctAnswer: correctAnswer,
+              onAnswer: (answer) {
+                setState(() {
+                  selectedAnswer = answer;
+                });
+
+                _socket.sendAnswer(
+                  roomId: roomId,
+                  questionIndex: event.data['questionIndex'],
+                  answer: answer,
+                );
+              },
+            );
+
+          case SoloState.result:
+            return ResultView(resultData: event.data);
+
+          case SoloState.error:
+            return ErrorView(message: event.data);
+        }
+      },
+    );
+  }
+}
