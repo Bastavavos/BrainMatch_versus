@@ -3,11 +3,9 @@ import 'package:brain_match/ui/layout/main_layout.dart';
 import 'package:brain_match/ui/screens/quiz/select_category.dart';
 import 'package:brain_match/ui/screens/auth/register.dart';
 import 'package:brain_match/ui/theme.dart';
-import 'package:brain_match/view_models/user_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart' as provider;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,12 +30,10 @@ class MyApp extends StatelessWidget {
         if (settings.name == '/confirm') {
           final args = settings.arguments as Map<String, dynamic>;
           final selectedMode = args['selectedMode'] as String;
-          final token = args['token'] as String;
 
           return MaterialPageRoute(
             builder: (context) => CategorySelectionPage(
               selectedMode: selectedMode,
-              token: token,
             ),
           );
         }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:brain_match/ui/layout/special_layout.dart';
+import '../../../provider/user_provider.dart';
 import '../../../view_manager/solo_router.dart';
 import '../../../view_manager/versus_router.dart';
 
-class CategoryConfirmationPage extends StatelessWidget {
+class CategoryConfirmationPage extends ConsumerWidget {
   final String categoryId;
   final String title;
   final String description;
@@ -11,7 +13,6 @@ class CategoryConfirmationPage extends StatelessWidget {
   final String logoUrl;
   final String mode;
   final String currentUser;
-  final String token;
 
   const CategoryConfirmationPage({
     super.key,
@@ -22,13 +23,14 @@ class CategoryConfirmationPage extends StatelessWidget {
     required this.logoUrl,
     required this.mode,
     required this.currentUser,
-    required this.token,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final primaryColor = mode == 'Solo' ? colorScheme.primary : colorScheme.secondary;
+    final primaryColor = mode == 'Solo'
+        ? colorScheme.primary
+        : colorScheme.secondary;
 
     return SpeLayout(
       child: Padding(
@@ -38,7 +40,7 @@ class CategoryConfirmationPage extends StatelessWidget {
           children: [
             _buildCategoryCard(context, colorScheme),
             const SizedBox(height: 30),
-            _buildStartButton(context, primaryColor),
+            _buildStartButton(context, ref, primaryColor),
             const SizedBox(height: 12),
             _buildBackButton(context, colorScheme),
           ],
@@ -101,7 +103,7 @@ class CategoryConfirmationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStartButton(BuildContext context, Color buttonColor) {
+  Widget _buildStartButton(BuildContext context, WidgetRef ref, Color buttonColor) {
     return SizedBox(
       width: 250,
       child: ElevatedButton(
@@ -111,7 +113,7 @@ class CategoryConfirmationPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
-        onPressed: () => _handleStartPressed(context),
+        onPressed: () => _handleStartPressed(context, ref),
         child: const Text('Start', style: TextStyle(fontSize: 18)),
       ),
     );
@@ -133,100 +135,22 @@ class CategoryConfirmationPage extends StatelessWidget {
     );
   }
 
-  void _handleStartPressed(BuildContext context) {
-    if (token.isEmpty) {
+  void _handleStartPressed(BuildContext context, WidgetRef ref) {
+    final token = ref.watch(tokenProvider);
+    if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Token invalide. Veuillez vous reconnecter.')),
       );
       return;
     }
 
-    if (mode == 'Solo') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SoloRouter(
-            categoryId: categoryId,
-            token: token,
-          ),
-        ),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => VersusRouter(
-            categoryId: categoryId,
-            token: token,
-          ),
-        ),
-      );
+    final Widget destination = mode == 'Solo'
+        ? SoloRouter(categoryId: categoryId, token: token)
+        : VersusRouter(categoryId: categoryId, token: token);
 
-      // Mode Versus: connexion socket + attente d'un autre joueur
-
-      ///// OLD ////////
-
-      // showDialog(
-      //   context: context,
-      //   barrierDismissible: false,
-      //   builder: (_) => const AlertDialog(
-      //     title: Text('En attente d’un autre joueur...'),
-      //     content: Row(
-      //       children: [
-      //         CircularProgressIndicator(),
-      //         SizedBox(width: 20),
-      //         Expanded(child: Text('Recherche en cours...')),
-      //       ],
-      //     ),
-      //   ),
-      // );
-
-      // SocketClient().connect(
-      //   token: token,
-      //   categoryId: categoryId,
-      //   onStartGame: (data) {
-      //     Navigator.pop(context); // Ferme la boîte d'attente
-      //     Navigator.pushReplacement(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (_) => QuizPlayPage(
-      //           categoryId: categoryId,
-      //           mode: mode,
-      //           versusData: data,
-      //           currentUser: currentUser,
-      //           token: token,
-      //         ),
-      //       ),
-      //     );
-      //   },
-      //   onNewQuestion: (questionData) {
-      //     print('Nouvelle question reçue : $questionData');
-      //     // Optionnel: gérer mise à jour question
-      //   },
-      //   onAnswerFeedback: (feedbackData) {
-      //     print('Feedback réponse reçue : $feedbackData');
-      //     // Optionnel: gérer feedback réponse
-      //   },
-      //   onGameOver: (gameOverData) {
-      //     print('Partie terminée : $gameOverData');
-      //     // Optionnel: gérer fin de partie
-      //   },
-      //   onError: (errorMessage) {
-      //     Navigator.pop(context); // Ferme la boîte d'attente
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       SnackBar(content: Text('Erreur : $errorMessage')),
-      //     );
-      //   },
-      //   onOpponentLeft: () {
-      //     Navigator.pop(context);
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       const SnackBar(content: Text('L\'adversaire a quitté la partie.')),
-      //     );
-      //   },
-      // );
-
-
-
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => destination),
+    );
   }
 }
