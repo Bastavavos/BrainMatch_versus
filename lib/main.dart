@@ -17,7 +17,7 @@ Future<void> main() async {
       providers: [
         provider.ChangeNotifierProvider(create: (_) => UserViewModel()),
       ],
-      child: ProviderScope( // Enveloppez avec ProviderScope si vous utilisez Riverpod
+      child: ProviderScope( // Enveloppez avec ProviderScope pour Riverpod
         child: MyApp(),
       ),
       // child: MyApp(),

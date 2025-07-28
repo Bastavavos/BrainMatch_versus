@@ -28,7 +28,7 @@ class ResultView extends StatelessWidget {
             : soloScore != null && totalQuestions != null
             ? Center(
           child: Text(
-            'Votre score : $soloScore / $totalQuestions',
+            'Score : $soloScore / $totalQuestions',
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
