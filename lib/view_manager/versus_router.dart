@@ -225,66 +225,19 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
 
                 // startTimer();
 
-                _controller.add(
-                    VersusEvent(state: VersusState.question, data: gameData));
+
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (!mounted) return;
+                  _controller.add(
+                    VersusEvent(state: VersusState.question, data: gameData),
+                  );
+                });
+
+                // _controller.add(
+                //     VersusEvent(state: VersusState.question, data: gameData));
+
               },
             );
-
-          // case VersusState.question:
-          //   return QuestionView(
-          //     questionData: event.data['question'],
-          //     questionIndex: event.data['questionIndex'],
-          //     totalQuestions: event.data['totalQuestions'],
-          //     timeLeft: timeLeft,
-          //     selectedAnswer: selectedAnswer,
-          //     correctAnswer: correctAnswer,
-          //     onAnswer: (answer) {
-          //       if (!mounted) return;
-          //       setState(() {
-          //         selectedAnswer = answer;
-          //       });
-          //
-          //       _socket.sendAnswer(
-          //         roomId: roomId,
-          //         questionIndex: event.data['questionIndex'],
-          //         answer: answer,
-          //       );
-          //     },
-          //   );
-
-          // case VersusState.question:
-          // // Démarre le timer ici seulement une fois
-          //   if (!questionTimerStarted) {
-          //     setState(() {
-          //       timeLeft = 100;
-          //       selectedAnswer = null;
-          //       correctAnswer = null;
-          //       questionTimerStarted = true;
-          //     });
-          //     startTimer();
-          //   }
-          //
-          //   return QuestionView(
-          //     questionData: event.data['question'],
-          //     questionIndex: event.data['questionIndex'],
-          //     totalQuestions: event.data['totalQuestions'],
-          //     timeLeft: timeLeft,
-          //     selectedAnswer: selectedAnswer,
-          //     correctAnswer: correctAnswer,
-          //     onAnswer: (answer) {
-          //       if (!mounted) return;
-          //       setState(() {
-          //         selectedAnswer = answer;
-          //       });
-          //
-          //       _socket.sendAnswer(
-          //         roomId: roomId,
-          //         questionIndex: event.data['questionIndex'],
-          //         answer: answer,
-          //       );
-          //     },
-          //   );
-
 
           case VersusState.question:
             if (!questionTimerStarted) {
@@ -319,8 +272,6 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
                 );
               },
             );
-
-
 
           case VersusState.result:
             return ResultView(resultData: event.data);
