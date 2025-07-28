@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import '../../../Service/api_service.dart';
 import '../../../provider/user_provider.dart';
 
 class UserProfilePage extends ConsumerStatefulWidget {
@@ -28,13 +29,9 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
 
     for (var friendId in friendIds) {
       try {
-        final response = await http.get(
-          Uri.parse('$baseUrl/user/$friendId'),
-          headers: {
-            'Content-Type': 'application/json',
-            if (token != null) 'Authorization': 'Bearer $token',
-          },
-        );
+        final api = ApiService(token: token);
+        final response = await api.get('/user/$friendId');
+
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
@@ -59,7 +56,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
 
   Future<void> _fetchUserData() async {
     final user = ref.read(userProvider);
-    if (user == null || user['id'] == null) {
+    if (user == null) {
       setState(() {
         _isLoading = false;
         _error = "Utilisateur non connecté.";
@@ -67,40 +64,19 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
       return;
     }
 
+    final token = ref.read(tokenProvider);
+
+    setState(() {
+      _userData = user;
+      _isLoading = false;
+    });
+
+    final friendIds = user['friends'] ?? [];
     final String baseUrl = dotenv.env['API_KEY']!;
-    final String userId = user['id'];
-    final String? token = user['token'];
-
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/user/$userId'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _userData = data;
-          _isLoading = false;
-        });
-        final friendIds = data['friends'] ?? [];
-        await _fetchFriendsData(friendIds, baseUrl, token);
-      } else {
-        setState(() {
-          _error = 'Erreur serveur : ${response.statusCode}';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _error = 'Erreur réseau : $e';
-        _isLoading = false;
-      });
-    }
+    await _fetchFriendsData(friendIds, baseUrl, token);
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -121,8 +97,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
     final String username = _userData!['username'];
     final String email = _userData!['email'];
     final int score = _userData!['score'] ?? 0;
-    final String pictureUrl =
-        _userData!['picture'] ?? 'https://exemple.com/default.jpg';
+    final String pictureUrl = _userData!['picture'] ?? 'https://exemple.com/default.jpg';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),

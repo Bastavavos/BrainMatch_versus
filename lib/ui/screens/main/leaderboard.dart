@@ -1,23 +1,35 @@
+
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../view_models/user_view_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../models/user.dart';
+import '../../../provider/user_provider.dart';
 import '../../widgets/user_widget.dart';
 
-class LeaderboardScreen extends StatefulWidget {
+class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
 
   @override
-  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
+  ConsumerState<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
+class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final userViewModel = Provider.of<UserViewModel>(context, listen: false);
-      userViewModel.fetchUsers();
+      final userViewModel = ref.read(userViewModelProvider);
+      final user = ref.read(userProvider);
+
+      if (user != null && user['id'] != null) {
+        await userViewModel.fetchCurrentUser(user['id']);
+      }
+
+      await userViewModel.fetchUsers();
     });
   }
 
@@ -30,82 +42,82 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       case 2:
         return const Color(0xFFCD7F32); // Bronze
       default:
-        return Colors.transparent; // Pour les autres, ou une couleur par défaut
+        return Colors.transparent;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserViewModel>(
-      builder: (context, viewModel, child) {
-        if (viewModel.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (viewModel.errorMessage != null) {
-          return Center(child: Text('Erreur : ${viewModel.errorMessage!}'));
-        } else if (viewModel.users.isEmpty) {
-          return const Center(child: Text('Aucun utilisateur trouvé.'));
-        }
+    final viewModel = ref.watch(userViewModelProvider);
 
-        final podiumUsers = viewModel.users.take(3).toList();
-        final otherUsers = viewModel.users.skip(3).toList();
+    if (viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (viewModel.errorMessage != null) {
+      return Center(child: Text('Erreur : ${viewModel.errorMessage!}'));
+    } else if (viewModel.users.isEmpty) {
+      return const Center(child: Text('Aucun utilisateur trouvé.'));
+    }
 
-        return CustomScrollView(
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                child: Text(
-                  'Leader board',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent, // Couleur thématique du jeu
-                  ),
-                  textAlign: TextAlign.center,
+    final podiumUsers = viewModel.users.take(3).toList();
+    final otherUsers = viewModel.users.skip(3).toList();
+
+    final userMap = ref.watch(userProvider);
+    if (userMap == null) {
+      return const Center(child: Text("Utilisateur non trouvé"));
+    }
+    final currentUser = User.fromJson(userMap);
+
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            child: Text(
+              'Leader board',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(child: _buildPodium(context, podiumUsers)),
+        if (otherUsers.isNotEmpty)
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+            sliver: SliverToBoxAdapter(
+              child: Divider(color: Colors.grey[400], thickness: 2),
+            ),
+          ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+                (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                child: UserWidget(
+                  user: otherUsers[index],
+                  currentUser: currentUser,
                 ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: _buildPodium(context, podiumUsers),
-            ),
-            if (otherUsers.isNotEmpty)
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-                sliver: SliverToBoxAdapter(
-                  child: Divider(
-                    color: Colors.grey[400],
-                    thickness: 2,
-                  ),
-                ),
-              ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                    child: UserWidget(user: otherUsers[index]), // user widget
-                  );
-                },
-                childCount: otherUsers.length,
-              ),
-            ),
-          ],
-        );
-      },
+              );
+            },
+            childCount: otherUsers.length,
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildPodium(BuildContext context, List<dynamic> podiumUsers) {
-    if (podiumUsers.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (podiumUsers.isEmpty) return const SizedBox.shrink();
 
     double getHeightForRank(int rank) {
       switch (rank) {
-        case 0: // 1er
+        case 0:
           return 180.0;
-        case 1: // 2ème
+        case 1:
           return 150.0;
-        case 2: // 3ème
+        case 2:
           return 120.0;
         default:
           return 100.0;
@@ -116,13 +128,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     if (podiumUsers.length > 1) orderedPodiumUsers.add(podiumUsers[1]);
     if (podiumUsers.isNotEmpty) orderedPodiumUsers.add(podiumUsers[0]);
     if (podiumUsers.length > 2) orderedPodiumUsers.add(podiumUsers[2]);
-
-    if (podiumUsers.length == 1) {
-      orderedPodiumUsers = [podiumUsers[0]];
-    } else if (podiumUsers.length == 2) {
-      orderedPodiumUsers = [podiumUsers[1], podiumUsers[0]];
-    }
-
+    if (podiumUsers.length == 1) orderedPodiumUsers = [podiumUsers[0]];
+    if (podiumUsers.length == 2) orderedPodiumUsers = [podiumUsers[1], podiumUsers[0]];
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24.0),
@@ -183,30 +190,33 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircleAvatar(
+              user.picture != null && user.picture!.isNotEmpty
+                  ? CircleAvatar(
+                radius: 25,
+                backgroundImage: CachedNetworkImageProvider(user.picture!),
+              )
+                  : CircleAvatar(
                 radius: 25,
                 backgroundColor: color.withOpacity(0.3),
                 child: Text(
                   user.username[0].toUpperCase(),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 user.username,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
                 'Score: ${user.score}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ],
           ),
