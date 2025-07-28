@@ -103,4 +103,11 @@ class SocketClient {
       _isInitialized = false;
     }
   }
+
+  void sendReadyForFirstQuestion(String roomId) {
+    _socket?.emit('client_ready_for_first_question', {
+      'roomId': roomId,
+    });
+  }
+
 }

@@ -225,7 +225,28 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
               onCountdownComplete: () {
                 if (!mounted || gameData == null) return;
 
-                readyToStartFirstQuestion = true;
+                // Marquer comme prêt à recevoir la première question
+                setState(() {
+                  readyToStartFirstQuestion = true;
+                });
+
+                // Informer le serveur
+                _socket.sendReadyForFirstQuestion(gameData['roomId']);
+
+                // Si une question était déjà reçue avant la fin du compte à rebours, on peut l'afficher maintenant
+                if (pendingFirstQuestion != null) {
+                  _controller.add(VersusEvent(
+                    state: VersusState.question,
+                    data: {
+                      ...pendingFirstQuestion!,
+                      'totalQuestions': totalQuestions,
+                    },
+                  ));
+                  pendingFirstQuestion = null;
+                }
+
+                // readyToStartFirstQuestion = true;
+
 
                 // setState(() {
                 //   timeLeft = 100;
