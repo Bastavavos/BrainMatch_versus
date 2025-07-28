@@ -42,6 +42,9 @@ class VersusRouter extends ConsumerStatefulWidget {
 }
 
 class _VersusRouterState extends ConsumerState<VersusRouter> {
+  bool readyToStartFirstQuestion = false;
+  Map<String, dynamic>? pendingFirstQuestion;
+
   final _controller = StreamController<VersusEvent>.broadcast();
   late final SocketClient _socket;
 
@@ -84,6 +87,11 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
           if (!mounted) return;
 
           questionTimerStarted = false;
+
+          if (!readyToStartFirstQuestion) {
+            pendingFirstQuestion = data;
+            return;
+          }
 
           // setState(() {
           //   timeLeft = 100;
@@ -216,6 +224,8 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
               opponent: opponentData,
               onCountdownComplete: () {
                 if (!mounted || gameData == null) return;
+
+                readyToStartFirstQuestion = true;
 
                 // setState(() {
                 //   timeLeft = 100;
