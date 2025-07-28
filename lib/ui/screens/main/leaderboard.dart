@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/user.dart';
 import '../../../provider/user_provider.dart';
+import '../../widgets/PodiumUserWidget.dart';
 import '../../widgets/user_widget.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -23,10 +24,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userViewModel = ref.read(userViewModelProvider);
-      final user = ref.read(userProvider);
+      final user = ref.read(currentUserProvider);
 
-      if (user != null && user['id'] != null) {
-        await userViewModel.fetchCurrentUser(user['id']);
+      if (user != null ) {
+        await userViewModel.fetchCurrentUser(user.id);
       }
 
       await userViewModel.fetchUsers();
@@ -61,11 +62,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     final podiumUsers = viewModel.users.take(3).toList();
     final otherUsers = viewModel.users.skip(3).toList();
 
-    final userMap = ref.watch(userProvider);
-    if (userMap == null) {
+    final currentUser = ref.watch(currentUserProvider);
+    if (currentUser == null) {
       return const Center(child: Text("Utilisateur non trouvé"));
     }
-    final currentUser = User.fromJson(userMap);
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -97,7 +97,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                 child: UserWidget(
                   user: otherUsers[index],
-                  currentUser: currentUser,
                 ),
               );
             },
@@ -114,11 +113,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     double getHeightForRank(int rank) {
       switch (rank) {
         case 0:
-          return 180.0;
+          return 230.0;
         case 1:
-          return 150.0;
+          return 200.0;
         case 2:
-          return 120.0;
+          return 170.0;
         default:
           return 100.0;
       }
@@ -139,91 +138,26 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         children: List.generate(orderedPodiumUsers.length, (indexInRow) {
           final user = orderedPodiumUsers[indexInRow];
           final originalRank = podiumUsers.indexOf(user);
-
-          return _buildPodiumItem(
-            context,
-            user,
-            originalRank,
-            getHeightForRank(originalRank),
+          final color = _getRankColor(originalRank);
+          final trophyIcon = _getTrophyIcon(originalRank);
+          final currentUser = ref.watch(currentUserProvider);
+          if (currentUser == null) {
+            return const SizedBox(); // ou un Container vide si tu veux juste ignorer
+          }
+          return PodiumUserWidget(
+            user: user,
+            currentUser: currentUser,
+            rank: originalRank,
+            height: getHeightForRank(originalRank),
+            color: color,
+            trophyIcon: trophyIcon,
           );
         }),
       ),
     );
   }
 
-  Widget _buildPodiumItem(BuildContext context, dynamic user, int rank, double height) {
-    final color = _getRankColor(rank);
-    final trophyIcon = _getTrophyIcon(rank);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (trophyIcon != null)
-          Icon(trophyIcon, color: color, size: 30),
-        const SizedBox(height: 8),
-        Text(
-          '#${rank + 1}',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          height: height,
-          width: MediaQuery.of(context).size.width / 3.5,
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(color: color, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              user.picture != null && user.picture!.isNotEmpty
-                  ? CircleAvatar(
-                radius: 25,
-                backgroundImage: CachedNetworkImageProvider(user.picture!),
-              )
-                  : CircleAvatar(
-                radius: 25,
-                backgroundColor: color.withOpacity(0.3),
-                child: Text(
-                  user.username[0].toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                user.username,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                'Score: ${user.score}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   IconData? _getTrophyIcon(int rank) {
     switch (rank) {

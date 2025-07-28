@@ -11,8 +11,8 @@ class SelectionModePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final user = ref.watch(userProvider);
-    final token = user != null && user.containsKey('token') ? user['token'] as String : '';
+    final user = ref.watch(currentUserProvider);
+    final token = ref.watch(tokenProvider);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -27,7 +27,7 @@ class SelectionModePage extends ConsumerWidget {
               icon: LucideIcons.user,
               color: colorScheme.primary,
               routeName: 'Solo',
-              token: token,
+              token: token ?? '',
             ),
             const SizedBox(height: 20),
             _buildModeCard(
@@ -36,7 +36,7 @@ class SelectionModePage extends ConsumerWidget {
               icon: LucideIcons.users,
               color: colorScheme.secondary,
               routeName: 'Versus',
-              token: token,
+              token: token ?? '',
             ),
           ],
         ),

@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../../models/user.dart';
 import '../../../provider/user_provider.dart';
 import '../../widgets/form_button.dart';
 
@@ -57,13 +58,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
         if (loginResponse.statusCode == 200) {
           if (!mounted) return;
-          final user = {
-            'userId': loginData['userId'],
-            'username': loginData['username'],
-            'email': loginData['email'],
-            'token': loginData['token'],
-          };
-          ref.read(userProvider.notifier).state = user;
+
+          final user = User.fromJson(loginData);
+          ref.read(currentUserProvider.notifier).setUser(user);
           Navigator.pushReplacementNamed(context, '/main');
         } else {
           setState(() {
@@ -160,7 +157,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 Column(
                   children: [
                     FormButton(
-                      label: _isLoading ? 'Chargement...' : 'Valider',
+                      label: _isLoading ? 'Loading...' : 'Signup',
                       icon: Icons.group_add,
                       onPressed: _isLoading ? null : _register,
                     ),

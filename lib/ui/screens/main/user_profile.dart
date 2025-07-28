@@ -1,11 +1,14 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+
 import '../../../Service/api_service.dart';
 import '../../../provider/user_provider.dart';
+import '../../widgets/profil_friend.dart';
 
 class UserProfilePage extends ConsumerStatefulWidget {
   const UserProfilePage({super.key});
@@ -14,15 +17,13 @@ class UserProfilePage extends ConsumerStatefulWidget {
   ConsumerState<UserProfilePage> createState() => _UserProfilePageState();
 }
 
-class _UserProfilePageState extends ConsumerState<UserProfilePage> {
-  Map<String, dynamic>? _userData;
+class _UserProfilePageState extends ConsumerState<UserProfilePage>  {
   bool _isLoading = true;
   String? _error;
   List<Map<String, dynamic>> _friendsData = [];
 
   Future<void> _fetchFriendsData(
-      List<dynamic> friendIds,
-      String baseUrl,
+      List<String> friendIds,
       String? token,
       ) async {
     List<Map<String, dynamic>> friends = [];
@@ -31,7 +32,6 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
       try {
         final api = ApiService(token: token);
         final response = await api.get('/user/$friendId');
-
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
@@ -43,6 +43,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
         }
       }
     }
+
     setState(() {
       _friendsData = friends;
     });
@@ -55,7 +56,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   }
 
   Future<void> _fetchUserData() async {
-    final user = ref.read(userProvider);
+    final user = ref.read(currentUserProvider);
     if (user == null) {
       setState(() {
         _isLoading = false;
@@ -65,21 +66,16 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
     }
 
     final token = ref.read(tokenProvider);
-
+    await _fetchFriendsData(user.friendIds, token);
     setState(() {
-      _userData = user;
       _isLoading = false;
     });
-
-    final friendIds = user['friends'] ?? [];
-    final String baseUrl = dotenv.env['API_KEY']!;
-    await _fetchFriendsData(friendIds, baseUrl, token);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(currentUserProvider);
+
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -88,16 +84,11 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
       return Scaffold(body: Center(child: Text(_error!)));
     }
 
-    if (_userData == null) {
+    if (user == null) {
       return const Scaffold(
         body: Center(child: Text("Aucune donnée utilisateur trouvée.")),
       );
     }
-
-    final String username = _userData!['username'];
-    final String email = _userData!['email'];
-    final int score = _userData!['score'] ?? 0;
-    final String pictureUrl = _userData!['picture'] ?? 'https://exemple.com/default.jpg';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -120,10 +111,10 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
               child: CircleAvatar(
                 radius: 60,
                 backgroundColor: Colors.deepPurple.shade100,
-                backgroundImage: _userData!['picture'] != null && _userData!['picture'] != ''
-                    ? NetworkImage(_userData!['picture'])
+                backgroundImage: user.picture != null && user.picture!.isNotEmpty
+                    ? NetworkImage(user.picture!)
                     : null,
-                child: (_userData!['picture'] == null || _userData!['picture'] == '')
+                child: (user.picture == null || user.picture!.isEmpty)
                     ? const Icon(Icons.person, size: 48, color: Colors.deepPurple)
                     : null,
               ),
@@ -146,7 +137,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
               child: Column(
                 children: [
                   Text(
-                    username,
+                    user.username,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -155,7 +146,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    email,
+                    user.email,
                     style: const TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                   const Divider(height: 32),
@@ -170,7 +161,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                         ),
                       ),
                       Text(
-                        "$score",
+                        "${user.score}",
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -186,16 +177,21 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
             const SizedBox(height: 32),
 
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Divider(height: 32),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Friends",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                  ),
+                const Text(
+                  "Friends",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 12),
+
+                // Affichage des demandes d'ami
+                const FriendRequestsWidget(),
+
+                const SizedBox(height: 24),
+
+                // Affichage de la liste des amis déjà acceptés
                 Column(
                   children: _friendsData.map((friend) {
                     return ListTile(
@@ -215,6 +211,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
               ],
             ),
 
+
             const SizedBox(height: 32),
 
             ElevatedButton.icon(
@@ -230,8 +227,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
               label: const Text("Changer de compte"),
               onPressed: () async {
                 final baseUrl = dotenv.env['API_KEY'];
-                final user = ref.read(userProvider);
-                final token = user?['token'];
+                final token = ref.read(tokenProvider);
 
                 if (token != null) {
                   try {
@@ -252,7 +248,10 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                     }
                   }
                 }
-                ref.read(userProvider.notifier).state = null;
+
+                ref.read(currentUserProvider.notifier).setUser(null);
+                ref.read(tokenProvider.notifier).state = null;
+
                 if (context.mounted) {
                   Navigator.pushReplacementNamed(context, '/');
                 }
@@ -266,3 +265,4 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
     );
   }
 }
+
