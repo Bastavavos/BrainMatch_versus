@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 import 'package:brain_match/Service/api_service.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 
 import '../models/user.dart';
 

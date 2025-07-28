@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../network/socket_manager.dart';
+import '../ui/screens/new_screen/before_match_view.dart';
 import '../ui/screens/new_screen/error_view.dart';
 import '../ui/screens/new_screen/opponent_left_view.dart';
 import '../ui/screens/new_screen/question_view.dart';
@@ -10,6 +11,7 @@ import '../ui/screens/new_screen/waiting_view.dart';
 
 enum VersusState {
   waiting,
+  beforeMatch,
   question,
   result,
   opponentLeft,
@@ -85,36 +87,15 @@ class _VersusRouterState extends State<VersusRouter> {
         roomId = data['roomId'];
         totalQuestions = data['totalQuestions'];
 
+        // On récupère l'adversaire depuis data (à adapter selon ta structure)
         final opponent = data['opponent'];
 
-
-        // ✅ D'abord, affiche les deux joueurs dans WaitingView
-        _controller.add(VersusEvent(
-          state: VersusState.waiting,
-          data: {
-            'opponent': opponent,
-            'questionData': data,
-          },
-        ));
-
-        // ⏱️ Démarre le timer de transition ici (2 secondes)
-        Future.delayed(const Duration(seconds: 8), () {
-          if (!mounted) return;
-
-          setState(() {
-            timeLeft = 100;
-            selectedAnswer = null;
-            correctAnswer = null;
-          });
-
-          startTimer();
-
-          _controller.add(VersusEvent(
-            state: VersusState.question,
-            data: data,
-          ));
-        });
+        _controller.add(VersusEvent(state: VersusState.beforeMatch, data: {
+          'opponent': opponent,
+          'gameData': data,  // tu peux stocker les données de jeu pour la suite
+        }));
       },
+
 
       onNewQuestion: (data) {
         if (!mounted) return;
@@ -207,8 +188,26 @@ class _VersusRouterState extends State<VersusRouter> {
 
         switch (event.state) {
           case VersusState.waiting:
-            return WaitingView(
-              opponent: event.data?['opponent'],
+            return WaitingView();
+
+          case VersusState.beforeMatch:
+            return BeforeMatchView(
+              opponent: event.data['opponent'],
+              onCountdownComplete: () {
+                if (!mounted) return;
+
+                final data = event.data['gameData'];
+
+                setState(() {
+                  timeLeft = 100;
+                  selectedAnswer = null;
+                  correctAnswer = null;
+                });
+
+                startTimer();
+
+                _controller.add(VersusEvent(state: VersusState.question, data: data));
+              },
             );
 
           case VersusState.question:
