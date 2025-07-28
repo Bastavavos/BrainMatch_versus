@@ -12,16 +12,9 @@ import 'package:provider/provider.dart' as provider;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(
-    provider.MultiProvider(
-      providers: [
-        provider.ChangeNotifierProvider(create: (_) => UserViewModel()),
-      ],
-      child: ProviderScope( // Enveloppez avec ProviderScope pour Riverpod
-        child: MyApp(),
-      ),
-      // child: MyApp(),
-    ),
+  runApp(const ProviderScope(
+      child: MyApp()
+   )
   );
 }
 
