@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import '../../../provider/user_provider.dart';
 import '../../widgets/form_button.dart';
 
@@ -33,7 +34,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final baseUrl = dotenv.env['API_KEY'];
       final response = await http.post(
         Uri.parse("$baseUrl/login"),
-        // Uri.parse("$baseUrl/login"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "identifier": _identifierController.text.trim(),
@@ -44,18 +44,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final user = {
-          "id": data["user"]["_id"],
-          "username": data["user"]["username"],
-          "email": data["user"]["email"],
-          "score": data["user"]["score"],
-          "picture": data["user"]["picture"],
-          "token": data["token"],
-        };
+        await onLoginSuccess(data, ref); // ✅ met le token + appelle /me
+
         if (kDebugMode) {
-          print("$user");
+          print("Connexion réussie avec token : ${data['token']}");
         }
-        ref.read(userProvider.notifier).state = user;
+
         Navigator.pushReplacementNamed(context, '/main');
       } else {
         setState(() {

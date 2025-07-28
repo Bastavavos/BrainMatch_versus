@@ -1,3 +1,4 @@
+import 'package:brain_match/provider/user_provider.dart';
 import 'package:brain_match/ui/screens/auth/login.dart';
 import 'package:brain_match/ui/layout/main_layout.dart';
 import 'package:brain_match/ui/screens/quiz/select_category.dart';
@@ -12,16 +13,9 @@ import 'package:provider/provider.dart' as provider;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(
-    provider.MultiProvider(
-      providers: [
-        provider.ChangeNotifierProvider(create: (_) => UserViewModel()),
-      ],
-      child: ProviderScope( // Enveloppez avec ProviderScope si vous utilisez Riverpod
-        child: MyApp(),
-      ),
-      // child: MyApp(),
-    ),
+  runApp(const ProviderScope(
+      child: MyApp()
+   )
   );
 }
 
