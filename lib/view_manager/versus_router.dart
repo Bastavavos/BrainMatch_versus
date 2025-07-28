@@ -85,17 +85,20 @@ class _VersusRouterState extends State<VersusRouter> {
         roomId = data['roomId'];
         totalQuestions = data['totalQuestions'];
 
+        final opponent = data['opponent'];
+
+
         // ✅ D'abord, affiche les deux joueurs dans WaitingView
         _controller.add(VersusEvent(
           state: VersusState.waiting,
           data: {
-            'opponent': data['opponent'], // 👈 ajoute cet objet
-            'questionData': data,         // 👈 on garde la suite pour lancer la partie ensuite
+            'opponent': opponent,
+            'questionData': data,
           },
         ));
 
         // ⏱️ Démarre le timer de transition ici (2 secondes)
-        Future.delayed(const Duration(seconds: 2), () {
+        Future.delayed(const Duration(seconds: 8), () {
           if (!mounted) return;
 
           setState(() {
