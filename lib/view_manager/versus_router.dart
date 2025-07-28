@@ -62,22 +62,57 @@ class _VersusRouterState extends State<VersusRouter> {
         if (!mounted) return;
         _controller.add(VersusEvent(state: VersusState.error, data: msg));
       },
+      // onGameStart: (data) {
+      //   if (!mounted) return;
+      //
+      //   roomId = data['roomId'];
+      //   totalQuestions = data['totalQuestions'];
+      //
+      //   setState(() {
+      //     timeLeft = 100;
+      //     selectedAnswer = null;
+      //     correctAnswer = null;
+      //   });
+      //
+      //   startTimer();
+      //
+      //   _controller.add(VersusEvent(state: VersusState.question, data: data));
+      // },
+
       onGameStart: (data) {
         if (!mounted) return;
 
         roomId = data['roomId'];
         totalQuestions = data['totalQuestions'];
 
-        setState(() {
-          timeLeft = 100;
-          selectedAnswer = null;
-          correctAnswer = null;
+        // ✅ D'abord, affiche les deux joueurs dans WaitingView
+        _controller.add(VersusEvent(
+          state: VersusState.waiting,
+          data: {
+            'opponent': data['opponent'], // 👈 ajoute cet objet
+            'questionData': data,         // 👈 on garde la suite pour lancer la partie ensuite
+          },
+        ));
+
+        // ⏱️ Démarre le timer de transition ici (2 secondes)
+        Future.delayed(const Duration(seconds: 2), () {
+          if (!mounted) return;
+
+          setState(() {
+            timeLeft = 100;
+            selectedAnswer = null;
+            correctAnswer = null;
+          });
+
+          startTimer();
+
+          _controller.add(VersusEvent(
+            state: VersusState.question,
+            data: data,
+          ));
         });
-
-        startTimer();
-
-        _controller.add(VersusEvent(state: VersusState.question, data: data));
       },
+
       onNewQuestion: (data) {
         if (!mounted) return;
 
@@ -114,7 +149,14 @@ class _VersusRouterState extends State<VersusRouter> {
     );
 
     _socket.joinGameVersus(widget.categoryId);
-    _controller.add(VersusEvent(state: VersusState.waiting));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _controller.add(VersusEvent(state: VersusState.waiting));
+      }
+    });
+
+    // _controller.add(VersusEvent(state: VersusState.waiting));
   }
 
   void startTimer() {
@@ -162,7 +204,9 @@ class _VersusRouterState extends State<VersusRouter> {
 
         switch (event.state) {
           case VersusState.waiting:
-            return const WaitingView();
+            return WaitingView(
+              opponent: event.data?['opponent'],
+            );
 
           case VersusState.question:
             return QuestionView(

@@ -5,10 +5,8 @@ import '../network/socket_manager.dart';
 import '../ui/screens/new_screen/error_view.dart';
 import '../ui/screens/new_screen/question_view.dart';
 import '../ui/screens/new_screen/result_view.dart';
-import '../ui/screens/new_screen/waiting_view.dart';
 
 enum SoloState {
-  waiting,
   question,
   result,
   error,
@@ -109,7 +107,6 @@ class _SoloRouterState extends State<SoloRouter> {
     );
 
     _socket.joinGameSolo(widget.categoryId);
-    _controller.add(SoloEvent(state: SoloState.waiting));
   }
 
   void startTimer() {
@@ -136,7 +133,7 @@ class _SoloRouterState extends State<SoloRouter> {
   void dispose() {
     countdownTimer?.cancel();
     _controller.close();
-    _socket.disconnect(); // 👈 maintenant sûr et propre
+    _socket.disconnect();
     super.dispose();
   }
 
@@ -152,8 +149,6 @@ class _SoloRouterState extends State<SoloRouter> {
         final event = snapshot.data!;
 
         switch (event.state) {
-          case SoloState.waiting:
-            return const WaitingView();
 
           case SoloState.question:
             return QuestionView(
