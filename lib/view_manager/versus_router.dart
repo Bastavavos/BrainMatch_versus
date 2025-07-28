@@ -90,6 +90,15 @@ class _VersusRouterState extends State<VersusRouter> {
         // On récupère l'adversaire depuis data (à adapter selon ta structure)
         final opponent = data['opponent'];
 
+        if (opponent == null || opponent is! Map<String, dynamic>) {
+          _controller.add(VersusEvent(
+            state: VersusState.error,
+            data: "Données de l'adversaire invalides.",
+          ));
+          return;
+        }
+
+
         _controller.add(VersusEvent(state: VersusState.beforeMatch, data: {
           'opponent': opponent,
           'gameData': data,  // tu peux stocker les données de jeu pour la suite
@@ -191,12 +200,17 @@ class _VersusRouterState extends State<VersusRouter> {
             return WaitingView();
 
           case VersusState.beforeMatch:
-            return BeforeMatchView(
-              opponent: event.data['opponent'],
-              onCountdownComplete: () {
-                if (!mounted) return;
+            final opponentData = event.data?['opponent'];
+            final gameData = event.data?['gameData'];
 
-                final data = event.data['gameData'];
+            if (opponentData == null || opponentData is! Map<String, dynamic>) {
+              return const ErrorView(message: "Données adversaire manquantes.");
+            }
+
+            return BeforeMatchView(
+              opponent: opponentData,
+              onCountdownComplete: () {
+                if (!mounted || gameData == null) return;
 
                 setState(() {
                   timeLeft = 100;
@@ -206,9 +220,29 @@ class _VersusRouterState extends State<VersusRouter> {
 
                 startTimer();
 
-                _controller.add(VersusEvent(state: VersusState.question, data: data));
+                _controller.add(VersusEvent(state: VersusState.question, data: gameData));
               },
             );
+
+          // case VersusState.beforeMatch:
+          //   return BeforeMatchView(
+          //     opponent: event.data['opponent'],
+          //     onCountdownComplete: () {
+          //       if (!mounted) return;
+          //
+          //       final data = event.data['gameData'];
+          //
+          //       setState(() {
+          //         timeLeft = 100;
+          //         selectedAnswer = null;
+          //         correctAnswer = null;
+          //       });
+          //
+          //       startTimer();
+          //
+          //       _controller.add(VersusEvent(state: VersusState.question, data: data));
+          //     },
+          //   );
 
           case VersusState.question:
             return QuestionView(

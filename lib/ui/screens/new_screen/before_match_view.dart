@@ -72,7 +72,7 @@ class _BeforeMatchViewState extends State<BeforeMatchView>
   @override
   Widget build(BuildContext context) {
     final opponentName = widget.opponent['username'] ?? "Adversaire";
-    final pictureUrl = widget.opponent['picture'];
+    final pictureUrl = widget.opponent['picture'] as String?;
 
     return Scaffold(
       backgroundColor: AppColors.primary,
