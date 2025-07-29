@@ -52,7 +52,7 @@ dependencies:
   provider: ^6.1.5
   mime: ^1.0.4
   path: ^1.8.3
-  permission_handler: ^10.2.0
+  permission_handler: ^11.3.0
 
 dev_dependencies:
   flutter_test:
