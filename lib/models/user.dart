@@ -32,4 +32,48 @@ class User {
       sentFriendRequestsId: List<String>.from(json['sentFriendRequests'] ?? [])
     );
   }
+
+  User copyWith({
+    String? id,
+    String? username,
+    String? email,
+    int? score,
+    String? picture,
+    List<String>? friendIds,
+    List<String>? friendRequestId,
+    List<String>? sentFriendRequestsId,
+  }) {
+    return User(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      score: score ?? this.score,
+      picture: picture ?? this.picture,
+      friendIds: friendIds ?? this.friendIds,
+      friendRequestId: friendRequestId ?? this.friendRequestId,
+      sentFriendRequestsId: sentFriendRequestsId ?? this.sentFriendRequestsId,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'username': username,
+      'email': email,
+      'score': score,
+      'picture': picture,
+      'friends': friendIds,
+      'friendRequests': friendRequestId,
+      'sentFriendRequests': sentFriendRequestsId,
+    };
+  }
+
+
+}
+
+extension UserImageHelper on User {
+  String? get imageWithCacheBuster {
+    if (picture == null || picture!.isEmpty) return null;
+    return '$picture?cb=${DateTime.now().millisecondsSinceEpoch}';
+  }
 }

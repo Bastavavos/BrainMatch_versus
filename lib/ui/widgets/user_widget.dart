@@ -8,20 +8,17 @@ import '../../repositories/user_repository.dart';
 
 class UserWidget extends ConsumerWidget {
   final User user;
-  final User currentUser; // utilisateur courant (amis, demandes)
 
   const UserWidget({
     super.key,
     required this.user,
-    required this.currentUser,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // On récupère le token via Riverpod
+    final currentUser = ref.watch(currentUserProvider);
     final token = ref.watch(tokenProvider);
 
-    // Fonction asynchrone pour envoyer une demande d'ami
     Future<void> _handleAddFriend() async {
       if (token == null || token.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -30,13 +27,19 @@ class UserWidget extends ConsumerWidget {
         return;
       }
 
+      if (currentUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Utilisateur courant non chargé')),
+        );
+        return;
+      }
+
       try {
-        // Crée l'ApiService avec le token
         final api = ApiService(token: token);
         final userRepository = UserRepository(api: api);
 
-        // Envoi de la demande
         await userRepository.sendFriendRequest(currentUser.id, user.id);
+        ref.read(currentUserProvider.notifier).addSentFriendRequest(user.id);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Demande envoyée à ${user.username}')),
@@ -48,24 +51,30 @@ class UserWidget extends ConsumerWidget {
       }
     }
 
-    final isFriend = currentUser.friendIds.contains(user.id);
-    final isRequestSent = currentUser.sentFriendRequestsId.contains(user.id);
-    final isRequestReceived = currentUser.friendRequestId.contains(user.id);
+    // Si currentUser n’est pas encore chargé, on peut afficher un loader ou rien
+    if (currentUser == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    Widget trailingWidget;
+    Widget? trailingWidget;
+    if (user.id != currentUser.id) {
+      final isFriend = currentUser.friendIds.contains(user.id);
+      final isRequestSent = currentUser.sentFriendRequestsId.contains(user.id);
+      final isRequestReceived = currentUser.friendRequestId.contains(user.id);
 
-    if (isFriend) {
-      trailingWidget = const Icon(Icons.check, color: Colors.green, semanticLabel: 'Déjà ami');
-    } else if (isRequestSent) {
-      trailingWidget = const Icon(Icons.hourglass_top, color: Colors.orange, semanticLabel: 'Demande envoyée');
-    } else if (isRequestReceived) {
-      trailingWidget = const Icon(Icons.mail, color: Colors.blue, semanticLabel: 'Demande reçue');
-    } else {
-      trailingWidget = IconButton(
-        icon: const Icon(Icons.person_add, color: Colors.deepPurple),
-        tooltip: 'Ajouter comme ami',
-        onPressed: _handleAddFriend, // on appelle la fonction définie plus haut
-      );
+      if (isFriend) {
+        trailingWidget = const Icon(Icons.check, color: Colors.green, semanticLabel: 'Déjà ami');
+      } else if (isRequestSent) {
+        trailingWidget = const Icon(Icons.hourglass_top, color: Colors.orange, semanticLabel: 'Demande envoyée');
+      } else if (isRequestReceived) {
+        trailingWidget = const Icon(Icons.mail, color: Colors.blue, semanticLabel: 'Demande reçue');
+      } else {
+        trailingWidget = IconButton(
+          icon: const Icon(Icons.person_add, color: Colors.deepPurple),
+          tooltip: 'Ajouter comme ami',
+          onPressed: _handleAddFriend,
+        );
+      }
     }
 
     return Card(
@@ -74,7 +83,7 @@ class UserWidget extends ConsumerWidget {
         leading: user.picture != null && user.picture!.isNotEmpty
             ? CircleAvatar(
           radius: 26,
-          backgroundImage: CachedNetworkImageProvider(user.picture!),
+          backgroundImage: CachedNetworkImageProvider(user.imageWithCacheBuster!),
         )
             : CircleAvatar(
           radius: 26,
@@ -88,7 +97,7 @@ class UserWidget extends ConsumerWidget {
         subtitle: Text('Score: ${user.score}'),
         trailing: trailingWidget,
         onTap: () {
-          // Action lors du clic sur un utilisateur, comme afficher le détail
+          // Action au clic sur un utilisateur (ex: afficher profil)
         },
       ),
     );

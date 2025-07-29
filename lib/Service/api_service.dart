@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:mime/mime.dart';
+import 'package:http_parser/http_parser.dart';
+
 
 class ApiService {
   final String? token;
@@ -43,6 +47,30 @@ class ApiService {
     );
   }
 
+  Future<http.Response> uploadUserImage(String userId, File imageFile) async {
+    final uri = Uri.parse('$baseUrl/user/upload');
+
+    final request = http.MultipartRequest('POST', uri)
+      ..fields['userId'] = userId
+      ..files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          imageFile.path,
+          contentType: MediaType.parse(
+            lookupMimeType(imageFile.path) ?? 'image/jpeg',
+          ),
+        ),
+      );
+
+    // Ajout du header d'authentification si token présent
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    final streamedResponse = await request.send();
+    return await http.Response.fromStream(streamedResponse);
+  }
+
   // Méthode privée pour construire les headers avec ou sans token
   Map<String, String> _buildHeaders() {
     return {
@@ -51,3 +79,5 @@ class ApiService {
     };
   }
 }
+
+
