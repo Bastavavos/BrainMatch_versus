@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../Service/api_service.dart';
+import '../../../service/api_service.dart';
 import '../../../provider/user_provider.dart';
 import '../../widgets/user_profile_card.dart';
 import '../../widgets/profil_friend.dart';

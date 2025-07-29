@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../network/socket_manager.dart';
 import '../provider/user_provider.dart';
-import '../ui/screens/new_screen/before_match_view.dart';
-import '../ui/screens/new_screen/error_view.dart';
-import '../ui/screens/new_screen/opponent_left_view.dart';
-import '../ui/screens/new_screen/question_view.dart';
-import '../ui/screens/new_screen/result_view.dart';
-import '../ui/screens/new_screen/waiting_view.dart';
+import '../ui/screens/quiz/before_match_view.dart';
+import '../ui/widgets/error_view.dart';
+import '../ui/screens/quiz/opponent_left_view.dart';
+import '../ui/screens/quiz/question_view.dart';
+import '../ui/screens/quiz/result_view.dart';
+import '../ui/screens/quiz/waiting_view.dart';
 
 enum VersusState {
   waiting,

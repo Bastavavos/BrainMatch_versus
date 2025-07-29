@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../models/user.dart';
-import '../../Service/api_service.dart';
+import '../../service/api_service.dart';
 
 class UserProfileCard extends StatefulWidget {
   final User user;
