@@ -257,12 +257,12 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
                 // startTimer();
 
 
-                Future.delayed(const Duration(milliseconds: 300), () {
-                  if (!mounted) return;
-                  _controller.add(
-                    VersusEvent(state: VersusState.question, data: gameData),
-                  );
-                });
+                // Future.delayed(const Duration(milliseconds: 300), () {
+                //   if (!mounted) return;
+                //   _controller.add(
+                //     VersusEvent(state: VersusState.question, data: gameData),
+                //   );
+                // }); //TODO à changer
 
                 // _controller.add(
                 //     VersusEvent(state: VersusState.question, data: gameData));
