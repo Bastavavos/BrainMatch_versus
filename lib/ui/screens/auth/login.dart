@@ -70,9 +70,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -96,7 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           TextFormField(
                             controller: _identifierController,
                             textInputAction: TextInputAction.next,
-                            decoration: _buildInputDecoration(context, 'Identifier :'),
+                            decoration: _buildInputDecoration(context, 'Username / Email'),
                             validator: (value) =>
                             value == null || value.isEmpty ? 'Veuillez entrer un email' : null,
                           ),

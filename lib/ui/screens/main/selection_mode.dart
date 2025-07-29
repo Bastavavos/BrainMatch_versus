@@ -12,6 +12,7 @@ class SelectionModePage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     final token = ref.watch(tokenProvider) ?? '';
+    final user = ref.watch(currentUserProvider);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
