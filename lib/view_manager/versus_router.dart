@@ -62,8 +62,8 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
     _socket = SocketClient();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = ref.read(userProvider);
-      currentUserId = user?['_id'];
+      final user = ref.read(currentUserProvider);
+      currentUserId = user?.id;
 
       if (currentUserId == null) {
         _controller.add(VersusEvent(

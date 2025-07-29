@@ -61,9 +61,9 @@ class _WaitingViewState extends ConsumerState<WaitingView>
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
-    final String username = user?['username'] ?? 'Joueur';
-    final String? pictureUrl = user?['picture'];
+    final user = ref.watch(currentUserProvider);
+    final String username = user?.username ?? 'Joueur';
+    final String? pictureUrl = user?.picture;
 
     return Scaffold(
       backgroundColor: AppColors.primary,
