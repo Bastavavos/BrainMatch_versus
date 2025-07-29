@@ -52,6 +52,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
       final api = ApiService(token: widget.token);
       final response = await api.uploadUserImage(widget.user.id, file);
 
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         final newImageUrl = jsonResponse['picture'];

@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../Service/api_service.dart';
 import '../../../provider/user_provider.dart';
-import '../../widgets/User_profile_card.dart';
+import '../../widgets/user_profile_card.dart';
 import '../../widgets/profil_friend.dart';
 
 class UserProfilePage extends ConsumerStatefulWidget {
@@ -47,6 +47,9 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
 
   Future<void> _fetchUserData() async {
     final user = ref.read(currentUserProvider);
+    await ref.read(currentUserProvider.notifier).refreshUser(ref);
+
+
     if (user == null) {
       setState(() {
         _isLoading = false;

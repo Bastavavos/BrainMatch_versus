@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/user.dart';
 import '../../../provider/user_provider.dart';
-import '../../widgets/PodiumUserWidget.dart';
+import '../../widgets/podium_user_widget.dart';
 import '../../widgets/user_widget.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -25,6 +25,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userViewModel = ref.read(userViewModelProvider);
       final user = ref.read(currentUserProvider);
+      await ref.read(currentUserProvider.notifier).refreshUser(ref);
+
 
       if (user != null ) {
         await userViewModel.fetchCurrentUser(user.id);
