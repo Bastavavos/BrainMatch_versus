@@ -83,7 +83,7 @@ class UserWidget extends ConsumerWidget {
         leading: user.picture != null && user.picture!.isNotEmpty
             ? CircleAvatar(
           radius: 26,
-          backgroundImage: CachedNetworkImageProvider(user.picture!),
+          backgroundImage: CachedNetworkImageProvider(user.imageWithCacheBuster!),
         )
             : CircleAvatar(
           radius: 26,

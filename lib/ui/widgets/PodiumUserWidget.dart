@@ -108,7 +108,7 @@ class PodiumUserWidget extends ConsumerWidget {
               user.picture != null && user.picture!.isNotEmpty
                   ? CircleAvatar(
                 radius: 25,
-                backgroundImage: CachedNetworkImageProvider(user.picture!),
+                backgroundImage: CachedNetworkImageProvider(user.imageWithCacheBuster!),
               )
                   : CircleAvatar(
                 radius: 25,

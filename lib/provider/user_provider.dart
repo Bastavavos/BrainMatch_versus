@@ -44,6 +44,11 @@ class CurrentUserNotifier extends StateNotifier<User?> {
     state = user;
   }
 
+  void updatePicture(String newPictureUrl) {
+    if (state == null) return;
+    state = state!.copyWith(picture: newPictureUrl);
+  }
+
   void addSentFriendRequest(String friendId) {
     if (state == null) return;
     if (state!.sentFriendRequestsId.contains(friendId)) return;

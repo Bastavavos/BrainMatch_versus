@@ -34,6 +34,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+    <string>Cette application nécessite l'accès à la caméra pour prendre des photos.</string>
+
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Cette application nécessite l'accès à la galerie pour choisir des photos.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

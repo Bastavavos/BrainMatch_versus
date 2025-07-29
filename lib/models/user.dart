@@ -67,4 +67,13 @@ class User {
       'sentFriendRequests': sentFriendRequestsId,
     };
   }
+
+
+}
+
+extension UserImageHelper on User {
+  String? get imageWithCacheBuster {
+    if (picture == null || picture!.isEmpty) return null;
+    return '$picture?cb=${DateTime.now().millisecondsSinceEpoch}';
+  }
 }
