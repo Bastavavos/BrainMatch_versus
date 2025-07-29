@@ -42,9 +42,6 @@ class VersusRouter extends ConsumerStatefulWidget {
 }
 
 class _VersusRouterState extends ConsumerState<VersusRouter> {
-  bool readyToStartFirstQuestion = false;
-  Map<String, dynamic>? pendingFirstQuestion;
-
   final _controller = StreamController<VersusEvent>.broadcast();
   late final SocketClient _socket;
 
@@ -82,24 +79,28 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
           if (!mounted) return;
           _controller.add(VersusEvent(state: VersusState.error, data: msg));
         },
-        onGameStart: handleGameStart,
-        onNewQuestion: (data) {
-          if (!mounted) return;
 
-          questionTimerStarted = false;
+        onPrepareGame: (data) {
+          final opponent = extractOpponent(data['players']);
 
-          if (!readyToStartFirstQuestion) {
-            pendingFirstQuestion = data;
+          if (opponent == null) {
+            _controller.add(VersusEvent(
+              state: VersusState.error,
+              data: "Adversaire introuvable",
+            ));
             return;
           }
 
-          // setState(() {
-          //   timeLeft = 100;
-          //   selectedAnswer = null;
-          //   correctAnswer = null;
-          // });
-          //
-          // startTimer();
+          _controller.add(VersusEvent(state: VersusState.beforeMatch, data: {
+            'opponent': opponent,
+          }));
+        },
+
+        onGameStart: handleGameStart,
+
+        onNewQuestion: (data) {
+          if (!mounted) return;
+          questionTimerStarted = false;
 
           _controller.add(VersusEvent(state: VersusState.question, data: {
             ...data,
@@ -129,29 +130,23 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
     });
   }
 
+  Map<String, dynamic>? extractOpponent(List<dynamic>? players) {
+    if (players == null) return null;
+
+    return players.firstWhere(
+          (p) => p['_id'] != currentUserId,
+      orElse: () => null,
+    );
+  }
+
   void handleGameStart(dynamic data) {
     if (!mounted) return;
-
-    print("Données reçues dans onGameStart: $data");
 
     roomId = data['roomId'];
     totalQuestions = data['totalQuestions'];
 
-    final players = data['players'];
-    if (players == null || players is! List || players.length < 2) {
-      _controller.add(VersusEvent(
-        state: VersusState.error,
-        data: "Joueurs invalides.",
-      ));
-      return;
-    }
-
-    final opponent = players.firstWhere(
-          (p) => p['_id'] != currentUserId,
-      orElse: () => null,
-    );
-
-    if (opponent == null || opponent is! Map<String, dynamic>) {
+    final opponent = extractOpponent(data['players']);
+    if (opponent == null) {
       _controller.add(VersusEvent(
         state: VersusState.error,
         data: "Adversaire non trouvé.",
@@ -159,10 +154,13 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
       return;
     }
 
-    _controller.add(VersusEvent(state: VersusState.beforeMatch, data: {
-      'opponent': opponent,
-      'gameData': data,
-    }));
+    _controller.add(VersusEvent(
+      state: VersusState.question,
+      data: {
+        ...data,
+        'totalQuestions': totalQuestions,
+      },
+    ));
   }
 
   void startTimer() {
@@ -213,61 +211,8 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
             return const WaitingView();
 
           case VersusState.beforeMatch:
-            final opponentData = event.data?['opponent'];
-            final gameData = event.data?['gameData'];
-
-            if (opponentData == null || opponentData is! Map<String, dynamic>) {
-              return const ErrorView(message: "Données adversaire manquantes.");
-            }
-
             return BeforeMatchView(
-              opponent: opponentData,
-              onCountdownComplete: () {
-                if (!mounted || gameData == null) return;
-
-                // Marquer comme prêt à recevoir la première question
-                setState(() {
-                  readyToStartFirstQuestion = true;
-                });
-
-                // Informer le serveur
-                _socket.sendReadyForFirstQuestion(gameData['roomId']);
-
-                // Si une question était déjà reçue avant la fin du compte à rebours, on peut l'afficher maintenant
-                if (pendingFirstQuestion != null) {
-                  _controller.add(VersusEvent(
-                    state: VersusState.question,
-                    data: {
-                      ...pendingFirstQuestion!,
-                      'totalQuestions': totalQuestions,
-                    },
-                  ));
-                  pendingFirstQuestion = null;
-                }
-
-                // readyToStartFirstQuestion = true;
-
-
-                // setState(() {
-                //   timeLeft = 100;
-                //   selectedAnswer = null;
-                //   correctAnswer = null;
-                // });
-
-                // startTimer();
-
-
-                // Future.delayed(const Duration(milliseconds: 300), () {
-                //   if (!mounted) return;
-                //   _controller.add(
-                //     VersusEvent(state: VersusState.question, data: gameData),
-                //   );
-                // }); //TODO à changer
-
-                // _controller.add(
-                //     VersusEvent(state: VersusState.question, data: gameData));
-
-              },
+              opponent: event.data['opponent'],
             );
 
           case VersusState.question:
@@ -317,5 +262,4 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
     );
   }
 }
-
 

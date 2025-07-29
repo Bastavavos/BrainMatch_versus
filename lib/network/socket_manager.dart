@@ -9,13 +9,14 @@ class SocketClient {
   void connect({
     required String token,
     required Function(String message) onError,
+    Function(dynamic data)? onPrepareGame,
     required Function(dynamic data) onGameStart,
     required Function(dynamic data) onNewQuestion,
     required Function(dynamic data) onAnswerFeedback,
     required Function(dynamic data) onGameOver,
     required Function(dynamic data) onOpponentLeft,
   }) {
-    disconnect(); // 🔒 Assure-toi qu’on part de zéro
+    disconnect();
 
     _socket = IO.io(
       'http://192.168.1.74:3000',
@@ -31,7 +32,7 @@ class SocketClient {
     // Nettoyage ciblé : supprime tous les anciens listeners
     _socket?.offAny();
 
-    // ⚠️ Supprime explicitement chaque callback AVANT de le réaffecter
+    // Supprime explicitement chaque callback AVANT de le réaffecter
     _socket
       ?..off('connect')
       ..onConnect((_) {
@@ -45,6 +46,15 @@ class SocketClient {
         print('⚠️ Erreur Socket: $data');
         onError(data['message']);
       });
+
+    if (onPrepareGame != null) {
+      _socket
+        ?..off('prepare_game')
+        ..on('prepare_game', (data) {
+          print('🎮 Préparation de la partie : $data');
+          onPrepareGame(data);
+        });
+    }
 
     _socket
       ?..off('start_game')
@@ -96,18 +106,11 @@ class SocketClient {
 
   void disconnect() {
     if (_socket != null) {
-      _socket?.offAny(); // 🔁 Supprime tous les listeners existants
+      _socket?.offAny(); // Supprime tous les listeners existants
       _socket?.disconnect();
       _socket?.destroy();
       _socket = null;
       _isInitialized = false;
     }
   }
-
-  void sendReadyForFirstQuestion(String roomId) {
-    _socket?.emit('client_ready_for_first_question', {
-      'roomId': roomId,
-    });
-  }
-
 }
