@@ -30,6 +30,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       _errorMessage = null;
     });
 
+
+
     try {
       final baseUrl = dotenv.env['API_KEY'];
 
@@ -46,7 +48,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
       if (registerResponse.statusCode == 201) {
         final loginResponse = await http.post(
-          Uri.parse("$baseUrl/user/login"),
+          Uri.parse("$baseUrl/login"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             "identifier": _emailController.text.trim(),
@@ -59,8 +61,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         if (loginResponse.statusCode == 200) {
           if (!mounted) return;
 
-          final user = User.fromJson(loginData);
-          ref.read(currentUserProvider.notifier).setUser(user);
+          await onLoginSuccess(loginData, ref);
           Navigator.pushReplacementNamed(context, '/main');
         } else {
           setState(() {

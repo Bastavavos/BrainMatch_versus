@@ -68,7 +68,7 @@ class FriendRequestsWidget extends ConsumerWidget {
                       onPressed: () async {
                         try {
                           await userRepository.acceptFriendRequest(currentUser.id, requester.id);
-                          ref.read(currentUserProvider.notifier).addFriend(requester.id); // 👈 AJOUT LOCAL
+                          await ref.read(currentUserProvider.notifier).refreshUser(ref); // 👈 MAJ LOCAL
                           ref.invalidate(friendRequestsProvider);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Demande acceptée de ${requester.username}')),
@@ -87,7 +87,7 @@ class FriendRequestsWidget extends ConsumerWidget {
                       onPressed: () async {
                         try {
                           await userRepository.deleteFriendRequest(currentUser.id, requester.id);
-                          ref.read(currentUserProvider.notifier).removeFriendRequest(requester.id); // 👈 MAJ LOCAL
+                          await ref.read(currentUserProvider.notifier).refreshUser(ref); // 👈 MAJ LOCAL
                           ref.invalidate(friendRequestsProvider);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Demande refusée de ${requester.username}')),

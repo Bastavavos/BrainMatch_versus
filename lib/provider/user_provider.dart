@@ -14,6 +14,7 @@ final currentUserProvider = StateNotifierProvider<CurrentUserNotifier, User?>(
       (ref) => CurrentUserNotifier(),
 );
 
+
 final userViewModelProvider = ChangeNotifierProvider<UserViewModel>((ref) {
   final token = ref.watch(tokenProvider);
   return UserViewModel(token: token);
@@ -42,6 +43,19 @@ class CurrentUserNotifier extends StateNotifier<User?> {
 
   void setUser(User? user) {
     state = user;
+  }
+  Future<void> refreshUser(WidgetRef ref) async {
+    final token = ref.read(tokenProvider);
+    if (token == null) return;
+
+    final api = ApiService(token: token);
+    final response = await api.get('/me');
+
+    if (response.statusCode == 200) {
+      final userJson = jsonDecode(response.body);
+      final user = User.fromJson(userJson);
+      state = user;
+    }
   }
 
   void updatePicture(String newPictureUrl) {

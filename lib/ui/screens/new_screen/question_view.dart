@@ -21,7 +21,7 @@ class QuestionView extends StatelessWidget {
   });
 
   String formatImageUrl(String url) {
-    return url.replaceAll("localhost", "192.168.1.74");
+    return url.replaceAll("localhost", "192.168.1.72");
     // return url.replaceAll("localhost", "192.168.1.17");
   }
 

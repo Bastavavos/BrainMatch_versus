@@ -148,7 +148,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
                   ),
                   child: CircleAvatar(
                     key: ValueKey(widget.user.picture),
-                    radius: 50,
+                    radius: 70,
                     backgroundColor: Colors.deepPurple.shade100,
                     backgroundImage: (imageUrl != null) ? NetworkImage(imageUrl) : null,
                     child: _isUploading
@@ -157,7 +157,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
                         ? Text(
                       firstLetter,
                       style: const TextStyle(
-                        fontSize: 40,
+                        fontSize: 50,
                         color: Colors.deepPurple,
                         fontWeight: FontWeight.bold,
                       ),

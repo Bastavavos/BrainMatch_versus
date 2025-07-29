@@ -39,7 +39,7 @@ class PodiumUserWidget extends ConsumerWidget {
         final api = ApiService(token: token);
         final userRepository = UserRepository(api: api);
         await userRepository.sendFriendRequest(currentUser.id, user.id);
-        ref.read(currentUserProvider.notifier).addSentFriendRequest(user.id);
+        await ref.read(currentUserProvider.notifier).refreshUser(ref); // 👈 MAJ LOCAL
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Demande envoyée à ${user.username}')),
         );
