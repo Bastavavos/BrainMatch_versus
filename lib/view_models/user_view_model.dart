@@ -2,7 +2,7 @@ import '../../../models/user.dart';
 import '../../../repositories/user_repository.dart';
 import 'package:flutter/material.dart';
 
-import '../Service/api_service.dart';
+import '../service/api_service.dart';
 
 class UserViewModel extends ChangeNotifier {
   final UserRepository _userRepository;

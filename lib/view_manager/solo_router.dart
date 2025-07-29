@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../network/socket_manager.dart';
-import '../ui/screens/new_screen/error_view.dart';
-import '../ui/screens/new_screen/question_view.dart';
-import '../ui/screens/new_screen/result_view.dart';
+import '../ui/widgets/error_view.dart';
+import '../ui/screens/quiz/question_view.dart';
+import '../ui/screens/quiz/result_view.dart';
 
 enum SoloState {
   question,

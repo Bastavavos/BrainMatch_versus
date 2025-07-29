@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../Service/api_service.dart';
+import '../service/api_service.dart';
 import '../models/user.dart';
 import '../view_models/user_view_model.dart';
 
@@ -61,31 +61,5 @@ class CurrentUserNotifier extends StateNotifier<User?> {
   void updatePicture(String newPictureUrl) {
     if (state == null) return;
     state = state!.copyWith(picture: newPictureUrl);
-  }
-
-  void addSentFriendRequest(String friendId) {
-    if (state == null) return;
-    if (state!.sentFriendRequestsId.contains(friendId)) return;
-
-    state = state!.copyWith(
-      sentFriendRequestsId: [...state!.sentFriendRequestsId, friendId],
-    );
-  }
-
-  void addFriend(String friendId) {
-    if (state != null) {
-      state = state!.copyWith(
-        friendIds: [...state!.friendIds, friendId],
-        friendRequestId: state!.friendRequestId.where((id) => id != friendId).toList(),
-      );
-    }
-  }
-
-  void removeFriendRequest(String requesterId) {
-    if (state != null) {
-      state = state!.copyWith(
-        friendRequestId: state!.friendRequestId.where((id) => id != requesterId).toList(),
-      );
-    }
   }
 }

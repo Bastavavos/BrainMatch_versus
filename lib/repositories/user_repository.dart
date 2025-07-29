@@ -1,13 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:brain_match/Service/api_service.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:mime/mime.dart';
-
+import 'package:brain_match/service/api_service.dart';
 
 import '../models/user.dart';
 
