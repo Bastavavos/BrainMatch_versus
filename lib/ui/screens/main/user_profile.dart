@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../service/api_service.dart';
 import '../../../provider/user_provider.dart';
-import '../../widgets/user_profile_card.dart';
-import '../../widgets/profil_friend.dart';
+import '../../widgets/user_profile/user_profile_card.dart';
+import '../../widgets/user_profile/profile_friend.dart';
 
 class UserProfilePage extends ConsumerStatefulWidget {
   const UserProfilePage({super.key});

@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../service/api_service.dart';
-import '../../models/user.dart';
-import '../../provider/user_provider.dart';
-import '../../repositories/user_repository.dart';
+import '../../../service/api_service.dart';
+import '../../../models/user.dart';
+import '../../../provider/user_provider.dart';
+import '../../../repositories/user_repository.dart';
 
 class PodiumUserWidget extends ConsumerWidget {
   final User user;
@@ -28,7 +28,7 @@ class PodiumUserWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final token = ref.watch(tokenProvider);
 
-    Future<void> _handleAddFriend() async {
+    Future<void> handleAddFriend() async {
       if (token == null || token.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Utilisateur non authentifié')),
@@ -65,7 +65,7 @@ class PodiumUserWidget extends ConsumerWidget {
       } else {
         actionWidget = IconButton(
           icon: const Icon(Icons.person_add, color: Colors.deepPurple),
-          onPressed: _handleAddFriend,
+          onPressed: handleAddFriend,
         );
       }
     }

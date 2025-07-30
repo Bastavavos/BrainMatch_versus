@@ -23,12 +23,12 @@ class NavBar extends StatelessWidget {
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.leaderboard_rounded),
-              label: 'LeaderBoard',
+              label: 'Classement',
             ),
             NavigationDestination(
               selectedIcon: Icon(Icons.play_arrow),
               icon: Icon(Icons.play_arrow),
-              label: 'Play',
+              label: 'Jouer',
             ),
             NavigationDestination(
               icon: Icon(Icons.account_circle),
