@@ -11,7 +11,7 @@ class ApiService {
 
   ApiService({this.token});
 
-  final String baseUrl = dotenv.env['API_KEY']!;
+  static final String baseUrl = dotenv.env['API_KEY']!;
 
   // GET
   Future<http.Response> get(String endpoint) async {

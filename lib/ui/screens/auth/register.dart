@@ -3,9 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../../models/user.dart';
 import '../../../provider/user_provider.dart';
-import '../../widgets/form_button.dart';
+import '../../widgets/button/form_button.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -30,14 +29,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       _errorMessage = null;
     });
 
-
-
     try {
       final baseUrl = dotenv.env['API_KEY'];
-
       final registerResponse = await http.post(
         Uri.parse("$baseUrl/register"),
-        // Uri.parse("$baseUrl/register"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": _usernameController.text.trim(),
@@ -87,94 +82,96 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: SizedBox(
-            height: screenHeight * 0.95,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Column(
-                  children: [
-                    const SizedBox(height: 40),
-                    Image.asset(
-                      'assets/images/himmel.png',
-                      height: 280,
-                    ),
-                    const SizedBox(height: 60),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: _usernameController,
-                            textInputAction: TextInputAction.next,
-                            decoration: _buildInputDecoration(context, 'Name :'),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Veuillez entrer un nom'
-                                : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _emailController,
-                            textInputAction: TextInputAction.next,
-                            decoration: _buildInputDecoration(context, 'Email :'),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Veuillez entrer un email'
-                                : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: (_) => _register(),
-                            decoration: _buildInputDecoration(context, 'Password :'),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Veuillez entrer un mot de passe'
-                                : null,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (_errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 40),
+                        Image.asset(
+                          'assets/images/himmel.png',
+                          height: 240,
                         ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 60),
-                Column(
-                  children: [
-                    FormButton(
-                      label: _isLoading ? 'Loading...' : 'Signup',
-                      icon: Icons.group_add,
-                      onPressed: _isLoading ? null : _register,
+                        const SizedBox(height: 32),
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              TextFormField(
+                                controller: _usernameController,
+                                textInputAction: TextInputAction.next,
+                                decoration: _buildInputDecoration(context, 'Nom :'),
+                                validator: (value) => value == null || value.isEmpty
+                                    ? 'Veuillez entrer un nom'
+                                    : null,
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _emailController,
+                                textInputAction: TextInputAction.next,
+                                decoration: _buildInputDecoration(context, 'Email :'),
+                                validator: (value) => value == null || value.isEmpty
+                                    ? 'Veuillez entrer un email'
+                                    : null,
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _passwordController,
+                                obscureText: true,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _register(),
+                                decoration: _buildInputDecoration(context, 'Mot de passe :'),
+                                validator: (value) => value == null || value.isEmpty
+                                    ? 'Veuillez entrer un mot de passe'
+                                    : null,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        if (_errorMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        const Spacer(),
+                        FormButton(
+                          label: _isLoading ? 'Chargement...' : "S'inscrire",
+                          icon: Icons.group_add,
+                          onPressed: _isLoading ? null : _register,
+                        ),
+                        const SizedBox(height: 24),
+                        FormButton(
+                          label: 'Se connecter',
+                          icon: Icons.power_settings_new,
+                          onPressed: _isLoading ? null : () {
+                            Navigator.pushNamed(context, '/');
+                          },
+                        ),
+                        const SizedBox(height: 32),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    FormButton(
-                      label: 'Login',
-                      icon: Icons.power_settings_new,
-                      onPressed: _isLoading ? null : () {
-                        Navigator.pushNamed(context, '/');
-                      },
-                    ),
-                  ],
+                  ),
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

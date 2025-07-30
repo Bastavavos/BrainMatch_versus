@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/user.dart';
-import '../../repositories/user_repository.dart';
-import '../../provider/user_provider.dart';
-import '../../service/api_service.dart';
+import '../../../models/user.dart';
+import '../../../repositories/user_repository.dart';
+import '../../../provider/user_provider.dart';
+import '../../../service/api_service.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final token = ref.watch(tokenProvider);

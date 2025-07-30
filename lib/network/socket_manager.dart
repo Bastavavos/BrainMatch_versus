@@ -92,6 +92,10 @@ class SocketClient {
     _socket?.emit('join_game_versus', {'categoryId': categoryId});
   }
 
+  void joinGameIa(String theme) {
+    _socket?.emit('join_game_ia', {'theme': theme});
+  }
+
   void sendAnswer({
     required String roomId,
     required int questionIndex,

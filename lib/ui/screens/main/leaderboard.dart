@@ -1,14 +1,8 @@
-
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../models/user.dart';
 import '../../../provider/user_provider.dart';
-import '../../widgets/podium_user_widget.dart';
-import '../../widgets/user_widget.dart';
+import '../../widgets/leaderboard/podium_user_widget.dart';
+import '../../widgets/leaderboard/user_widget.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
@@ -26,12 +20,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       final userViewModel = ref.read(userViewModelProvider);
       final user = ref.read(currentUserProvider);
       await ref.read(currentUserProvider.notifier).refreshUser(ref);
-
-
       if (user != null ) {
         await userViewModel.fetchCurrentUser(user.id);
       }
-
       await userViewModel.fetchUsers();
     });
   }
@@ -158,8 +149,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       ),
     );
   }
-
-
 
   IconData? _getTrophyIcon(int rank) {
     switch (rank) {

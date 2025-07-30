@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../service/api_service.dart';
 import '../../theme.dart';
 
 class BeforeMatchView extends StatefulWidget {
@@ -64,7 +66,13 @@ class _BeforeMatchViewState extends State<BeforeMatchView>
   @override
   Widget build(BuildContext context) {
     final opponentName = widget.opponent['username'] ?? "Adversaire";
-    final pictureUrl = widget.opponent['picture'] as String?;
+    final picturePath = widget.opponent['picture'] as String?;
+
+    final String? imageUrl = (picturePath != null && picturePath.isNotEmpty)
+        ? Uri.parse(ApiService.baseUrl)
+        .resolve('$picturePath?cb=${DateTime.now().millisecondsSinceEpoch}')
+        .toString()
+        : null;
 
     return Scaffold(
       backgroundColor: AppColors.primary,
@@ -82,16 +90,27 @@ class _BeforeMatchViewState extends State<BeforeMatchView>
                 ),
               ),
               const SizedBox(height: 24),
+
+              // ✅ Avatar avec fallback
               CircleAvatar(
                 radius: 50,
-                backgroundImage: (pictureUrl != null && pictureUrl.isNotEmpty)
-                    ? NetworkImage(pictureUrl)
-                    : null,
                 backgroundColor: AppColors.light,
-                child: (pictureUrl == null || pictureUrl.isEmpty)
-                    ? const Icon(Icons.person, size: 50, color: AppColors.primary)
+                backgroundImage: imageUrl != null
+                    ? CachedNetworkImageProvider(imageUrl)
+                    : null,
+                child: imageUrl == null
+                    ? Text(
+                  opponentName.isNotEmpty
+                      ? opponentName[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    fontSize: 30,
+                    color: AppColors.primary,
+                  ),
+                )
                     : null,
               ),
+
               const SizedBox(height: 12),
               Text(
                 opponentName,
@@ -110,6 +129,7 @@ class _BeforeMatchViewState extends State<BeforeMatchView>
                 ),
               ),
               const SizedBox(height: 48),
+
               AnimatedBuilder(
                 animation: _scaleAnimation,
                 builder: (context, child) {
