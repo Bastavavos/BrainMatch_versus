@@ -19,7 +19,7 @@ class SocketClient {
     disconnect();
 
     _socket = IO.io(
-      'http://192.168.1.74:3000',
+      'http://192.168.1.72:3000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -90,6 +90,10 @@ class SocketClient {
 
   void joinGameVersus(String categoryId) {
     _socket?.emit('join_game_versus', {'categoryId': categoryId});
+  }
+
+  void joinGameIa(String theme) {
+    _socket?.emit('join_game_ia', {'theme': theme});
   }
 
   void sendAnswer({

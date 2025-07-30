@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../provider/user_provider.dart';
+import '../../../view_manager/ia_router.dart';
 
 class SelectionModePage extends ConsumerStatefulWidget {
   const SelectionModePage({super.key});
@@ -10,7 +11,8 @@ class SelectionModePage extends ConsumerStatefulWidget {
   ConsumerState<SelectionModePage> createState() => _SelectionModePageState();
 }
 
-class _SelectionModePageState extends ConsumerState<SelectionModePage> with TickerProviderStateMixin {
+class _SelectionModePageState extends ConsumerState<SelectionModePage>
+    with TickerProviderStateMixin {
   late AnimationController _imageController;
   late Animation<Offset> _imageOffsetAnimation;
   late AnimationController _textController;
@@ -28,21 +30,17 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage> with Tick
     _imageOffsetAnimation = Tween<Offset>(
       begin: const Offset(0.0, -0.3),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _imageController,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _imageController, curve: Curves.easeOut));
 
     _textController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
 
-    _textOpacity = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _textController, curve: Curves.easeIn),
-    );
+    _textOpacity = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeIn));
 
     _imageController.forward();
     _textController.forward();
@@ -117,46 +115,57 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage> with Tick
                 routeName: 'Versus',
                 token: token,
               ),
-              // const SizedBox(height: 24),
-              // _buildModeCard(
-              //   context,
-              //   title: "Génère ton quiz",
-              //   imagePath: 'assets/images/himmel_versus.png',
-              //   color: colorScheme.secondary,
-              //   routeName: 'Ia',
-              //   token: token,
-              // ),
+              const SizedBox(height: 24),
+              _buildModeCard(
+                context,
+                title: "Génère ton quiz",
+                imagePath: 'assets/images/himmel_versus.png',
+                color: colorScheme.secondary,
+                routeName: 'Ia',
+                token: token,
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
   Widget _buildModeCard(
-      BuildContext context, {
-        required String title,
-        required String imagePath,
-        required Color color,
-        required String routeName,
-        required String token,
-      }) {
+    BuildContext context, {
+    required String title,
+    required String imagePath,
+    required Color color,
+    required String routeName,
+    required String token,
+  }) {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: () {
         if (token.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Token manquant, veuillez vous reconnecter')),
+            const SnackBar(
+              content: Text('Token manquant, veuillez vous reconnecter'),
+            ),
           );
           return;
         }
-        Navigator.pushNamed(
-          context,
-          '/confirm',
-          arguments: {
-            'selectedMode': routeName,
-            'token': token,
-          },
-        );
+
+        if (routeName == 'Ia') {
+          Navigator.pushNamed(
+            context,
+            '/confirm',
+            arguments: {
+              'selectedMode': 'Ia',
+              'token': token},
+          );
+        } else {
+          Navigator.pushNamed(
+            context,
+            '/confirm',
+            arguments: {'selectedMode': routeName, 'token': token},
+          );
+        }
       },
       child: Container(
         height: 120,
@@ -174,12 +183,7 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage> with Tick
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(
           children: [
-            Image.asset(
-              imagePath,
-              height: 60,
-              width: 60,
-              fit: BoxFit.contain,
-            ),
+            Image.asset(imagePath, height: 60, width: 60, fit: BoxFit.contain),
             const SizedBox(width: 20),
             Expanded(
               child: Column(
@@ -202,9 +206,4 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage> with Tick
       ),
     );
   }
-
-
 }
-
-
-

@@ -1,5 +1,6 @@
 import 'package:brain_match/ui/screens/auth/login.dart';
 import 'package:brain_match/ui/layout/main_layout.dart';
+import 'package:brain_match/ui/screens/quiz/ia_theme_page.dart';
 import 'package:brain_match/ui/screens/quiz/select_category.dart';
 import 'package:brain_match/ui/screens/auth/register.dart';
 import 'package:brain_match/ui/theme.dart';
@@ -30,6 +31,14 @@ class MyApp extends StatelessWidget {
         if (settings.name == '/confirm') {
           final args = settings.arguments as Map<String, dynamic>;
           final selectedMode = args['selectedMode'] as String;
+
+          final token = args['token'] as String;
+
+          if (selectedMode == 'Ia') {
+            return MaterialPageRoute(
+              builder: (_) => QuizIaThemePage(token: token),
+            );
+          }
 
           return MaterialPageRoute(
             builder: (context) => CategorySelectionPage(
