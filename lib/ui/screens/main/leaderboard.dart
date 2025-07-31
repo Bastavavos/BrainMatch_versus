@@ -1,3 +1,4 @@
+import 'package:brain_match/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../provider/user_provider.dart';
@@ -64,12 +65,13 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       slivers: <Widget>[
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 52.0, 16.0, 24.0),
             child: Text(
               'Leader board',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
+              style: TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 30.0,
+                  color: AppColors.primary
               ),
               textAlign: TextAlign.center,
             ),

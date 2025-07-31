@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../models/user.dart';
 import '../../../repositories/user_repository.dart';
 import '../../../service/api_service.dart';
+import '../../theme.dart';
 
 class UserProfileCard extends StatefulWidget {
   final User user;

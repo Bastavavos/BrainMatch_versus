@@ -1,3 +1,4 @@
+import 'package:brain_match/ui/theme.dart';
 import 'package:flutter/material.dart';
 
 class NavBar extends StatelessWidget {
@@ -12,31 +13,43 @@ class NavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(50),
-        child: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          indicatorColor: Colors.grey,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.leaderboard_rounded),
-              label: 'Classement',
-            ),
-            NavigationDestination(
-              selectedIcon: Icon(Icons.play_arrow),
-              icon: Icon(Icons.play_arrow),
-              label: 'Jouer',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.account_circle),
-              label: 'Profile',
-            ),
-          ],
-        ),
+    return NavigationBarTheme(
+      data: NavigationBarThemeData(
+        backgroundColor: AppColors.primary,
+        indicatorColor: AppColors.light,
+        labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return const TextStyle(color: AppColors.light);
+          }
+          return const TextStyle(color: Colors.grey);
+        }),
+        iconTheme: MaterialStateProperty.resolveWith<IconThemeData>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return const IconThemeData(color: AppColors.primary);
+          }
+          return const IconThemeData(color: Colors.grey);
+        }),
+      ),
+      child: NavigationBar(
+        selectedIndex: selectedIndex,
+        onDestinationSelected: onDestinationSelected,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.leaderboard_rounded),
+            label: 'Classement',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.play_arrow),
+            icon: Icon(Icons.play_arrow),
+            label: 'Jouer',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.account_circle),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }
 }
+

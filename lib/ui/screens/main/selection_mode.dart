@@ -1,8 +1,8 @@
+import 'package:brain_match/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../provider/user_provider.dart';
-import '../../../view_manager/ia_router.dart';
 
 class SelectionModePage extends ConsumerStatefulWidget {
   const SelectionModePage({super.key});
@@ -58,72 +58,81 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
     final token = ref.watch(tokenProvider) ?? '';
     final colorScheme = Theme.of(context).colorScheme;
 
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.07),
 
-              // --- Animated Image ---
-              SlideTransition(
-                position: _imageOffsetAnimation,
-                child: Center(
-                  child: Image.asset(
-                    'assets/images/himmel_2.png',
-                    height: 160,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // --- Animated Text ---
+              // --- Animated Title ---
               FadeTransition(
                 opacity: _textOpacity,
                 child: Center(
                   child: Text(
                     "Choisis ton mode de jeu",
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
                     textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Luckiest Guy',
+                      fontSize: 30.0,
+                      color: colorScheme.primary
+                    ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 32),
-              _buildModeCard(
-                context,
-                title: "Solo",
-                imagePath: 'assets/images/himmel_solo_mode.png',
-                color: colorScheme.primary,
-                routeName: 'Solo',
-                token: token,
-              ),
-              const SizedBox(height: 24),
+              // Center(
+              //   child: WavyText(
+              //     "Choisis ton mode de jeu :",
+              //     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              //       fontWeight: FontWeight.bold,
+              //       color: colorScheme.primary,
+              //     ),
+              //   ),
+              // ),
+              SizedBox(height: screenHeight * 0.07),
+
               _buildModeCard(
                 context,
                 title: "Versus",
                 imagePath: 'assets/images/himmel_versus.png',
-                color: colorScheme.secondary,
+                color: colorScheme.primary,
                 routeName: 'Versus',
                 token: token,
+                height: screenHeight * 0.13,
               ),
-              const SizedBox(height: 24),
+
+              SizedBox(height: screenHeight * 0.05),
+
+              _buildModeCard(
+                context,
+                title: "Solo",
+                imagePath: 'assets/images/himmel_solo_mode.png',
+                color: colorScheme.secondary,
+                routeName: 'Solo',
+                token: token,
+                height: screenHeight * 0.13,
+              ),
+
+              SizedBox(height: screenHeight * 0.035),
+
               _buildModeCard(
                 context,
                 title: "Génère ton quiz",
-                imagePath: 'assets/images/himmel_versus.png',
-                color: colorScheme.secondary,
+                imagePath: 'assets/images/ia_logo.png',
+                color: colorScheme.tertiary,
                 routeName: 'Ia',
                 token: token,
+                height: screenHeight * 0.13,
               ),
+
+              SizedBox(height: screenHeight * 0.06),
             ],
           ),
         ),
@@ -138,6 +147,7 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
     required Color color,
     required String routeName,
     required String token,
+    required double height,
   }) {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -151,24 +161,14 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
           return;
         }
 
-        if (routeName == 'Ia') {
-          Navigator.pushNamed(
-            context,
-            '/confirm',
-            arguments: {
-              'selectedMode': 'Ia',
-              'token': token},
-          );
-        } else {
-          Navigator.pushNamed(
-            context,
-            '/confirm',
-            arguments: {'selectedMode': routeName, 'token': token},
-          );
-        }
+        Navigator.pushNamed(
+          context,
+          '/confirm',
+          arguments: {'selectedMode': routeName, 'token': token},
+        );
       },
       child: Container(
-        height: 120,
+        height: height,
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(20),
@@ -186,19 +186,13 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
             Image.asset(imagePath, height: 60, width: 60, fit: BoxFit.contain),
             const SizedBox(width: 20),
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  // const SizedBox(height: 4),
-                ],
+              child: Text(
+                title,
+                style: TextStyle(
+                    fontFamily: 'Luckiest Guy',
+                    fontSize: 20.0,
+                  color: title == "Solo" ? AppColors.primary : AppColors.light
+                ),
               ),
             ),
           ],
