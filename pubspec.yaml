@@ -85,6 +85,9 @@ flutter:
     - assets/images/himmel_2.png
     - assets/images/himmel_solo_mode.png
     - assets/images/himmel_versus.png
+    - assets/images/himmel_win.png
+    - assets/images/himmel_average.webp
+    - assets/images/himmel_lose.webp
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
