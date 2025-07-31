@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../service/api_service.dart';
 import '../../../models/user.dart';
 import '../../../provider/user_provider.dart';
 import '../../../repositories/user_repository.dart';
+import '../../theme.dart';
 
 class UserWidget extends ConsumerWidget {
   final User user;
@@ -78,28 +78,23 @@ class UserWidget extends ConsumerWidget {
     }
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: ListTile(
-        leading: user.picture != null && user.picture!.isNotEmpty
-            ? CircleAvatar(
-          radius: 26,
-          backgroundImage: CachedNetworkImageProvider(user.imageWithCacheBuster!),
-        )
-            : CircleAvatar(
-          radius: 26,
-          backgroundColor: Colors.deepPurple.shade100,
-          child: Text(
-            user.username.isNotEmpty ? user.username[0].toUpperCase() : '?',
-            style: const TextStyle(color: Colors.deepPurple),
-          ),
-        ),
-        title: Text(user.username, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('Score: ${user.score}'),
-        trailing: trailingWidget,
-        onTap: () {
-          // Action au clic sur un utilisateur (ex: afficher profil)
-        },
-      ),
-    );
+          color: AppColors.background,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: ListTile(
+              title: Text(user.username,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  )),
+              subtitle: Text('Score: ${user.score}',
+                  style: const TextStyle(color: AppColors.secondaryAccent)),
+                  trailing: trailingWidget,
+                  onTap: () {
+                    // Action au clic sur un utilisateur (ex: afficher profil)
+                  },
+          )
+      );
   }
 }

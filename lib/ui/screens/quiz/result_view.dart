@@ -37,7 +37,6 @@ class ResultView extends StatelessWidget {
         )
             : const Text('Score indisponible.'),
       ),
-
     );
   }
 }

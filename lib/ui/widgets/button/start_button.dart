@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../provider/user_provider.dart';
 import '../../../view_manager/solo_router.dart';
 import '../../../view_manager/versus_router.dart';
+import '../../theme.dart';
 
 class StartButton extends ConsumerStatefulWidget {
   final Color buttonColor;
@@ -83,10 +84,9 @@ class _StartButtonState extends ConsumerState<StartButton> with SingleTickerProv
             child: const Text(
               'Start',
               style: TextStyle(
-                color: Colors.white,
+                fontFamily: 'Luckiest Guy',
+                color: AppColors.light,
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
               ),
             ),
           ),
