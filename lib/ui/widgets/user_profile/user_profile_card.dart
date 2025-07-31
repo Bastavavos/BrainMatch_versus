@@ -238,20 +238,16 @@ class _UserProfileCardState extends State<UserProfileCard> {
         ? '${_user.picture!}?cb=${DateTime.now().millisecondsSinceEpoch}'
         : null;
 
-    return Stack(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x22000000),
-                blurRadius: 10,
-                offset: Offset(0, 5),
-              ),
-            ],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 10,
+            offset: Offset(0, 5),
           ),
           child: Column(
             children: [
@@ -335,33 +331,61 @@ class _UserProfileCardState extends State<UserProfileCard> {
                       color: Colors.deepPurple,
                     ),
                   ),
-                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _user.username,
+                style: TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 30,
+                  color: AppColors.background,
+              ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: _editUsername,
+                child: const Icon(
+                  Icons.edit,
+                  size: 20,
+                  color: AppColors.light,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            widget.user.email,
+            style: TextStyle(
+              fontFamily: 'Mulish',
+              fontSize: 16,
+              color: AppColors.background,
+            ),
+          ),
+          const Divider(height: 50, color: AppColors.background,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Score - ",
+                style: TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 25,
+                  color: AppColors.accent,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                _user.email,
-                style: const TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-              const Divider(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Score",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    "${_user.score}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                ],
+                "${widget.user.score}",
+                style: TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 25,
+                  color: AppColors.accent,
+                ),
               ),
             ],
           ),
