@@ -114,7 +114,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
               token: token,
               onImageUpdated: (newUrl) {
                 _updateUserImage(newUrl);
-              },
+              }, onLogout: () {  },
             ),
 
             const SizedBox(height: 32),
