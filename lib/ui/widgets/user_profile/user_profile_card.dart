@@ -2,44 +2,35 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Ajouté
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../models/user.dart';
+import '../../../provider/user_provider.dart';
 import '../../../repositories/user_repository.dart';
 import '../../../service/api_service.dart';
 import '../../theme.dart';
 
-class UserProfileCard extends StatefulWidget {
+class UserProfileCard extends ConsumerStatefulWidget {
   final User user;
   final String token;
-  final void Function(String newImageUrl)? onImageUpdated;
-  final void Function(User updatedUser)? onUserUpdated; // Callback pour remontée des modifs utilisateur
   final VoidCallback onLogout;
 
   const UserProfileCard({
     super.key,
     required this.user,
     required this.token,
-    this.onImageUpdated,
-    this.onUserUpdated,
     required this.onLogout,
   });
 
   @override
-  State<UserProfileCard> createState() => _UserProfileCardState();
+  ConsumerState<UserProfileCard> createState() => _UserProfileCardState();
 }
 
-class _UserProfileCardState extends State<UserProfileCard> {
-  late User _user;
+class _UserProfileCardState extends ConsumerState<UserProfileCard> {
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _user = widget.user;
-  }
 
   Future<void> _pickImage(ImageSource source) async {
     Navigator.of(context).pop();
@@ -53,32 +44,19 @@ class _UserProfileCardState extends State<UserProfileCard> {
         return;
       }
     }
+
     final pickedFile = await _picker.pickImage(source: source, imageQuality: 80);
     if (pickedFile == null) return;
 
-    setState(() {
-      _isUploading = true;
-    });
+    setState(() => _isUploading = true);
 
     try {
       final file = File(pickedFile.path);
       final api = ApiService(token: widget.token);
-      final response = await api.uploadUserImage(_user.id, file);
+      final response = await api.uploadUserImage(widget.user.id, file);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        final newImageUrl = jsonResponse['picture'];
-
-        setState(() {
-          _user = _user.copyWith(picture: newImageUrl);
-        });
-
-        if (widget.onImageUpdated != null) {
-          widget.onImageUpdated!(newImageUrl);
-        }
-        if (widget.onUserUpdated != null) {
-          widget.onUserUpdated!(_user);
-        }
+        await ref.read(currentUserProvider.notifier).refreshUser(ref);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Image uploadée avec succès !')),
@@ -94,16 +72,14 @@ class _UserProfileCardState extends State<UserProfileCard> {
       );
     } finally {
       if (mounted) {
-        setState(() {
-          _isUploading = false;
-        });
+        setState(() => _isUploading = false);
       }
     }
   }
 
   Future<void> _editUsername() async {
     final TextEditingController controller =
-    TextEditingController(text: _user.username);
+    TextEditingController(text: widget.user.username);
 
     final newUsername = await showDialog<String>(
       context: context,
@@ -111,9 +87,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
         title: const Text('Modifier le pseudo'),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Nouveau pseudo',
-          ),
+          decoration: const InputDecoration(hintText: 'Nouveau pseudo'),
         ),
         actions: [
           TextButton(
@@ -130,23 +104,17 @@ class _UserProfileCardState extends State<UserProfileCard> {
 
     if (newUsername != null &&
         newUsername.trim().isNotEmpty &&
-        newUsername.trim() != _user.username) {
+        newUsername.trim() != widget.user.username) {
       try {
         final apiService = ApiService(token: widget.token);
         final repository = UserRepository(api: apiService);
 
-        final updatedUser = await repository.updateUserById(
-          _user.id,
+        await repository.updateUserById(
+          widget.user.id,
           {'username': newUsername.trim()},
         );
 
-        setState(() {
-          _user = updatedUser;
-        });
-
-        if (widget.onUserUpdated != null) {
-          widget.onUserUpdated!(updatedUser);
-        }
+        await ref.read(currentUserProvider.notifier).refreshUser(ref);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pseudo mis à jour avec succès')),
@@ -208,7 +176,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
         final apiService = ApiService(token: widget.token);
         final repository = UserRepository(api: apiService);
 
-        final message = await repository.deleteUserById(_user.id);
+        final message = await repository.deleteUserById(widget.user.id);
 
         if (!mounted) return;
 
@@ -230,12 +198,10 @@ class _UserProfileCardState extends State<UserProfileCard> {
 
   @override
   Widget build(BuildContext context) {
-    final firstLetter = (_user.username.isNotEmpty)
-        ? _user.username[0].toUpperCase()
-        : '?';
-
-    final imageUrl = (_user.picture != null && _user.picture!.isNotEmpty)
-        ? '${_user.picture!}?cb=${DateTime.now().millisecondsSinceEpoch}'
+    final user = widget.user;
+    final firstLetter = (user.username.isNotEmpty) ? user.username[0].toUpperCase() : '?';
+    final imageUrl = (user.picture != null && user.picture!.isNotEmpty)
+        ? '${user.picture!}?cb=${DateTime.now().millisecondsSinceEpoch}'
         : null;
 
     return Stack(
@@ -272,7 +238,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
                         ],
                       ),
                       child: CircleAvatar(
-                        key: ValueKey(_user.picture),
+                        key: ValueKey(user.picture),
                         radius: 70,
                         backgroundColor: Colors.deepPurple.shade100,
                         backgroundImage:
@@ -319,7 +285,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _user.username,
+                    user.username,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -339,7 +305,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
               ),
               const SizedBox(height: 8),
               Text(
-                _user.email,
+                user.email,
                 style: const TextStyle(fontSize: 16, color: Colors.black87),
               ),
               const Divider(height: 32),
@@ -354,7 +320,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
                     ),
                   ),
                   Text(
-                    "${_user.score}",
+                    "${user.score}",
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

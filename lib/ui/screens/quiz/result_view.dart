@@ -8,9 +8,9 @@ class ResultView extends StatelessWidget {
 
   String _getImageForScore(int score) {
     if (score <= 4) {
-      return 'assets/images/himmel_lose.png';
+      return 'assets/images/himmel_lose.webp';
     } else if (score <= 7) {
-      return 'assets/images/himmel_average.png';
+      return 'assets/images/himmel_average.webp';
     } else {
       return 'assets/images/himmel_win.png';
     }

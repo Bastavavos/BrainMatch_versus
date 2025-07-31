@@ -46,10 +46,9 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   }
 
   Future<void> _fetchUserData() async {
-    final user = ref.read(currentUserProvider);
     await ref.read(currentUserProvider.notifier).refreshUser(ref);
 
-
+    final user = ref.read(currentUserProvider);
     if (user == null) {
       setState(() {
         _isLoading = false;
@@ -60,6 +59,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
 
     final token = ref.read(tokenProvider);
     await _fetchFriendsData(user.friendIds, token);
+
     setState(() {
       _isLoading = false;
     });
@@ -69,12 +69,6 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   void initState() {
     super.initState();
     _fetchUserData();
-  }
-
-  // Cette fonction met à jour l'URL de l'image dans le provider
-  void _updateUserImage(String newUrl) {
-    // Appelle un notifier ou une fonction dans ton userProvider pour modifier l'utilisateur
-    ref.read(currentUserProvider.notifier).updatePicture(newUrl);
   }
 
   @override
@@ -89,6 +83,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
     if (_error != null) {
       return Scaffold(body: Center(child: Text(_error!)));
     }
+
     if (token == null) {
       return const Scaffold(
         body: Center(child: Text("Token manquant, veuillez vous reconnecter.")),
@@ -109,12 +104,13 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
           children: [
             const SizedBox(height: 24),
 
+
             UserProfileCard(
               user: user,
               token: token,
-              onImageUpdated: (newUrl) {
-                _updateUserImage(newUrl);
-              }, onLogout: () {  },
+              onLogout: () {
+                // Ajoute ici la logique de déconnexion si nécessaire
+              },
             ),
 
             const SizedBox(height: 32),
