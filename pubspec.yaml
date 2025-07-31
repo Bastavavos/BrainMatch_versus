@@ -124,6 +124,9 @@ flutter:
     - family: Luckiest Guy
       fonts:
         - asset: lib/fonts/LuckiestGuy-Regular.ttf
+    - family: Mulish
+      fonts:
+        - asset: lib/fonts/Mulish-Regular.ttf
 
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:brain_match/ui/layout/special_layout.dart';
+import '../../theme.dart';
 import '../../widgets/button/start_button.dart';
 
 class CategoryConfirmationPage extends ConsumerWidget {
@@ -72,10 +73,10 @@ class CategoryConfirmationPage extends ConsumerWidget {
     return Center(
       child: Text(
         title,
-        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          shadows: const [Shadow(color: Colors.black87, blurRadius: 8)],
+        style: TextStyle(
+          fontFamily: 'Luckiest Guy',
+          color: AppColors.accent,
+          fontSize: 50,
         ),
         textAlign: TextAlign.center,
       ),
@@ -93,7 +94,11 @@ class CategoryConfirmationPage extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           child: Text(
             description,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: TextStyle(
+              fontFamily: 'Mulish',
+              color: AppColors.primary,
+              fontSize: 16,
+            ),
             textAlign: TextAlign.center,
           ),
         ),

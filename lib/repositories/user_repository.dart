@@ -32,6 +32,28 @@ class UserRepository {
     }
   }
 
+  Future<User> updateUserById(String userId, Map<String, dynamic> data) async {
+    final response = await api.patch('/user/$userId', body: data);
+
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Ce pseudo est probablement déjà pris.');
+    }
+  }
+
+  Future<String> deleteUserById(String userId) async {
+    final response = await api.delete('/user/$userId');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      return jsonResponse['message'] ?? 'Utilisateur supprimé avec succès';
+    } else {
+      throw Exception('Échec de la suppression de l\'utilisateur');
+    }
+  }
+
+
   Future<void> sendFriendRequest(String senderId, String receiverId) async {
     final response = await api.patch('/user/friend/send/$senderId/$receiverId');
 
@@ -96,4 +118,3 @@ class UserRepository {
   }
 
 }
-

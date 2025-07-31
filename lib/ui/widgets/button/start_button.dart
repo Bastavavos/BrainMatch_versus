@@ -81,12 +81,14 @@ class _StartButtonState extends ConsumerState<StartButton> with SingleTickerProv
               ],
             ),
             alignment: Alignment.center,
-            child: const Text(
-              'Start',
-              style: TextStyle(
-                fontFamily: 'Luckiest Guy',
-                color: AppColors.light,
-                fontSize: 20,
+            child: const Center(
+              child: Text(
+                'Start',
+                style: TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  color: AppColors.light,
+                  fontSize: 28,
+                ),
               ),
             ),
           ),
