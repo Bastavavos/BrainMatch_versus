@@ -5,6 +5,7 @@ import '../../../service/api_service.dart';
 import '../../../models/user.dart';
 import '../../../provider/user_provider.dart';
 import '../../../repositories/user_repository.dart';
+import '../../theme.dart';
 
 class PodiumUserWidget extends ConsumerWidget {
   final User user;
@@ -90,15 +91,15 @@ class PodiumUserWidget extends ConsumerWidget {
           width: MediaQuery.of(context).size.width / 3.5,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(color: color, width: 3),
+            border: Border.all(color: color, width: 2.5),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+                color: color.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 6,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -123,15 +124,22 @@ class PodiumUserWidget extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
+
               Text(
                 user.username,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppColors.primary,
+                ),
               ),
               Text(
                 'Score: ${user.score}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.secondaryAccent,
+                ),
               ),
               if (actionWidget != null) ...[
                 const SizedBox(height: 4),

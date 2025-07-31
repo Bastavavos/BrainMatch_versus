@@ -53,6 +53,7 @@ dependencies:
   mime: ^1.0.4
   path: ^1.8.3
   permission_handler: ^11.3.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +68,11 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/launcher_icon.png"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -85,6 +91,9 @@ flutter:
     - assets/images/himmel_2.png
     - assets/images/himmel_solo_mode.png
     - assets/images/himmel_versus.png
+    - assets/images/himmel_ia.png
+    - assets/images/ia_logo.png
+    - assets/images/launcher_icon.png
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -110,5 +119,11 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+
+  fonts:
+    - family: Luckiest Guy
+      fonts:
+        - asset: lib/fonts/LuckiestGuy-Regular.ttf
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

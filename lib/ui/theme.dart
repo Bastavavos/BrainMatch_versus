@@ -12,9 +12,11 @@ final ThemeData appTheme = ThemeData(
   colorScheme: ColorScheme(
     brightness: Brightness.light,
     primary: AppColors.primary,
-    onPrimary: Colors.white,
+    onPrimary: AppColors.light,
     secondary: AppColors.accent,
     onSecondary: Colors.black,
+    tertiary: AppColors.secondaryAccent,
+    onTertiary: AppColors.light,
     error: Colors.red,
     onError: Colors.white,
     surface: Colors.white,

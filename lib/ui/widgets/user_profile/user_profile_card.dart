@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../models/user.dart';
 import '../../../service/api_service.dart';
+import '../../theme.dart';
 
 class UserProfileCard extends StatefulWidget {
   final User user;
@@ -193,9 +194,9 @@ class _UserProfileCardState extends State<UserProfileCard> {
           Text(
             widget.user.username,
             style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
+                fontFamily: 'Luckiest Guy',
+                fontSize: 30.0,
+                color: AppColors.primary
             ),
           ),
           const SizedBox(height: 8),
@@ -210,8 +211,9 @@ class _UserProfileCardState extends State<UserProfileCard> {
               const Text(
                 "Score",
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
+                    fontFamily: 'Luckiest Guy',
+                    fontSize: 18.0,
+                    color: AppColors.primary
                 ),
               ),
               Text(
