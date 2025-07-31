@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 
+import '../models/user.dart';
+
 
 class ApiService {
   final String? token;
@@ -46,6 +48,7 @@ class ApiService {
       headers: _buildHeaders(),
     );
   }
+
 
   Future<http.Response> uploadUserImage(String userId, File imageFile) async {
     final uri = Uri.parse('$baseUrl/user/upload');

@@ -1,6 +1,6 @@
 class User {
   final String id;
-  final String username;
+  late final String username;
   final String email;
   final int score;
   final String? picture;
