@@ -112,7 +112,7 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
         newUsername
             .trim()
             .isNotEmpty &&
-        newUsername.trim() != _user.username) {
+        newUsername.trim() != widget.user.username) {
       try {
         final apiService = ApiService(token: widget.token);
         final repository = UserRepository(api: apiService);
@@ -208,12 +208,12 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
   @override
   Widget build(BuildContext context) {
 
-    final firstLetter = (_user.username.isNotEmpty)
-        ? _user.username[0].toUpperCase()
+    final firstLetter = (widget.user.username.isNotEmpty)
+        ? widget.user.username[0].toUpperCase()
         : '?';
 
-    final imageUrl = (_user.picture != null && _user.picture!.isNotEmpty)
-        ? '${_user.picture!}?cb=${DateTime
+    final imageUrl = (widget.user.picture != null && widget.user.picture!.isNotEmpty)
+        ? '${widget.user.picture!}?cb=${DateTime
         .now()
         .millisecondsSinceEpoch}'
         : null;
@@ -252,7 +252,7 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
                         ],
                       ),
                       child: CircleAvatar(
-                        key: ValueKey(user.picture),
+                        key: ValueKey(widget.user.picture),
                         radius: 70,
                         backgroundColor: Colors.deepPurple.shade100,
                         backgroundImage: (imageUrl != null) ? NetworkImage(
@@ -299,7 +299,7 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    user.username,
+                    widget.user.username,
                     style: const TextStyle(
                       fontFamily: 'Luckiest Guy',
                       fontSize: 30,
