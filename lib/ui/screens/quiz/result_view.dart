@@ -51,7 +51,7 @@ class ResultView extends StatelessWidget {
                 ),
               const SizedBox(height: 20),
               Text(
-                'Score : $score / $totalQuestions',
+                '$score / $totalQuestions',
                 style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,

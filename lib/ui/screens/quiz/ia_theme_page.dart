@@ -38,9 +38,6 @@ class _QuizIaThemePageState extends State<QuizIaThemePage> {
       return;
     }
 
-    print('>>> Thème choisi : $theme'); // 👈 debug
-    print('>>> Token : ${widget.token}');
-
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

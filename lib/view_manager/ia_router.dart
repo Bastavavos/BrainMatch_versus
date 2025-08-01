@@ -5,6 +5,7 @@ import '../network/socket_manager.dart';
 import '../ui/widgets/error_view.dart';
 import '../ui/screens/quiz/question_view.dart';
 import '../ui/screens/quiz/result_view.dart';
+import '../ui/widgets/ia/loading_ia.dart';
 
 enum IaState {
   question,
@@ -143,7 +144,7 @@ class _IaRouterState extends State<IaRouter> {
       stream: _controller.stream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const LoadingContent();
         }
 
         final event = snapshot.data!;
