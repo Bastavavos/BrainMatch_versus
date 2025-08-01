@@ -57,6 +57,9 @@ class _StartButtonState extends ConsumerState<StartButton> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final Color textColor = widget.mode == 'Versus'
+        ? AppColors.primary // ou une autre couleur si tu veux le texte en AppColors.primary
+        : AppColors.light;
     return Center(
       child: AnimatedScale(
         scale: _scale,
@@ -80,14 +83,21 @@ class _StartButtonState extends ConsumerState<StartButton> with SingleTickerProv
                 )
               ],
             ),
-            alignment: Alignment.center,
-            child: const Center(
-              child: Text(
-                'Start',
-                style: TextStyle(
-                  fontFamily: 'Luckiest Guy',
-                  color: AppColors.light,
-                  fontSize: 28,
+            child: Center(
+              child: SizedBox(
+                height: 30, // hauteur approximative du texte
+                child: Baseline(
+                  baseline: 24, // ← ajuste selon ta police (25 - 26 = bon pour fontSize 25)
+                  baselineType: TextBaseline.alphabetic,
+                  child: Text(
+                    'Start',
+                    style: TextStyle(
+                      fontFamily: 'Luckiest Guy',
+                      color: textColor,
+                      fontSize: 25,
+                    ),
+                  ),
+
                 ),
               ),
             ),

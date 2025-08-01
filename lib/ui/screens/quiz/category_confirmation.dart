@@ -1,3 +1,4 @@
+import 'package:brain_match/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:brain_match/ui/layout/special_layout.dart';
@@ -32,40 +33,73 @@ class CategoryConfirmationPage extends ConsumerWidget {
         : colorScheme.secondary;
 
     return SpeLayout(
-      child: SafeArea(
-        child: Stack(
-          children: [
-            _buildBackgroundImage(), // l'image en fond
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 3),
-                _buildTitle(context),
-                const SizedBox(height: 20),
-                _buildDescriptionCard(context, colorScheme),
-                const Spacer(flex: 2),
-                StartButton(
-                  buttonColor: primaryColor,
-                  mode: mode,
-                  categoryId: categoryId,
-                ),
-                const SizedBox(height: 40),
-              ],
+      child: Stack(
+        fit: StackFit.expand, // ← étend le Stack à toute la taille disponible
+        children: [
+          _buildBackgroundImage(),
+
+          Container(color: Colors.black.withOpacity(0.4)), // overlay assombrissant
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Spacer(), // pousse le titre+description vers le centre verticalement
+
+                  // Titre en haut
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: AppColors.accent,
+                      fontWeight: FontWeight.bold,
+                      shadows: const [Shadow(color: Colors.black87, blurRadius: 8)],
+                      fontSize: 36,
+                      fontFamily: 'Luckiest Guy',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Description juste en dessous du titre
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: 'Luckiest Guy',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const Spacer(), // pousse le bouton vers le bas
+
+                  // Bouton en bas
+                  StartButton(
+                    buttonColor: primaryColor,
+                    mode: mode,
+                    categoryId: categoryId,
+                  ),
+
+                  const SizedBox(height: 40), // marge sous le bouton
+                ],
+              ),
+
             ),
-          ],
-        ),
+          ),
+
+        ],
       ),
     );
   }
 
   Widget _buildBackgroundImage() {
-    return Positioned.fill(
-      child: Image.network(
-        imageUrl,
-        fit: BoxFit.cover,
-        color: Colors.black.withOpacity(0.4),
-        colorBlendMode: BlendMode.darken,
-      ),
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
     );
   }
 
