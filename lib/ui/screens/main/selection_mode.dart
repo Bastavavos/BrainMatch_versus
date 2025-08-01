@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../provider/user_provider.dart';
+import '../../widgets/arrow.dart';
 
 class SelectionModePage extends ConsumerStatefulWidget {
   const SelectionModePage({super.key});
@@ -76,7 +77,7 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
                 opacity: _textOpacity,
                 child: Center(
                   child: Text(
-                    "Choisis ton mode de jeu",
+                    "Choisis un mode",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Luckiest Guy',
@@ -87,16 +88,14 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
                 ),
               ),
 
-              // Center(
-              //   child: WavyText(
-              //     "Choisis ton mode de jeu :",
-              //     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              //       fontWeight: FontWeight.bold,
-              //       color: colorScheme.primary,
-              //     ),
-              //   ),
-              // ),
-              SizedBox(height: screenHeight * 0.07),
+              Center(
+                child: BouncingArrow(
+                  size: 52,
+                  duration: Duration(seconds: 1),
+                ),
+              ),
+
+              SizedBox(height: screenHeight * 0.03),
 
               _buildModeCard(
                 context,

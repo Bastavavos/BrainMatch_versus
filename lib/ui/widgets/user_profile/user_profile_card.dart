@@ -45,7 +45,9 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
       }
     }
 
-    final pickedFile = await _picker.pickImage(source: source, imageQuality: 80);
+    final pickedFile = await _picker.pickImage(
+        source: source, imageQuality: 80);
+
     if (pickedFile == null) return;
 
     setState(() => _isUploading = true);
@@ -83,28 +85,34 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
 
     final newUsername = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Modifier le pseudo'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'Nouveau pseudo'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+      builder: (context) =>
+          AlertDialog(
+            title: const Text('Modifier le pseudo'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Nouveau pseudo',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Annuler'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, controller.text),
+                child: const Text('Enregistrer'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Enregistrer'),
-          ),
-        ],
-      ),
     );
 
     if (newUsername != null &&
-        newUsername.trim().isNotEmpty &&
-        newUsername.trim() != widget.user.username) {
+
+        newUsername
+            .trim()
+            .isNotEmpty &&
+        newUsername.trim() != _user.username) {
       try {
         final apiService = ApiService(token: widget.token);
         final repository = UserRepository(api: apiService);
@@ -154,21 +162,22 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
   Future<void> _confirmDeleteAccount() async {
     final bool? confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmer la suppression'),
-        content: const Text(
-            'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
+      builder: (context) =>
+          AlertDialog(
+            title: const Text('Confirmer la suppression'),
+            content: const Text(
+                'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Annuler'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Supprimer'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Supprimer'),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -198,10 +207,15 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
 
   @override
   Widget build(BuildContext context) {
-    final user = widget.user;
-    final firstLetter = (user.username.isNotEmpty) ? user.username[0].toUpperCase() : '?';
-    final imageUrl = (user.picture != null && user.picture!.isNotEmpty)
-        ? '${user.picture!}?cb=${DateTime.now().millisecondsSinceEpoch}'
+
+    final firstLetter = (_user.username.isNotEmpty)
+        ? _user.username[0].toUpperCase()
+        : '?';
+
+    final imageUrl = (_user.picture != null && _user.picture!.isNotEmpty)
+        ? '${_user.picture!}?cb=${DateTime
+        .now()
+        .millisecondsSinceEpoch}'
         : null;
 
     return Stack(
@@ -209,7 +223,7 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
@@ -241,8 +255,8 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
                         key: ValueKey(user.picture),
                         radius: 70,
                         backgroundColor: Colors.deepPurple.shade100,
-                        backgroundImage:
-                        (imageUrl != null) ? NetworkImage(imageUrl) : null,
+                        backgroundImage: (imageUrl != null) ? NetworkImage(
+                            imageUrl) : null,
                         child: _isUploading
                             ? const CircularProgressIndicator()
                             : (imageUrl == null)
@@ -287,9 +301,9 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
                   Text(
                     user.username,
                     style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                      fontFamily: 'Luckiest Guy',
+                      fontSize: 30,
+                      color: AppColors.background,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -298,33 +312,42 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
                     child: const Icon(
                       Icons.edit,
                       size: 20,
-                      color: Colors.deepPurple,
+                      color: AppColors.light,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                user.email,
-                style: const TextStyle(fontSize: 16, color: Colors.black87),
+
+                widget.user.email,
+                style: const TextStyle(
+                  fontFamily: 'Mulish',
+                  fontSize: 16,
+                  color: AppColors.background,
+                ),
               ),
-              const Divider(height: 32),
+              const Divider(height: 50, color: AppColors.background),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Score",
+                    "Score - ",
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Luckiest Guy',
+                      fontSize: 25,
+                      color: AppColors.accent,
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
-                    "${user.score}",
+
+                    "${widget.user.score}",
+
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                      fontFamily: 'Luckiest Guy',
+                      fontSize: 25,
+                      color: AppColors.accent,
                     ),
                   ),
                 ],

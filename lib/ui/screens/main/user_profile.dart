@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../service/api_service.dart';
 import '../../../provider/user_provider.dart';
+import '../../theme.dart';
 import '../../widgets/user_profile/user_profile_card.dart';
 import '../../widgets/user_profile/profile_friend.dart';
 
@@ -103,8 +104,6 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
         child: Column(
           children: [
             const SizedBox(height: 24),
-
-
             UserProfileCard(
               user: user,
               token: token,
@@ -113,45 +112,73 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
               },
             ),
 
-            const SizedBox(height: 32),
-
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Divider(height: 32),
-                const Text(
-                  "Friends",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 12),
-
-                // Widget pour les demandes d'ami
                 const FriendRequestsWidget(),
-
                 const SizedBox(height: 24),
 
-                // Liste des amis
-                if (_friendsData.isEmpty)
-                  const Text("Aucun ami trouvé.")
-                else
-                  ..._friendsData.map((friend) {
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.deepPurple.shade100,
-                        backgroundImage: (friend['picture'] != null && friend['picture'] != '')
-                            ? NetworkImage(friend['picture'])
-                            : null,
-                        child: (friend['picture'] == null || friend['picture'] == '')
-                            ? const Icon(Icons.person, color: Colors.deepPurple)
-                            : null,
-                      ),
-                      title: Text(friend['username'] ?? ''),
-                    );
-                  }).toList(),
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Mes amis :",
+                          style: TextStyle(
+                            fontFamily: 'Mulish',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        if (_friendsData.isEmpty)
+                          const Text("Aucun ami trouvé.")
+                        else
+                          ..._friendsData.map((friend) {
+                            return Column(
+                              children: [
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.deepPurple.shade100,
+                                    backgroundImage: (friend['picture'] != null && friend['picture'] != '')
+                                        ? NetworkImage(friend['picture'])
+                                        : null,
+                                    child: (friend['picture'] == null || friend['picture'] == '')
+                                        ? const Icon(Icons.person, color: Colors.deepPurple)
+                                        : null,
+                                  ),
+                                  title: Text(
+                                    friend['username'] ?? '',
+                                    style: const TextStyle(
+                                      fontFamily: 'Mulish',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                      ],
+                    ),
+                  ),
+                ),
               ],
-            ),
+            )
 
-            const SizedBox(height: 32),
+
+
+
+
           ],
         ),
       ),

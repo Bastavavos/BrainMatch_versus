@@ -41,7 +41,7 @@ class _IaRouterState extends State<IaRouter> {
   late String roomId;
   int totalQuestions = 0;
 
-  int timeLeft = 100;
+  double timeLeft = 12000;
   Timer? countdownTimer;
 
   String? selectedAnswer;
@@ -65,7 +65,7 @@ class _IaRouterState extends State<IaRouter> {
         totalQuestions = data['totalQuestions'];
 
         setState(() {
-          timeLeft = 100;
+          timeLeft = 120;
           selectedAnswer = null;
           correctAnswer = null;
         });
@@ -80,7 +80,7 @@ class _IaRouterState extends State<IaRouter> {
         if (!mounted) return;
 
         setState(() {
-          timeLeft = 100;
+          timeLeft = 120;
           selectedAnswer = null;
           correctAnswer = null;
         });
@@ -114,17 +114,23 @@ class _IaRouterState extends State<IaRouter> {
     countdownTimer?.cancel();
     if (!mounted) return;
 
-    setState(() {
-      timeLeft = 100;
-    });
+    final startTime = DateTime.now();
+    const totalTime = Duration(seconds: 12);
 
-    countdownTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (timeLeft <= 0) {
+    countdownTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      final elapsed = DateTime.now().difference(startTime);
+      final remaining = totalTime - elapsed;
+
+      if (remaining <= Duration.zero) {
         timer.cancel();
+        if (!mounted) return;
+        setState(() {
+          timeLeft = 0;
+        });
       } else {
         if (!mounted) return;
         setState(() {
-          timeLeft--;
+          timeLeft = remaining.inMilliseconds.toDouble();
         });
       }
     });
@@ -155,7 +161,7 @@ class _IaRouterState extends State<IaRouter> {
               questionData: event.data['question'],
               questionIndex: event.data['questionIndex'],
               totalQuestions: event.data['totalQuestions'],
-              timeLeft: timeLeft,
+              timeLeft: timeLeft.toInt(),
               selectedAnswer: selectedAnswer,
               correctAnswer: correctAnswer,
               onAnswer: (answer) {

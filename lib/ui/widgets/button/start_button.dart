@@ -83,7 +83,6 @@ class _StartButtonState extends ConsumerState<StartButton> with SingleTickerProv
                 )
               ],
             ),
-
             child: Center(
               child: SizedBox(
                 height: 30, // hauteur approximative du texte
@@ -98,6 +97,7 @@ class _StartButtonState extends ConsumerState<StartButton> with SingleTickerProv
                       fontSize: 25,
                     ),
                   ),
+
                 ),
               ),
             ),
