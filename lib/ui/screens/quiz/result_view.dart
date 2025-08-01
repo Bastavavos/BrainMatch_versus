@@ -18,13 +18,12 @@ class ResultView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scores = resultData['scores'] as Map<String, dynamic>?;
-    final soloScore = resultData['score'] as int?;
-    final totalQuestions = resultData['totalQuestions'] as int?;
-    final players = resultData['players'] as List<dynamic>?;
+    // On récupère les données principales du résultat
+    final int? soloScore = resultData['score'] as int?;
+    final int? totalQuestions = resultData['totalQuestions'] as int?;
+    final List<dynamic>? players = resultData['players'] as List<dynamic>?;
 
-    final scoreToUse = soloScore ?? (scores?.values.first as int?);
-    final imagePath = scoreToUse != null ? _getImageForScore(scoreToUse) : null;
+    final imagePath = (soloScore != null) ? _getImageForScore(soloScore) : null;
 
     return SpeLayout(
       child: Stack(
@@ -38,16 +37,17 @@ class ResultView extends StatelessWidget {
                 colorBlendMode: BlendMode.darken,
               ),
             ),
-          if ((players != null && players.isNotEmpty && totalQuestions != null))
+
+          if (players != null && players.isNotEmpty && totalQuestions != null)
             ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
               itemCount: players.length,
               itemBuilder: (context, index) {
-                final player = players[index];
+                final player = players[index] as Map<String, dynamic>;
                 final username = player['username'] ?? 'Joueur';
                 final image = player['image'] ?? '';
-                final score = scores?[username] ?? soloScore ?? 0;
-                final questions = player['questions'] as List<dynamic>? ?? [];
+                final int score = soloScore ?? 0;
+                final List<dynamic> questions = player['questions'] as List<dynamic>? ?? [];
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -68,9 +68,22 @@ class ResultView extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     ...questions.map((q) {
-                      final question = q['question'] ?? 'Question inconnue';
-                      final answer = q['answer'] ?? '---';
-                      final correct = q['correct'] == true;
+                      final qMap = q as Map<String, dynamic>;
+
+                      // Si question est un map complexe, essayer d'extraire un texte
+                      final dynamic questionRaw = qMap['question'];
+                      String questionText = 'Question inconnue';
+
+                      if (questionRaw is String) {
+                        questionText = questionRaw;
+                      } else if (questionRaw is Map<String, dynamic>) {
+                        // Exemple: prendre 'text' ou 'title' si présent
+                        questionText = questionRaw['question'] ?? questionText;
+                      }
+
+                      final answer = qMap['answer'] ?? '---';
+                      final correct = qMap['correct'] == true;
+
                       return Container(
                         margin: const EdgeInsets.symmetric(vertical: 6),
                         padding: const EdgeInsets.all(12),
@@ -83,7 +96,7 @@ class ResultView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              question,
+                              questionText,
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                             const SizedBox(height: 4),
@@ -115,7 +128,7 @@ class ResultView extends StatelessWidget {
             )
           else
             const Center(
-              child: Text('Score indisponible.', style: TextStyle(fontSize: 18)),
+              child: Text('Score indisponible.', style: TextStyle(fontSize: 18, color: Colors.white)),
             ),
         ],
       ),
