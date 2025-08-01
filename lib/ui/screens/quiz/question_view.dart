@@ -69,7 +69,7 @@ class QuestionView extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
-                value: timeLeft / 100,
+                value: timeLeft / 12000,
                 backgroundColor: Colors.white,
                 color: AppColors.primary,
                 minHeight: 10,
