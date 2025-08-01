@@ -16,98 +16,108 @@ class ResultView extends StatelessWidget {
     }
   }
 
-  Widget buildCenteredResult({
-    required int score,
-    required int totalQuestions,
-    String? playerName,
-  }) {
-    return Stack(
-      children: [
-        // Image de fond avec assombrissement
-        Positioned.fill(
-          child: Image.asset(
-            _getImageForScore(score),
-            fit: BoxFit.cover,
-            color: Colors.black.withOpacity(0.5), // filtre sombre
-            colorBlendMode: BlendMode.darken,
-          ),
-        ),
-        // Contenu principal
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (playerName != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    playerName,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // texte lisible
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 20),
-              Text(
-                '$score / $totalQuestions',
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // texte lisible
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 4,
-                      color: Colors.black87,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final scores = resultData['scores'] as Map<String, dynamic>?;
     final soloScore = resultData['score'] as int?;
     final totalQuestions = resultData['totalQuestions'] as int?;
+    final players = resultData['players'] as List<dynamic>?;
+
+    final scoreToUse = soloScore ?? (scores?.values.first as int?);
+    final imagePath = scoreToUse != null ? _getImageForScore(scoreToUse) : null;
 
     return SpeLayout(
-      child: (scores != null && totalQuestions != null)
-          ? ListView(
-        padding: const EdgeInsets.all(0),
-        children: scores.entries.map((entry) {
-          final playerName = entry.key;
-          final playerScore = entry.value as int;
-          return SizedBox(
-            height: MediaQuery.of(context).size.height,
-            child: buildCenteredResult(
-              score: playerScore,
-              totalQuestions: totalQuestions,
-              playerName: playerName,
+      child: Stack(
+        children: [
+          if (imagePath != null)
+            Positioned.fill(
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                color: Colors.black.withOpacity(0.5),
+                colorBlendMode: BlendMode.darken,
+              ),
             ),
-          );
-        }).toList(),
-      )
-          : (soloScore != null && totalQuestions != null)
-          ? SizedBox.expand(
-        child: buildCenteredResult(
-          score: soloScore,
-          totalQuestions: totalQuestions,
-        ),
-      )
-          : const Center(
-        child: Text(
-          'Score indisponible.',
-          style: TextStyle(fontSize: 18),
-        ),
+          if ((players != null && players.isNotEmpty && totalQuestions != null))
+            ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              itemCount: players.length,
+              itemBuilder: (context, index) {
+                final player = players[index];
+                final username = player['username'] ?? 'Joueur';
+                final image = player['image'] ?? '';
+                final score = scores?[username] ?? soloScore ?? 0;
+                final questions = player['questions'] as List<dynamic>? ?? [];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(image),
+                      radius: 40,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      username,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$score / $totalQuestions',
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    const SizedBox(height: 16),
+                    ...questions.map((q) {
+                      final question = q['question'] ?? 'Question inconnue';
+                      final answer = q['answer'] ?? '---';
+                      final correct = q['correct'] == true;
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: correct ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+                          border: Border.all(color: correct ? Colors.green : Colors.red),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              question,
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Réponse : $answer ${correct ? '✔️' : '❌'}',
+                              style: const TextStyle(fontSize: 15, color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    const SizedBox(height: 30),
+                  ],
+                );
+              },
+            )
+          else if (soloScore != null && totalQuestions != null)
+            ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              children: [
+                const SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    '$soloScore / $totalQuestions',
+                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+              ],
+            )
+          else
+            const Center(
+              child: Text('Score indisponible.', style: TextStyle(fontSize: 18)),
+            ),
+        ],
       ),
     );
   }

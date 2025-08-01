@@ -46,6 +46,11 @@ class _SoloRouterState extends State<SoloRouter> {
   String? selectedAnswer;
   String? correctAnswer;
 
+  // 🆕 Ajout : données du joueur
+  List<Map<String, dynamic>> playerQuestions = [];
+  final String username = "Moi"; // ou récupéré dynamiquement
+  final String imageUrl = "https://placehold.co/100x100"; // par défaut ou récupéré
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +72,7 @@ class _SoloRouterState extends State<SoloRouter> {
           timeLeft = 120;
           selectedAnswer = null;
           correctAnswer = null;
+          playerQuestions = []; // réinitialiser les réponses
         });
         startTimer();
 
@@ -90,19 +96,45 @@ class _SoloRouterState extends State<SoloRouter> {
           'totalQuestions': totalQuestions,
         }));
       },
+
       onAnswerFeedback: (data) {
         if (!mounted) return;
 
         setState(() {
           correctAnswer = data['correctAnswer'];
         });
+
+        final question = data['question']; // doît être envoyé côté serveur
+        final answered = selectedAnswer;
+
+        if (question != null && answered != null) {
+          playerQuestions.add({
+            "question": question,
+            "answer": answered,
+            "correct": answered == data['correctAnswer'],
+          });
+        }
       },
+
       onGameOver: (data) {
         countdownTimer?.cancel();
         if (!mounted) return;
 
-        _controller.add(SoloEvent(state: SoloState.result, data: data));
+        final resultData = {
+          "score": data['score'],
+          "totalQuestions": totalQuestions,
+          "players": [
+            {
+              "username": username,
+              "image": imageUrl,
+              "questions": playerQuestions,
+            }
+          ]
+        };
+
+        _controller.add(SoloEvent(state: SoloState.result, data: resultData));
       },
+
       onOpponentLeft: (_) {},
     );
 
@@ -155,7 +187,6 @@ class _SoloRouterState extends State<SoloRouter> {
         final event = snapshot.data!;
 
         switch (event.state) {
-
           case SoloState.question:
             return QuestionView(
               questionData: event.data['question'],
@@ -179,6 +210,7 @@ class _SoloRouterState extends State<SoloRouter> {
             );
 
           case SoloState.result:
+            print(event.data); // pour debug
             return ResultView(resultData: event.data);
 
           case SoloState.error:
