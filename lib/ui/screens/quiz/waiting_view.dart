@@ -21,7 +21,6 @@ class _WaitingViewState extends ConsumerState<WaitingView>
   @override
   void initState() {
     super.initState();
-
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         secondsLeft++;
@@ -40,7 +39,7 @@ class _WaitingViewState extends ConsumerState<WaitingView>
       mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
-          radius: 70,
+          radius: 50,
           backgroundColor: AppColors.light,
           backgroundImage: (pictureUrl != null && pictureUrl.isNotEmpty)
               ? NetworkImage(pictureUrl)
@@ -72,31 +71,67 @@ class _WaitingViewState extends ConsumerState<WaitingView>
       child: Container(
         color: AppColors.primary,
         child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildPlayer(username, pictureUrl),
-                const SizedBox(height: 40),
-                Text(
-                  "Recherche d'un joueur",
-                  style: const TextStyle(
-                    fontFamily: 'Luckiest Guy',
-                    fontSize: 30,
-                    color: AppColors.background,
-                  ),
+          child: Column(
+            children: [
+              const SizedBox(height: 110),
+              const Text(
+                "Recherche d'un joueur",
+                style: TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 30,
+                  color: AppColors.background,
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  '$secondsLeft s',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: AppColors.accent,
-                    fontWeight: FontWeight.bold,
+                textAlign: TextAlign.center,
+              ),
+
+              const Spacer(flex: 1),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildPlayer(username, pictureUrl),
+
+                  const SizedBox(width: 40),
+
+                  const Text(
+                    'VS',
+                    style: TextStyle(
+                      fontFamily: 'Luckiest Guy',
+                      fontSize: 44,
+                      color: AppColors.background,
+                    ),
                   ),
+
+                  const SizedBox(width: 44),
+
+                  Transform.translate(
+                    offset: const Offset(0, -26), // Ajuste cette valeur si besoin
+                    child: const SizedBox(
+                      height: 90,
+                      width: 90,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                ],
+              ),
+
+              const Spacer(flex: 1),
+
+              Text(
+                '$secondsLeft s',
+                style: const TextStyle(
+                  fontFamily: 'Mulish',
+                  fontSize: 30,
+                  color: AppColors.background,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 110),
+            ],
           ),
         ),
       ),
