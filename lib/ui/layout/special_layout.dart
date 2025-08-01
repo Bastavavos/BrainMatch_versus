@@ -24,7 +24,6 @@ class SpeLayout extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      backgroundColor: const Color(0xFFF7F5FD),
       body: child,
     );
   }
