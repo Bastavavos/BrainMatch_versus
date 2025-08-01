@@ -35,17 +35,37 @@ class QuestionView extends StatelessWidget {
         : null;
 
     return SpeLayout(
+      titleWidget: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Text(
+          'Question ${questionIndex + 1} / $totalQuestions',
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontFamily: 'Mulish',
+          ),
+        ),
+      ),
       child: Column(
         children: [
           if (imageUrl != null)
             Padding(
-              padding: const EdgeInsets.only(top: 12.0, bottom: 12.0), // léger padding top
+              padding: const EdgeInsets.only(
+                top: 12.0,
+                bottom: 12.0,
+              ), // léger padding top
               child: Container(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 0.25,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16.0),
-                  color: AppColors.background, // utile si l’image est transparente
+                  color:
+                      AppColors.background, // utile si l’image est transparente
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Image.network(
@@ -55,15 +75,6 @@ class QuestionView extends StatelessWidget {
                 ),
               ),
             ),
-          Text(
-            'Question ${questionIndex + 1} / $totalQuestions',
-            style: TextStyle(
-              fontFamily: 'Mulish',
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
             child: ClipRRect(
@@ -93,7 +104,10 @@ class QuestionView extends StatelessWidget {
           const SizedBox(height: 8),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: options.map((option) {
@@ -123,7 +137,10 @@ class QuestionView extends StatelessWidget {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.symmetric(vertical: 6),
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
@@ -137,12 +154,17 @@ class QuestionView extends StatelessWidget {
                         ],
                       ),
                       child: InkWell(
-                        onTap: selectedAnswer == null ? () => onAnswer(option) : null,
+                        onTap: selectedAnswer == null
+                            ? () => onAnswer(option)
+                            : null,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Text(option, style: const TextStyle(fontSize: 16)),
+                              child: Text(
+                                option,
+                                style: const TextStyle(fontSize: 16),
+                              ),
                             ),
                             if (trailingIcon != null) trailingIcon,
                           ],
@@ -157,7 +179,5 @@ class QuestionView extends StatelessWidget {
         ],
       ),
     );
-
   }
 }
-
