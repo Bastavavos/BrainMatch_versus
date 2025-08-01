@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class SpeLayout extends StatelessWidget {
   final Widget child;
-  const SpeLayout({super.key, required this.child});
+  final Widget? titleWidget;
+  const SpeLayout({super.key, required this.child, this.titleWidget});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,8 @@ class SpeLayout extends StatelessWidget {
             Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
           },
         ),
-        title: Image.asset(
+        title: titleWidget ??
+            Image.asset(
           'assets/images/title.png',
           height: 70,
           fit: BoxFit.contain,
