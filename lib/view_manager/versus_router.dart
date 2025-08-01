@@ -49,7 +49,7 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
   int totalQuestions = 0;
   String? currentUserId;
 
-  int timeLeft = 100;
+  double timeLeft = 12000;
   Timer? countdownTimer;
   String? selectedAnswer;
   String? correctAnswer;
@@ -168,20 +168,26 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
     if (!mounted) return;
 
     setState(() {
-      timeLeft = 100;
+      timeLeft = 120;
     });
 
-    countdownTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
+    final startTime = DateTime.now();
+    const totalTime = Duration(seconds: 12);
 
-      if (timeLeft <= 0) {
+    countdownTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      final elapsed = DateTime.now().difference(startTime);
+      final remaining = totalTime - elapsed;
+
+      if (remaining <= Duration.zero) {
         timer.cancel();
-      } else {
+        if (!mounted) return;
         setState(() {
-          timeLeft--;
+          timeLeft = 0;
+        });
+      } else {
+        if (!mounted) return;
+        setState(() {
+          timeLeft = remaining.inMilliseconds.toDouble();
         });
       }
     });
@@ -220,7 +226,7 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
                 setState(() {
-                  timeLeft = 100;
+                  timeLeft = 120;
                   selectedAnswer = null;
                   correctAnswer = null;
                   questionTimerStarted = true;
@@ -232,7 +238,7 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
               questionData: event.data['question'],
               questionIndex: event.data['questionIndex'],
               totalQuestions: event.data['totalQuestions'],
-              timeLeft: timeLeft,
+              timeLeft: timeLeft.toInt(),
               selectedAnswer: selectedAnswer,
               correctAnswer: correctAnswer,
               onAnswer: (answer) {
