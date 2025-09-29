@@ -159,51 +159,51 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
     );
   }
 
-  Future<void> _confirmDeleteAccount() async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: const Text('Confirmer la suppression'),
-            content: const Text(
-                'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Annuler'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Supprimer'),
-              ),
-            ],
-          ),
-    );
-
-    if (confirm == true) {
-      try {
-        final apiService = ApiService(token: widget.token);
-        final repository = UserRepository(api: apiService);
-
-        final message = await repository.deleteUserById(widget.user.id);
-
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
-
-        widget.onLogout();
-
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la suppression : $e')),
-        );
-      }
-    }
-  }
+  // Future<void> _confirmDeleteAccount() async {
+  //   final bool? confirm = await showDialog<bool>(
+  //     context: context,
+  //     builder: (context) =>
+  //         AlertDialog(
+  //           title: const Text('Confirmer la suppression'),
+  //           content: const Text(
+  //               'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () => Navigator.of(context).pop(false),
+  //               child: const Text('Annuler'),
+  //             ),
+  //             ElevatedButton(
+  //               onPressed: () => Navigator.of(context).pop(true),
+  //               child: const Text('Supprimer'),
+  //             ),
+  //           ],
+  //         ),
+  //   );
+  //
+  //   if (confirm == true) {
+  //     try {
+  //       final apiService = ApiService(token: widget.token);
+  //       final repository = UserRepository(api: apiService);
+  //
+  //       final message = await repository.deleteUserById(widget.user.id);
+  //
+  //       if (!mounted) return;
+  //
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text(message)),
+  //       );
+  //
+  //       widget.onLogout();
+  //
+  //       Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+  //     } catch (e) {
+  //       if (!mounted) return;
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Erreur lors de la suppression : $e')),
+  //       );
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -355,29 +355,29 @@ class _UserProfileCardState extends ConsumerState<UserProfileCard> {
             ],
           ),
         ),
-        Positioned(
-          top: 8,
-          right: 8,
-          child: ElevatedButton(
-            onPressed: _confirmDeleteAccount,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              minimumSize: const Size(0, 0),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              textStyle: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            child: const Text('Supprimer mon compte'),
-          ),
-        ),
+        // Positioned(
+        //   top: 8,
+        //   right: 8,
+        //   child: ElevatedButton(
+        //     onPressed: _confirmDeleteAccount,
+        //     style: ElevatedButton.styleFrom(
+        //       backgroundColor: Colors.red,
+        //       foregroundColor: Colors.white,
+        //       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        //       minimumSize: const Size(0, 0),
+        //       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        //       elevation: 2,
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(20),
+        //       ),
+        //       textStyle: const TextStyle(
+        //         fontSize: 12,
+        //         fontWeight: FontWeight.w500,
+        //       ),
+        //     ),
+        //     child: const Text('Supprimer mon compte'),
+        //   ),
+        // ),
       ],
     );
   }
