@@ -7,7 +7,9 @@ import '../../../provider/user_provider.dart';
 import '../../theme.dart';
 
 class WaitingView extends ConsumerStatefulWidget {
-  const WaitingView({super.key});
+  final String categoryName;
+
+  const WaitingView({super.key, required this.categoryName});
 
   @override
   ConsumerState<WaitingView> createState() => _WaitingViewState();
@@ -80,6 +82,18 @@ class _WaitingViewState extends ConsumerState<WaitingView>
                   fontFamily: 'Luckiest Guy',
                   fontSize: 30,
                   color: AppColors.background,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 5),
+
+              Text(
+                widget.categoryName,
+                style: const TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 36,
+                  color: AppColors.accent,
                 ),
                 textAlign: TextAlign.center,
               ),

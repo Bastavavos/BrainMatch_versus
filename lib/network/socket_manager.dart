@@ -19,7 +19,7 @@ class SocketClient {
     disconnect();
 
     _socket = IO.io(
-      'http://192.168.1.94:3000',
+      'http://192.168.1.101:3000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()

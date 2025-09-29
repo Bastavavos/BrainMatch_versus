@@ -232,7 +232,7 @@ class _QuestionViewState extends State<QuestionView> {
   }
 
   String formatImageUrl(String url) {
-    return url.replaceAll("localhost", "192.168.1.94");
+    return url.replaceAll("localhost", "192.168.1.101");
   }
 
   @override
