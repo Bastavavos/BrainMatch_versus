@@ -48,6 +48,7 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 12),
             const Text("General",
                 style: TextStyle(
                     fontSize: 24,
@@ -57,15 +58,7 @@ class SettingsScreen extends ConsumerWidget {
                 )),
             const SizedBox(height: 12),
             const ListTile(
-              title: Text("Security",
-              style: TextStyle(
-                fontFamily: 'Mulish'
-              )),
-              trailing: Icon(Icons.arrow_forward_ios),
-              leading: Icon(Icons.security),
-            ),
-            const ListTile(
-              title: Text("Reminders",
+              title: Text("Notifications",
                   style: TextStyle(
                       fontFamily: 'Mulish'
                   )),
@@ -73,7 +66,7 @@ class SettingsScreen extends ConsumerWidget {
               leading: Icon(Icons.browse_gallery_outlined),
             ),
             const ListTile(
-              title: Text("History",
+              title: Text("Données personnelles",
                   style: TextStyle(
                       fontFamily: 'Mulish'
                   )),
@@ -81,7 +74,14 @@ class SettingsScreen extends ConsumerWidget {
               leading: Icon(Icons.collections_bookmark_rounded),
             ),
             const SizedBox(height: 12),
-            const Text("Help & Support",
+            const Text("Sons",
+                style: TextStyle(
+                    fontSize: 24,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Luckiest Guy')),
+            const SizedBox(height: 12),
+            const Text("Aide & Support",
                 style: TextStyle(
                     fontSize: 24,
                     color: AppColors.primary,
@@ -89,44 +89,21 @@ class SettingsScreen extends ConsumerWidget {
                     fontFamily: 'Luckiest Guy')),
             const SizedBox(height: 12),
             const ListTile(
-              title: Text("About",
+              title: Text("Sécurité",
+                  style: TextStyle(
+                      fontFamily: 'Mulish'
+                  )),
+              trailing: Icon(Icons.arrow_forward_ios),
+              leading: Icon(Icons.security),
+            ),
+            const SizedBox(height: 12),
+            const ListTile(
+              title: Text("À propos",
                   style: TextStyle(
                       fontFamily: 'Mulish'
                   )),
               trailing: Icon(Icons.arrow_forward_ios),
               leading: Icon(Icons.info_outline_rounded),
-            ),
-            const SizedBox(height: 12),
-            const Text("Privacy",
-                style: TextStyle(
-                    fontSize: 24,
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Luckiest Guy')),
-            const SizedBox(height: 12),
-            const ListTile(
-              title: Text("Terms of Service",
-                  style: TextStyle(
-                      fontFamily: 'Mulish'
-                  )),
-              trailing: Icon(Icons.arrow_forward_ios),
-              leading: Icon(Icons.electrical_services_rounded),
-            ),
-            const ListTile(
-              title: Text("Privacy Policy",
-                  style: TextStyle(
-                      fontFamily: 'Mulish'
-                  )),
-              trailing: Icon(Icons.arrow_forward_ios),
-              leading: Icon(Icons.privacy_tip_rounded),
-            ),
-            const ListTile(
-              title: Text("Security Policy",
-                  style: TextStyle(
-                      fontFamily: 'Mulish'
-                  )),
-              trailing: Icon(Icons.arrow_forward_ios),
-              leading: Icon(Icons.policy),
             ),
             const SizedBox(height: 30),
             Center(

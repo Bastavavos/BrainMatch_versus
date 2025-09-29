@@ -76,6 +76,9 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final token = ref.watch(tokenProvider);
+    final sortedFriends =
+        _friendsData.where((friend) => friend['username'] != null).toList()
+          ..sort((a, b) => (b['score'] ?? 0).compareTo(a['score'] ?? 0));
 
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -119,17 +122,17 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                 const SizedBox(height: 24),
 
                 Card(
-                  elevation: 4,
+                  elevation: 1,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const Text(
-                          "Mes amis :",
+                          "Mes amis",
                           style: TextStyle(
                             fontFamily: 'Mulish',
                             fontSize: 20,
@@ -141,44 +144,74 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                         if (_friendsData.isEmpty)
                           const Text("Aucun ami trouvé.")
                         else
-                          ..._friendsData.map((friend) {
-                            return Column(
-                              children: [
-                                ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  leading: CircleAvatar(
-                                    backgroundColor: Colors.deepPurple.shade100,
-                                    backgroundImage: (friend['picture'] != null && friend['picture'] != '')
-                                        ? NetworkImage(friend['picture'])
-                                        : null,
-                                    child: (friend['picture'] == null || friend['picture'] == '')
-                                        ? const Icon(Icons.person, color: Colors.deepPurple)
-                                        : null,
-                                  ),
-                                  title: Text(
-                                    friend['username'] ?? '',
+                          ...sortedFriends.map(
+                            (friend) => ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.deepPurple.shade100,
+                                backgroundImage:
+                                    (friend['picture'] != null &&
+                                        friend['picture'] != '')
+                                    ? NetworkImage(friend['picture'])
+                                    : null,
+                                child:
+                                    (friend['picture'] == null ||
+                                        friend['picture'] == '')
+                                    ? const Icon(
+                                        Icons.person,
+                                        color: Colors.deepPurple,
+                                      )
+                                    : null,
+                              ),
+                              title: Text(
+                                friend['username'] ?? '',
+                                style: const TextStyle(
+                                  fontFamily: 'Mulish',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "${friend['score'] ?? 0}",
                                     style: const TextStyle(
                                       fontFamily: 'Mulish',
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
+                                      color: Colors.black,
                                     ),
                                   ),
-                                ),
-                              ],
-                            );
-                          }),
+                                  const SizedBox(width: 4),
+                                  Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      // contour noir
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.black,
+                                        size:
+                                            20, // légèrement plus grand que l'icône jaune
+                                      ),
+                                      // étoile principale
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 18,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
                 ),
               ],
-            )
-
-
-
-
-
+            ),
           ],
         ),
       ),
