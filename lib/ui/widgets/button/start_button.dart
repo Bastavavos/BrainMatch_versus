@@ -9,12 +9,14 @@ class StartButton extends ConsumerStatefulWidget {
   final Color buttonColor;
   final String mode;
   final String categoryId;
+  final String categoryName;
 
   const StartButton({
     super.key,
     required this.buttonColor,
     required this.mode,
     required this.categoryId,
+    required this.categoryName,
   });
 
   @override
@@ -47,7 +49,7 @@ class _StartButtonState extends ConsumerState<StartButton> with SingleTickerProv
 
     final Widget destination = widget.mode == 'Solo'
         ? SoloRouter(categoryId: widget.categoryId, token: token)
-        : VersusRouter(categoryId: widget.categoryId, token: token);
+        : VersusRouter(categoryId: widget.categoryId, token: token, categoryName: widget.categoryName,);
 
     Navigator.pushReplacement(
       context,

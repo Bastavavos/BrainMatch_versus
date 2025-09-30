@@ -2,6 +2,7 @@ import 'package:brain_match/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../provider/background_music_provider.dart';
 import '../../../provider/user_provider.dart';
 import '../../widgets/arrow.dart';
 
@@ -45,6 +46,11 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
 
     _imageController.forward();
     _textController.forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final musicController = ref.read(backgroundMusicProvider.notifier);
+      musicController.playMusic();
+    });
   }
 
   @override
