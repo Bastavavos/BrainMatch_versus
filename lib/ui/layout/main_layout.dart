@@ -38,11 +38,11 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
           padding: const EdgeInsets.only(left: 20),
           child: Image.asset(
             'assets/images/logo.png',
-            height: 60,
+            height: 30,
           ),
         ),
         title: Image.asset(
-          'assets/images/title.png',
+          'assets/images/new_logo.png',
           height: 70,
           fit: BoxFit.contain,
         ),

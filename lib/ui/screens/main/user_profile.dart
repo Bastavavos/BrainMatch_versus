@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../service/api_service.dart';
 import '../../../provider/user_provider.dart';
 import '../../theme.dart';
+import '../../widgets/user_profile/score_progress_bar.dart';
 import '../../widgets/user_profile/user_profile_card.dart';
 import '../../widgets/user_profile/profile_friend.dart';
 
@@ -21,6 +22,28 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   bool _isLoading = true;
   String? _error;
   List<Map<String, dynamic>> _friendsData = [];
+
+  Widget _getFriendScoreImage(int score) {
+    if (score < 50) {
+      return Image.asset(
+        'assets/images/bronze_rank.png',
+        width: 24,
+        height: 24,
+      );
+    } else if (score < 100) {
+      return Image.asset(
+        'assets/images/plat_rank.png',
+        width: 24,
+        height: 24,
+      );
+    } else {
+      return Image.asset(
+        'assets/images/gold_rank.png',
+        width: 24,
+        height: 24,
+      );
+    }
+  }
 
   Future<void> _fetchFriendsData(List<String> friendIds, String? token) async {
     List<Map<String, dynamic>> friends = [];
@@ -107,6 +130,10 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
         child: Column(
           children: [
             const SizedBox(height: 24),
+            ScoreProgressBar(
+              score: user.score ?? 0,
+            ),
+            const SizedBox(height: 28),
             UserProfileCard(
               user: user,
               token: token,
@@ -114,7 +141,6 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                 // Ajoute ici la logique de déconnexion si nécessaire
               },
             ),
-
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -194,12 +220,7 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                                         size:
                                             20, // légèrement plus grand que l'icône jaune
                                       ),
-                                      // étoile principale
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                        size: 18,
-                                      ),
+                                      _getFriendScoreImage(friend['score'] ?? 0),
                                     ],
                                   ),
                                 ],
