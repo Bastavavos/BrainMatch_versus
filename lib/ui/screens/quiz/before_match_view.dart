@@ -1,27 +1,28 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../provider/user_provider.dart';
 import '../../../service/api_service.dart';
+import '../../layout/special_layout.dart';
 import '../../theme.dart';
 
-class BeforeMatchView extends StatefulWidget {
+class BeforeMatchView extends ConsumerStatefulWidget {
   final Map<String, dynamic> opponent;
 
-  const BeforeMatchView({
-    super.key,
-    required this.opponent,
-  });
+  const BeforeMatchView({super.key, required this.opponent});
 
   @override
-  State<BeforeMatchView> createState() => _BeforeMatchViewState();
+  ConsumerState<BeforeMatchView> createState() => _BeforeMatchViewState();
 }
 
-class _BeforeMatchViewState extends State<BeforeMatchView>
+class _BeforeMatchViewState extends ConsumerState<BeforeMatchView>
     with SingleTickerProviderStateMixin {
   int countdown = 3;
   late Timer _timer;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
+  late String? opponentPicture;
+
 
   @override
   void initState() {
@@ -35,6 +36,12 @@ class _BeforeMatchViewState extends State<BeforeMatchView>
     _scaleAnimation = Tween<double>(begin: 0.7, end: 1.3).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+
+    final String? picturePath = widget.opponent['picture'];
+    opponentPicture = (picturePath != null && picturePath.isNotEmpty)
+        ? Uri.parse(ApiService.baseUrl).resolve(picturePath).toString()
+        : null;
+
 
     _startCountdown();
   }
@@ -63,72 +70,98 @@ class _BeforeMatchViewState extends State<BeforeMatchView>
     super.dispose();
   }
 
+  Widget _buildPlayer(String name, String? pictureUrl) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundColor: AppColors.light,
+          backgroundImage: (pictureUrl != null && pictureUrl.isNotEmpty)
+              ? NetworkImage(pictureUrl)
+              : null,
+          child: (pictureUrl == null || pictureUrl.isEmpty)
+              ? const Icon(Icons.person, size: 70, color: AppColors.primary)
+              : null,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          name,
+          style: const TextStyle(
+            fontFamily: 'Luckiest Guy',
+            fontSize: 30,
+            color: AppColors.accent,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final opponentName = widget.opponent['username'] ?? "Adversaire";
-    final picturePath = widget.opponent['picture'] as String?;
+    final user = ref.watch(currentUserProvider);
+    final String userName = user?.username ?? 'Anonyme';
+    final String? userPicture = user?.picture;
+    final String opponentName = widget.opponent['username'] ?? "Adversaire";
 
-    final String? imageUrl = (picturePath != null && picturePath.isNotEmpty)
-        ? Uri.parse(ApiService.baseUrl)
-        .resolve('$picturePath?cb=${DateTime.now().millisecondsSinceEpoch}')
-        .toString()
-        : null;
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.height < 600;
 
-    return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: SafeArea(
-        child: Center(
+    return SpeLayout(
+      child: Container(
+        color: AppColors.primary,
+        child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                "Adversaire trouvé !",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.accent,
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 110),
 
-              // ✅ Avatar avec fallback
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: AppColors.light,
-                backgroundImage: imageUrl != null
-                    ? CachedNetworkImageProvider(imageUrl)
-                    : null,
-                child: imageUrl == null
-                    ? Text(
-                  opponentName.isNotEmpty
-                      ? opponentName[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    fontSize: 30,
-                    color: AppColors.primary,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  "Adversaire trouvé !",
+                  style: TextStyle(
+                    fontFamily: 'Luckiest Guy',
+                    fontSize: isSmallScreen ? 24 : 30,
+                    color: AppColors.background,
                   ),
-                )
-                    : null,
+                  textAlign: TextAlign.center,
+                ),
               ),
 
-              const SizedBox(height: 12),
-              Text(
-                opponentName,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+              const Spacer(flex: 1),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _buildPlayer(userName, userPicture),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    const Text(
+                      'VS',
+                      style: TextStyle(
+                        fontFamily: 'Luckiest Guy',
+                        fontSize: 40,
+                        color: AppColors.background,
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: _buildPlayer(opponentName, opponentPicture),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 32),
-              const Text(
-                "Prépare-toi au duel !",
-                style: TextStyle(
-                  color: AppColors.secondaryAccent,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 48),
+
+              const Spacer(flex: 1),
 
               AnimatedBuilder(
                 animation: _scaleAnimation,
@@ -137,15 +170,17 @@ class _BeforeMatchViewState extends State<BeforeMatchView>
                     scale: _scaleAnimation.value,
                     child: Text(
                       '$countdown',
-                      style: const TextStyle(
-                        fontSize: 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                      style: TextStyle(
+                        fontFamily: 'Luckiest Guy',
+                        fontSize: isSmallScreen ? 48 : 64,
+                        color: AppColors.accent,
                       ),
                     ),
                   );
                 },
               ),
+
+              const SizedBox(height: 110),
             ],
           ),
         ),
