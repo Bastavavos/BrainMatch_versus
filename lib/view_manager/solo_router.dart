@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:brain_match/provider/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/user.dart';
 import '../network/socket_manager.dart';
 import '../ui/widgets/error_view.dart';
 import '../ui/screens/quiz/question_view.dart';
@@ -19,7 +22,7 @@ class SoloEvent {
   SoloEvent({required this.state, this.data});
 }
 
-class SoloRouter extends StatefulWidget {
+class SoloRouter extends ConsumerStatefulWidget {
   final String token;
   final String categoryId;
 
@@ -30,10 +33,10 @@ class SoloRouter extends StatefulWidget {
   });
 
   @override
-  State<SoloRouter> createState() => _SoloRouterState();
+  ConsumerState<SoloRouter> createState() => _SoloRouterState();
 }
 
-class _SoloRouterState extends State<SoloRouter> {
+class _SoloRouterState extends ConsumerState<SoloRouter> {
   final _controller = StreamController<SoloEvent>.broadcast();
   late final SocketClient _socket;
 
@@ -45,6 +48,11 @@ class _SoloRouterState extends State<SoloRouter> {
 
   String? selectedAnswer;
   String? correctAnswer;
+  Map<String, dynamic>? currentQuestion;
+
+  List<Map<String, dynamic>> playerQuestions = [];
+
+  // On ne stocke plus username et image ici, on les récupère dans build
 
   @override
   void initState() {
@@ -67,6 +75,8 @@ class _SoloRouterState extends State<SoloRouter> {
           timeLeft = 120;
           selectedAnswer = null;
           correctAnswer = null;
+          playerQuestions = [];
+          currentQuestion = null;
         });
         startTimer();
 
@@ -82,6 +92,7 @@ class _SoloRouterState extends State<SoloRouter> {
           timeLeft = 120;
           selectedAnswer = null;
           correctAnswer = null;
+          currentQuestion = data['question'] as Map<String, dynamic>?;
         });
         startTimer();
 
@@ -96,12 +107,37 @@ class _SoloRouterState extends State<SoloRouter> {
         setState(() {
           correctAnswer = data['correctAnswer'];
         });
+
+        if (currentQuestion != null && selectedAnswer != null) {
+          playerQuestions.add({
+            "question": currentQuestion,
+            "answer": selectedAnswer,
+            "correct": selectedAnswer == data['correctAnswer'],
+          });
+        }
       },
       onGameOver: (data) {
         countdownTimer?.cancel();
         if (!mounted) return;
 
-        _controller.add(SoloEvent(state: SoloState.result, data: data));
+        // On récupère l'user au moment du gameOver
+        final user = ref.read(currentUserProvider);
+        final username = user?.username ?? '';
+        final imageUrl = user?.picture ?? '';
+
+        final resultData = {
+          "score": data['score'],
+          "totalQuestions": totalQuestions,
+          "players": [
+            {
+              "username": username,
+              "image": imageUrl,
+              "questions": playerQuestions,
+            }
+          ]
+        };
+
+        _controller.add(SoloEvent(state: SoloState.result, data: resultData));
       },
       onOpponentLeft: (_) {},
     );
@@ -123,14 +159,10 @@ class _SoloRouterState extends State<SoloRouter> {
       if (remaining <= Duration.zero) {
         timer.cancel();
         if (!mounted) return;
-        setState(() {
-          timeLeft = 0;
-        });
+        setState(() => timeLeft = 0);
       } else {
         if (!mounted) return;
-        setState(() {
-          timeLeft = remaining.inMilliseconds.toDouble();
-        });
+        setState(() => timeLeft = remaining.inMilliseconds.toDouble());
       }
     });
   }
@@ -145,6 +177,11 @@ class _SoloRouterState extends State<SoloRouter> {
 
   @override
   Widget build(BuildContext context) {
+    // Ici on récupère le user **en direct** depuis le provider
+    final user = ref.watch(currentUserProvider);
+    final username = user?.username ?? '';
+    final imageUrl = user?.picture ?? '';
+
     return StreamBuilder<SoloEvent>(
       stream: _controller.stream,
       builder: (context, snapshot) {
@@ -155,7 +192,6 @@ class _SoloRouterState extends State<SoloRouter> {
         final event = snapshot.data!;
 
         switch (event.state) {
-
           case SoloState.question:
             return QuestionView(
               questionData: event.data['question'],
@@ -166,6 +202,8 @@ class _SoloRouterState extends State<SoloRouter> {
               correctAnswer: correctAnswer,
               onAnswer: (answer) {
                 if (!mounted) return;
+                selectedAnswer = answer;
+
                 setState(() {
                   selectedAnswer = answer;
                 });
@@ -179,7 +217,14 @@ class _SoloRouterState extends State<SoloRouter> {
             );
 
           case SoloState.result:
-            return ResultView(resultData: event.data);
+          // On remplace username et image dans resultData si besoin
+            final resultData = Map<String, dynamic>.from(event.data);
+            if (resultData['players'] != null && resultData['players'] is List) {
+              resultData['players'][0]['username'] = username;
+              resultData['players'][0]['image'] = imageUrl;
+            }
+
+            return ResultView(resultData: resultData);
 
           case SoloState.error:
             return ErrorView(message: event.data);

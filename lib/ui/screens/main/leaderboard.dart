@@ -2,6 +2,7 @@ import 'package:brain_match/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../provider/user_provider.dart';
+import '../../widgets/leaderboard/SearchBarWidget.dart';
 import '../../widgets/leaderboard/podium_user_widget.dart';
 import '../../widgets/leaderboard/user_widget.dart';
 
@@ -13,6 +14,8 @@ class LeaderboardScreen extends ConsumerStatefulWidget {
 }
 
 class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
+  String _searchQuery = "";
+
   @override
   void initState() {
     super.initState();
@@ -21,7 +24,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       final userViewModel = ref.read(userViewModelProvider);
       final user = ref.read(currentUserProvider);
       await ref.read(currentUserProvider.notifier).refreshUser(ref);
-      if (user != null ) {
+      if (user != null) {
         await userViewModel.fetchCurrentUser(user.id);
       }
       await userViewModel.fetchUsers();
@@ -56,6 +59,12 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     final podiumUsers = viewModel.users.take(3).toList();
     final otherUsers = viewModel.users.skip(3).toList();
 
+    // ✅ filtrer les utilisateurs en fonction de la recherche
+    final filteredUsers = otherUsers.where((user) {
+      final username = user.username.toLowerCase();
+      return username.contains(_searchQuery.toLowerCase());
+    }).toList();
+
     final currentUser = ref.watch(currentUserProvider);
     if (currentUser == null) {
       return const Center(child: Text("Utilisateur non trouvé"));
@@ -63,39 +72,38 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
     return CustomScrollView(
       slivers: <Widget>[
+
+        SliverToBoxAdapter(child: _buildPodium(context, podiumUsers)),
+
+        // ✅ Barre de recherche
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 52.0, 16.0, 24.0),
-            child: Text(
-              'Leader board',
-              style: TextStyle(
-                  fontFamily: 'Luckiest Guy',
-                  fontSize: 30.0,
-                  color: AppColors.primary
-              ),
-              textAlign: TextAlign.center,
-            ),
+          child: SearchBarWidget(
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
           ),
         ),
-        SliverToBoxAdapter(child: _buildPodium(context, podiumUsers)),
-        if (otherUsers.isNotEmpty)
+
+        if (filteredUsers.isNotEmpty)
           SliverPadding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+            padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 5.0),
             sliver: SliverToBoxAdapter(
               child: Divider(color: Colors.grey[400], thickness: 2),
             ),
           ),
+
+        // ✅ Liste filtrée
         SliverList(
           delegate: SliverChildBuilderDelegate(
                 (context, index) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                child: UserWidget(
-                  user: otherUsers[index],
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                child: UserWidget(user: filteredUsers[index]),
               );
             },
-            childCount: otherUsers.length,
+            childCount: filteredUsers.length,
           ),
         ),
       ],
@@ -108,60 +116,93 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     double getHeightForRank(int rank) {
       switch (rank) {
         case 0:
-          return 230.0;
-        case 1:
           return 200.0;
-        case 2:
+        case 1:
           return 170.0;
+        case 2:
+          return 150.0;
         default:
           return 100.0;
       }
     }
 
+    // organisation podium (2-1-3)
     List<dynamic> orderedPodiumUsers = [];
     if (podiumUsers.length > 1) orderedPodiumUsers.add(podiumUsers[1]);
     if (podiumUsers.isNotEmpty) orderedPodiumUsers.add(podiumUsers[0]);
     if (podiumUsers.length > 2) orderedPodiumUsers.add(podiumUsers[2]);
     if (podiumUsers.length == 1) orderedPodiumUsers = [podiumUsers[0]];
-    if (podiumUsers.length == 2) orderedPodiumUsers = [podiumUsers[1], podiumUsers[0]];
+    if (podiumUsers.length == 2) {
+      orderedPodiumUsers = [podiumUsers[1], podiumUsers[0]];
+    }
+
+    const double horizontalPadding = 16.0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: List.generate(orderedPodiumUsers.length, (indexInRow) {
-          final user = orderedPodiumUsers[indexInRow];
-          final originalRank = podiumUsers.indexOf(user);
-          final color = _getRankColor(originalRank);
-          final trophyIcon = _getTrophyIcon(originalRank);
-          final currentUser = ref.watch(currentUserProvider);
-          if (currentUser == null) {
-            return const SizedBox(); // ou un Container vide si tu veux juste ignorer
-          }
-          return PodiumUserWidget(
-            user: user,
-            currentUser: currentUser,
-            rank: originalRank,
-            height: getHeightForRank(originalRank),
-            color: color,
-            trophyIcon: trophyIcon,
-          );
-        }),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: horizontalPadding),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: 240,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // 2ème place (gauche)
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: PodiumUserWidget(
+                  user: podiumUsers.length > 1 ? podiumUsers[1] : podiumUsers[0],
+                  currentUser: ref.watch(currentUserProvider)!,
+                  rank: podiumUsers.length > 1 ? 1 : 0,
+                  height: getHeightForRank(podiumUsers.length > 1 ? 1 : 0),
+                  color: _getRankColor(podiumUsers.length > 1 ? 1 : 0),
+                  trophyIcon: _getTrophyIcon(podiumUsers.length > 1 ? 1 : 0),
+                  trophyColor: _getRankColor(podiumUsers.length > 1 ? 1 : 0),
+                ),
+              ),
+            ),
+
+            // 1ère place (centre)
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: PodiumUserWidget(
+                  user: podiumUsers[0],
+                  currentUser: ref.watch(currentUserProvider)!,
+                  rank: 0,
+                  height: getHeightForRank(0),
+                  color: _getRankColor(0),
+                  trophyIcon: _getTrophyIcon(0),
+                  trophyColor: _getRankColor(0),
+                ),
+              ),
+            ),
+
+            // 3ème place (droite)
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: PodiumUserWidget(
+                  user: podiumUsers.length > 2
+                      ? podiumUsers[2]
+                      : podiumUsers[0],
+                  currentUser: ref.watch(currentUserProvider)!,
+                  rank: podiumUsers.length > 2 ? 2 : (podiumUsers.length > 1 ? 1 : 0),
+                  height: getHeightForRank(podiumUsers.length > 2 ? 2 : (podiumUsers.length > 1 ? 1 : 0)),
+                  color: _getRankColor(podiumUsers.length > 2 ? 2 : (podiumUsers.length > 1 ? 1 : 0)),
+                  trophyIcon: _getTrophyIcon(podiumUsers.length > 2 ? 2 : (podiumUsers.length > 1 ? 1 : 0)),
+                  trophyColor: _getRankColor(podiumUsers.length > 2 ? 2 : (podiumUsers.length > 1 ? 1 : 0)),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   IconData? _getTrophyIcon(int rank) {
-    switch (rank) {
-      case 0:
-        return Icons.emoji_events;
-      case 1:
-        return Icons.military_tech;
-      case 2:
-        return Icons.star_border;
-      default:
-        return null;
-    }
+    return Icons.emoji_events;
   }
 }

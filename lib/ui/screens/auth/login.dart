@@ -1,13 +1,57 @@
+import 'dart:convert';
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../provider/background_music_provider.dart';
 import '../../../provider/user_provider.dart';
 import '../../widgets/button/form_button.dart';
+
+/// Petit widget utilitaire pour appliquer l'effet "glass" autour d'un enfant.
+class GlassContainer extends StatelessWidget {
+  final Widget child;
+  final BorderRadius borderRadius;
+  final EdgeInsets padding;
+  final Color? borderColor;
+  final double blurSigma;
+  final Color backgroundColor;
+
+  const GlassContainer({
+    super.key,
+    required this.child,
+    this.borderRadius = const BorderRadius.all(Radius.circular(8)),
+    this.padding = const EdgeInsets.all(6),
+    this.borderColor,
+    this.blurSigma = 8.0,
+    this.backgroundColor = const Color.fromRGBO(255, 255, 255, 0.06),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveBorderColor =
+        borderColor ?? Theme.of(context).colorScheme.primary.withOpacity(0.18);
+
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: borderRadius,
+            border: Border.all(color: effectiveBorderColor, width: 1.0),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -79,106 +123,178 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 40),
-                        Image.asset(
-                          'assets/images/himmel.png',
-                          height: 240,
-                        ),
-                        const SizedBox(height: 40),
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              TextFormField(
-                                controller: _identifierController,
-                                textInputAction: TextInputAction.next,
-                                decoration: _buildInputDecoration(context, 'Pseudo ou Email :'),
-                                validator: (value) => value == null || value.isEmpty
-                                    ? 'Veuillez entrer un email'
-                                    : null,
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: _passwordController,
-                                obscureText: true,
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _login(),
-                                decoration: _buildInputDecoration(context, 'Mot de passe :'),
-                                validator: (value) => value == null || value.isEmpty
-                                    ? 'Veuillez entrer un mot de passe'
-                                    : null,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        if (_errorMessage != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                          ),
-                        const Spacer(),
-                        FormButton(
-                          label: _isLoading ? 'Connexion...' : 'Connexion',
-                          icon: Icons.power_settings_new,
-                          onPressed: _isLoading ? null : _login,
-                        ),
-                        const SizedBox(height: 24),
-                        FormButton(
-                          label: "Créer un compte",
-                          icon: Icons.group_add,
-                          onPressed: _isLoading
-                              ? null
-                              : () {
-                            Navigator.pushNamed(context, '/register');
-                          },
-                        ),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   InputDecoration _buildInputDecoration(BuildContext context, String label) {
     final primaryColor = Theme.of(context).colorScheme.primary;
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: primaryColor),
-      border: OutlineInputBorder(
+      enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: primaryColor.withOpacity(0.6), width: 1.2),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: primaryColor),
         borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: primaryColor, width: 1.6),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.black),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      filled: false, // important : on laisse GlassContainer gérer le background
+    );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final primary = colorScheme.primary;
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // --------- Fond plein écran (derrière tout, y compris status bar + bas) ----------
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/fond-1.webp',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+          ),
+
+          // léger overlay pour lisibilité (optionnel)
+          Positioned.fill(
+            child: Container(color: Colors.black.withOpacity(0.08)),
+          ),
+
+          // --------- Contenu : formulaire centré (scrollable si clavier) ----------
+          Center(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min, // centre verticalement
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 40),
+                      // logo supprimé (espace conservé)
+                      const SizedBox(height: 40),
+
+                      // Formulaire (inputs with glass)
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            // Identifiant
+                            GlassContainer(
+                              borderRadius: BorderRadius.circular(10),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              borderColor: primary.withOpacity(0.2),
+                              blurSigma: 6.0,
+                              backgroundColor: Colors.white.withOpacity(0.85), // <- blanc opaque
+                              child: TextFormField(
+                                controller: _identifierController,
+                                textInputAction: TextInputAction.next,
+                                decoration: _buildInputDecoration(context, 'Pseudo ou Email :'),
+                                validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer un email' : null,
+                                style: TextStyle(color: primary), // <- texte primary
+                              ),
+                            ),
+
+
+                            const SizedBox(height: 16),
+
+                            // Mot de passe
+                            GlassContainer(
+                              borderRadius: BorderRadius.circular(10),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              borderColor: primary.withOpacity(0.2),
+                              blurSigma: 6.0,
+                              backgroundColor: Colors.white.withOpacity(0.85), // <- blanc opaque
+                              child: TextFormField(
+                                controller: _passwordController,
+                                textInputAction: TextInputAction.next,
+                                decoration: _buildInputDecoration(context, 'Pseudo ou Email :'),
+                                validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer un email' : null,
+                                style: TextStyle(color: primary), // <- texte primary
+                              ),
+                            ),
+
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(color: Colors.black), // <- noir
+                          ),
+                        ),
+
+                      const SizedBox(height: 18),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // --------- Boutons ancrés en bas avec légère marge ----------
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 12 + MediaQuery.of(context).padding.bottom, // marge légère + SafeArea
+            child: SafeArea(
+              top: false,
+              bottom: true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 560),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: FormButton(
+                          label: _isLoading ? 'Connexion...' : 'Connexion',
+                          icon: Icons.power_settings_new,
+                          onPressed: _isLoading ? null : _login,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FormButton(
+                          label: "Créer un compte",
+                          icon: Icons.group_add,
+                          onPressed: _isLoading ? null : () => Navigator.pushNamed(context, '/register'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

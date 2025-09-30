@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../view_manager/ia_router.dart';
 import '../../layout/special_layout.dart';
-import 'package:flutter/material.dart';
-import '../../../view_manager/ia_router.dart';
-import '../../layout/special_layout.dart';
+
 
 class QuizIaThemePage extends StatefulWidget {
   final String token;
@@ -80,15 +78,21 @@ class _QuizIaThemePageState extends State<QuizIaThemePage> {
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
+                              fontSize: 25
                             ),
                           ),
                           const SizedBox(height: 24),
                           TextField(
                             controller: controller,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20
+                            ),
                             decoration: InputDecoration(
                               hintText: 'Ex : mythologie, sport, cinéma...',
-                              hintStyle: const TextStyle(color: Colors.white70),
+                              hintStyle: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 20),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.2),
                               contentPadding:

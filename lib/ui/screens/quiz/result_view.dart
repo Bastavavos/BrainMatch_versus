@@ -7,107 +7,163 @@ class ResultView extends StatelessWidget {
   const ResultView({super.key, required this.resultData});
 
   String _getImageForScore(int score) {
-    if (score <= 4) {
-      return 'assets/images/himmel_lose.webp';
-    } else if (score <= 7) {
-      return 'assets/images/himmel_average.webp';
-    } else {
-      return 'assets/images/himmel_win.png';
-    }
+    if (score <= 4) return 'assets/images/himmel_lose.webp';
+    if (score <= 7) return 'assets/images/himmel_average.webp';
+    return 'assets/images/himmel_win.png';
   }
 
-  Widget buildCenteredResult({
-    required int score,
-    required int totalQuestions,
-    String? playerName,
-  }) {
-    return Stack(
+  Widget buildPlayerCard(Map<String, dynamic> player, int totalQuestions) {
+    final username = player['username'] ?? 'Joueur';
+    final image = player['image'] ?? '';
+    final score = player['score'] ?? 0;
+
+    return Column(
       children: [
-        // Image de fond avec assombrissement
-        Positioned.fill(
-          child: Image.asset(
-            _getImageForScore(score),
-            fit: BoxFit.cover,
-            color: Colors.black.withOpacity(0.5), // filtre sombre
-            colorBlendMode: BlendMode.darken,
-          ),
+        CircleAvatar(
+          backgroundImage: image.isNotEmpty ? NetworkImage(image) : null,
+          radius: 40,
+          child: image.isEmpty ? const Icon(Icons.person, size: 40) : null,
         ),
-        // Contenu principal
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (playerName != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    playerName,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // texte lisible
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 20),
-              Text(
-                '$score / $totalQuestions',
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // texte lisible
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 4,
-                      color: Colors.black87,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
-          ),
+        const SizedBox(height: 8),
+        Text(
+          username,
+          style: const TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '$score / $totalQuestions',
+          style: const TextStyle(fontSize: 16, color: Colors.white),
         ),
       ],
     );
   }
 
+  Widget buildQuestionHistory(List<dynamic>? questions) {
+    if (questions == null || questions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: questions.map((q) {
+        final qMap = q as Map<String, dynamic>;
+
+        final questionText = (qMap['question'] is String)
+            ? qMap['question']
+            : (qMap['question']?['question'] ?? 'Question inconnue');
+
+        final answer = qMap['answer'] ?? '---';
+        final correct = qMap['correct'] == true;
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: correct
+                ? Colors.green.withOpacity(0.2)
+                : Colors.red.withOpacity(0.2),
+            border: Border.all(color: correct ? Colors.green : Colors.red),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                questionText,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Réponse : $answer ${correct ? "(✓)" : "(✗)"}',
+                style: const TextStyle(fontSize: 15, color: Colors.white70),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final scores = resultData['scores'] as Map<String, dynamic>?;
-    final soloScore = resultData['score'] as int?;
-    final totalQuestions = resultData['totalQuestions'] as int?;
+    final int? soloScore = resultData['score'] as int?;
+    final int? totalQuestions = resultData['totalQuestions'] as int?;
+    final List<dynamic>? players = resultData['players'] as List<dynamic>?;
+
+    // Normalisation : VersusRouter envoie players = [currentPlayer, opponentPlayer]
+    final List<Map<String, dynamic>> normalizedPlayers = (players ?? [])
+        .whereType<Map<String, dynamic>>()
+        .toList();
+
+    final bool isVersus = normalizedPlayers.length >= 2;
+
+    // Image de fond : dépend de ton score si dispo
+    final int scoreForBackground = soloScore ??
+        (normalizedPlayers.isNotEmpty
+            ? (normalizedPlayers.first['score'] ?? 0)
+            : 0);
+    final imagePath = _getImageForScore(scoreForBackground);
 
     return SpeLayout(
-      child: (scores != null && totalQuestions != null)
-          ? ListView(
-        padding: const EdgeInsets.all(0),
-        children: scores.entries.map((entry) {
-          final playerName = entry.key;
-          final playerScore = entry.value as int;
-          return SizedBox(
-            height: MediaQuery.of(context).size.height,
-            child: buildCenteredResult(
-              score: playerScore,
-              totalQuestions: totalQuestions,
-              playerName: playerName,
+      child: Stack(
+        children: [
+          if (imagePath.isNotEmpty)
+            Positioned.fill(
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                color: Colors.black.withOpacity(0.5),
+                colorBlendMode: BlendMode.darken,
+              ),
             ),
-          );
-        }).toList(),
-      )
-          : (soloScore != null && totalQuestions != null)
-          ? SizedBox.expand(
-        child: buildCenteredResult(
-          score: soloScore,
-          totalQuestions: totalQuestions,
-        ),
-      )
-          : const Center(
-        child: Text(
-          'Score indisponible.',
-          style: TextStyle(fontSize: 18),
-        ),
+
+          if (totalQuestions != null)
+            ListView(
+              padding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              children: [
+                // Mode SOLO / IA -> juste ton score
+                if (!isVersus && soloScore != null)
+                  Center(
+                    child: Text(
+                      '$soloScore / $totalQuestions',
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+
+                // Mode VERSUS -> les 2 joueurs affichés en haut
+                if (isVersus) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: normalizedPlayers
+                        .map((p) => buildPlayerCard(p, totalQuestions))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 30),
+                ],
+
+                // Historique de ton joueur courant (toujours premier dans la liste)
+                buildQuestionHistory(
+                  (normalizedPlayers.isNotEmpty
+                      ? normalizedPlayers.first['questions']
+                      : null)
+                  as List<dynamic>?,
+                ),
+              ],
+            )
+          else
+            const Center(
+              child: Text('Score indisponible.',
+                  style: TextStyle(fontSize: 18, color: Colors.white)),
+            ),
+        ],
       ),
     );
   }
