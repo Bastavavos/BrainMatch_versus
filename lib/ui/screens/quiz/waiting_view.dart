@@ -1,10 +1,15 @@
+import 'dart:async';
+
+import 'package:brain_match/ui/layout/special_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../provider/user_provider.dart';
 import '../../theme.dart';
 
 class WaitingView extends ConsumerStatefulWidget {
-  const WaitingView({super.key});
+  final String categoryName;
+
+  const WaitingView({super.key, required this.categoryName});
 
   @override
   ConsumerState<WaitingView> createState() => _WaitingViewState();
@@ -12,23 +17,22 @@ class WaitingView extends ConsumerStatefulWidget {
 
 class _WaitingViewState extends ConsumerState<WaitingView>
     with SingleTickerProviderStateMixin {
-  late AnimationController _dotsController;
-  late Animation<int> _dotAnimation;
+  int secondsLeft = 0;
+  late Timer timer;
 
   @override
   void initState() {
     super.initState();
-    _dotsController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..repeat();
-
-    _dotAnimation = IntTween(begin: 0, end: 3).animate(_dotsController);
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        secondsLeft++;
+      });
+    });
   }
 
   @override
   void dispose() {
-    _dotsController.dispose();
+    timer.cancel();
     super.dispose();
   }
 
@@ -37,22 +41,22 @@ class _WaitingViewState extends ConsumerState<WaitingView>
       mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
-          radius: 40,
+          radius: 50,
           backgroundColor: AppColors.light,
           backgroundImage: (pictureUrl != null && pictureUrl.isNotEmpty)
               ? NetworkImage(pictureUrl)
               : null,
           child: (pictureUrl == null || pictureUrl.isEmpty)
-              ? const Icon(Icons.person, size: 40, color: AppColors.primary)
+              ? const Icon(Icons.person, size: 70, color: AppColors.primary)
               : null,
         ),
         const SizedBox(height: 8),
         Text(
           name,
           style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
+            fontFamily: 'Luckiest Guy',
+            fontSize: 30,
+            color: AppColors.accent,
           ),
         ),
       ],
@@ -62,46 +66,85 @@ class _WaitingViewState extends ConsumerState<WaitingView>
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
-    final String username = user?.username ?? 'Joueur';
+    final String username = user?.username ?? 'Anonyme';
     final String? pictureUrl = user?.picture;
 
-    return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: SafeArea(
-        child: Center(
+    return SpeLayout(
+      child: Container(
+        color: AppColors.primary,
+        child: SafeArea(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              _buildPlayer(username, pictureUrl),
-              const SizedBox(height: 16),
+              const SizedBox(height: 110),
+              const Text(
+                "Recherche d'un joueur",
+                style: TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 30,
+                  color: AppColors.background,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 5),
+
               Text(
-                username,
+                widget.categoryName,
                 style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 36,
+                  color: AppColors.accent,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const Spacer(flex: 1),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildPlayer(username, pictureUrl),
+
+                  const SizedBox(width: 40),
+
+                  const Text(
+                    'VS',
+                    style: TextStyle(
+                      fontFamily: 'Luckiest Guy',
+                      fontSize: 44,
+                      color: AppColors.background,
+                    ),
+                  ),
+
+                  const SizedBox(width: 44),
+
+                  Transform.translate(
+                    offset: const Offset(0, -26), // Ajuste cette valeur si besoin
+                    child: const SizedBox(
+                      height: 90,
+                      width: 90,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                ],
+              ),
+
+              const Spacer(flex: 1),
+
+              Text(
+                '$secondsLeft s',
+                style: const TextStyle(
+                  fontFamily: 'Mulish',
+                  fontSize: 30,
+                  color: AppColors.background,
                 ),
               ),
-              const SizedBox(height: 40),
-              AnimatedBuilder(
-                animation: _dotAnimation,
-                builder: (context, child) {
-                  String dots = '.' * _dotAnimation.value;
-                  return Text(
-                    'En attente d’un adversaire$dots',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.secondaryAccent,
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              const CircularProgressIndicator(
-                color: AppColors.accent,
-                strokeWidth: 3,
-              ),
+              const SizedBox(height: 110),
             ],
           ),
         ),

@@ -20,6 +20,7 @@ class SocketClient {
 
     _socket = IO.io(
       'http://192.168.1.93:3000',
+
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()

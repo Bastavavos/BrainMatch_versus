@@ -30,11 +30,13 @@ class VersusEvent {
 class VersusRouter extends ConsumerStatefulWidget {
   final String token;
   final String categoryId;
+  final String categoryName;
 
   const VersusRouter({
     super.key,
     required this.token,
     required this.categoryId,
+    required this.categoryName,
   });
 
   @override
@@ -316,7 +318,7 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
 
         switch (event.state) {
           case VersusState.waiting:
-            return const WaitingView();
+            return WaitingView(categoryName: widget.categoryName);
 
           case VersusState.beforeMatch:
             return BeforeMatchView(

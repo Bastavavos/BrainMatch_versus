@@ -82,6 +82,7 @@ class CategoryConfirmationPage extends ConsumerWidget {
                     buttonColor: primaryColor,
                     mode: mode,
                     categoryId: categoryId,
+                    categoryName: title,
                   ),
 
                   const SizedBox(height: 40), // marge sous le bouton
@@ -100,43 +101,6 @@ class CategoryConfirmationPage extends ConsumerWidget {
     return Image.network(
       imageUrl,
       fit: BoxFit.cover,
-    );
-  }
-
-  Widget _buildTitle(BuildContext context) {
-    return Center(
-      child: Text(
-        title,
-        style: TextStyle(
-          fontFamily: 'Luckiest Guy',
-          color: AppColors.accent,
-          fontSize: 50,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildDescriptionCard(BuildContext context, ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Card(
-        color: colorScheme.surface.withOpacity(0.9),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 3,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            description,
-            style: TextStyle(
-              fontFamily: 'Mulish',
-              color: AppColors.primary,
-              fontSize: 16,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
     );
   }
 }
