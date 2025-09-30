@@ -96,7 +96,6 @@ flutter:
     - assets/images/himmel_average.webp
     - assets/images/himmel_lose.webp
     - assets/images/himmel_ia.png
-    - assets/images/ia_logo.png
     - assets/images/launcher_icon.png
     - assets/images/bronze_rank.png
     - assets/images/silver_rank.png

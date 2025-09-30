@@ -223,13 +223,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                               borderColor: primary.withOpacity(0.2),
                               blurSigma: 6.0,
-                              backgroundColor: Colors.white.withOpacity(0.85), // <- blanc opaque
+                              backgroundColor: Colors.white.withOpacity(0.85),
                               child: TextFormField(
                                 controller: _passwordController,
-                                textInputAction: TextInputAction.next,
-                                decoration: _buildInputDecoration(context, 'Pseudo ou Email :'),
-                                validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer un email' : null,
-                                style: TextStyle(color: primary), // <- texte primary
+                                obscureText: true, // <-- masque le texte
+                                textInputAction: TextInputAction.done, // mieux que "next" ici
+                                decoration: _buildInputDecoration(context, 'Mot de passe :'),
+                                validator: (value) =>
+                                value == null || value.isEmpty ? 'Veuillez entrer un mot de passe' : null,
+                                style: TextStyle(color: primary),
                               ),
                             ),
 
