@@ -93,6 +93,7 @@ class _CategorySelectionPageState extends ConsumerState<CategorySelectionPage>
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     final token = ref.watch(tokenProvider);
@@ -122,7 +123,9 @@ class _CategorySelectionPageState extends ConsumerState<CategorySelectionPage>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 50),
+                          const SizedBox(
+                            height: 50,
+                          ),
 
                           FadeTransition(
                             opacity: _textOpacity,
@@ -135,6 +138,7 @@ class _CategorySelectionPageState extends ConsumerState<CategorySelectionPage>
                               ),
                             ),
                           ),
+
 
                           Center(
                             child: BouncingArrow(
@@ -150,7 +154,7 @@ class _CategorySelectionPageState extends ConsumerState<CategorySelectionPage>
                             final heroTag = 'category-logo-${category["_id"]}';
 
                             return Card(
-                              elevation: 1,
+                              elevation: 3,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -177,33 +181,32 @@ class _CategorySelectionPageState extends ConsumerState<CategorySelectionPage>
                                     ),
                                   );
                                 },
-                                child: SizedBox(
-                                  height: 80,
-                                  child: Stack(
-                                    alignment: Alignment.center,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
                                     children: [
-                                      // Logo à gauche
-                                      Positioned(
-                                        left: 16,
-                                        child: Hero(
-                                          tag: heroTag,
-                                          child: CircleAvatar(
-                                            radius: 24,
-                                            backgroundImage: NetworkImage(
-                                              category['logo'],
-                                            ),
-                                            backgroundColor: colorScheme.primary
-                                                .withOpacity(0.1),
+                                      Hero(
+                                        tag: heroTag,
+                                        child: CircleAvatar(
+                                          radius: 30,
+                                          backgroundImage: NetworkImage(
+                                            category['logo'],
                                           ),
+                                          backgroundColor: colorScheme.primary
+                                              .withOpacity(0.1),
                                         ),
                                       ),
-                                      Center(
+                                      const SizedBox(width: 20),
+                                      Expanded(
                                         child: Text(
                                           category['theme'],
                                           textAlign: TextAlign.center,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: 'Mulish',
-                                            fontSize: 18,
+                                            fontSize: 16,
                                             color: AppColors.primary,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -214,7 +217,7 @@ class _CategorySelectionPageState extends ConsumerState<CategorySelectionPage>
                                 ),
                               ),
                             );
-                          }),
+                          }).toList(),
                         ],
                       ),
                     ),

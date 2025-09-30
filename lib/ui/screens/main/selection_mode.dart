@@ -63,7 +63,7 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F5FD),
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -72,6 +72,7 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
             children: [
               SizedBox(height: screenHeight * 0.07),
 
+              // --- Animated Title ---
               FadeTransition(
                 opacity: _textOpacity,
                 child: Center(
@@ -94,7 +95,7 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
                 ),
               ),
 
-              SizedBox(height: screenHeight * 0.04),
+              SizedBox(height: screenHeight * 0.03),
 
               _buildModeCard(
                 context,
@@ -106,7 +107,7 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
                 height: screenHeight * 0.13,
               ),
 
-              SizedBox(height: screenHeight * 0.04),
+              SizedBox(height: screenHeight * 0.05),
 
               _buildModeCard(
                 context,
@@ -118,19 +119,19 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
                 height: screenHeight * 0.13,
               ),
 
-              SizedBox(height: screenHeight * 0.04),
+              SizedBox(height: screenHeight * 0.035),
 
               _buildModeCard(
                 context,
-                title: "Créer ton quiz",
-                imagePath: 'assets/images/himmel_2.png',
+                title: "Génère ton quiz",
+                imagePath: 'assets/images/ia_logo.png',
                 color: colorScheme.tertiary,
                 routeName: 'Ia',
                 token: token,
                 height: screenHeight * 0.13,
               ),
 
-              SizedBox(height: screenHeight * 0.07),
+              SizedBox(height: screenHeight * 0.06),
             ],
           ),
         ),
@@ -139,14 +140,14 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
   }
 
   Widget _buildModeCard(
-      BuildContext context, {
-        required String title,
-        required String imagePath,
-        required Color color,
-        required String routeName,
-        required String token,
-        required double height,
-      }) {
+    BuildContext context, {
+    required String title,
+    required String imagePath,
+    required Color color,
+    required String routeName,
+    required String token,
+    required double height,
+  }) {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: () {
@@ -158,6 +159,7 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
           );
           return;
         }
+
         Navigator.pushNamed(
           context,
           '/confirm',
@@ -177,29 +179,19 @@ class _SelectionModePageState extends ConsumerState<SelectionModePage>
             ),
           ],
         ),
-        child: Stack(
-          alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
           children: [
-            // Image alignée à gauche avec padding
-            Positioned(
-              left: 20,
-              child: Image.asset(
-                imagePath,
-                height: 60,
-                width: 60,
-                fit: BoxFit.contain,
-              ),
-            ),
-
-            Center(
+            Image.asset(imagePath, height: 60, width: 60, fit: BoxFit.contain),
+            const SizedBox(width: 20),
+            Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  fontFamily: 'Luckiest Guy',
-                  fontSize: 22.0,
-                  color: title == "Solo" ? AppColors.primary : AppColors.light,
+                    fontFamily: 'Luckiest Guy',
+                    fontSize: 20.0,
+                  color: title == "Solo" ? AppColors.primary : AppColors.light
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ],

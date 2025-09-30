@@ -82,6 +82,7 @@ class CategoryConfirmationPage extends ConsumerWidget {
                     buttonColor: primaryColor,
                     mode: mode,
                     categoryId: categoryId,
+                    categoryName: title,
                   ),
 
                   const SizedBox(height: 40), // marge sous le bouton
