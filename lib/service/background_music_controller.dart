@@ -10,17 +10,21 @@ class BackgroundMusicController extends StateNotifier<double> {
 
   BackgroundMusicController() : super(1.0);
 
-  /// Lancer la musique (à appeler après connexion réussie)
+
+  /// Lancer la musique (à appeler après connexion réussie ou sur SelectionModePage)
   Future<void> playMusic() async {
-    try {
-      await _player.setAsset('assets/audios/music.mp3'); // ton fichier
-      _player.setLoopMode(LoopMode.all);                 // boucle infinie
-      _player.setVolume(state);
-      _player.play();
-    } catch (e) {
-      print("Erreur lecture audio: $e");
+    if (!_player.playing) { // ✅ Ne joue que si ce n'est pas déjà en train de jouer
+      try {
+        await _player.setAsset('assets/audios/music2.mp3'); // ton fichier
+        _player.setLoopMode(LoopMode.all);                 // boucle infinie
+        _player.setVolume(state);
+        await _player.play();
+      } catch (e) {
+        print("Erreur lecture audio: $e");
+      }
     }
   }
+
 
   /// Stopper la musique (à appeler lors de la déconnexion)
   void stop() => _player.stop();

@@ -98,6 +98,7 @@ flutter:
     - assets/images/himmel_ia.png
     - assets/images/launcher_icon.png
     - assets/audios/music.mp3
+    - assets/audios/music2.mp3
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
