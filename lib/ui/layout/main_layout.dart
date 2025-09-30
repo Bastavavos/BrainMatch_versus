@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../provider/user_provider.dart';
+import '../screens/settings/settings_view.dart';
+import '../theme.dart';
 import '../widgets/nav_bar.dart';
 import '../screens/main/leaderboard.dart';
 import '../screens/main/selection_mode.dart';
@@ -25,31 +27,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     UserProfilePage()
   ];
 
-  Future<void> _logout() async {
-    final token = ref.read(tokenProvider);
-    final baseUrl = dotenv.env['API_KEY'];
 
-    if (token != null && baseUrl != null) {
-      try {
-        await http.post(
-          Uri.parse('$baseUrl/user/logout'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        );
-      } catch (e) {
-        debugPrint("Erreur logout: $e");
-      }
-    }
-
-    ref.read(currentUserProvider.notifier).setUser(null);
-    ref.read(tokenProvider.notifier).state = null;
-
-    if (context.mounted) {
-      Navigator.pushReplacementNamed(context, '/');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +51,14 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white, size: 28),
-              tooltip: 'Déconnexion',
-              onPressed: _logout,
+              icon: const Icon(Icons.settings, color: AppColors.background, size: 28),
+              tooltip: 'Settings',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                );
+              },
             ),
           ),
         ],

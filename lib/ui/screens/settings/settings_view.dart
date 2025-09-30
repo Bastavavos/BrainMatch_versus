@@ -9,6 +9,7 @@ import '../../../repositories/user_repository.dart';
 import '../../../service/api_service.dart';
 import '../../layout/special_layout.dart';
 import '../../theme.dart';
+import '../../../provider/background_music_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -42,6 +43,10 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Récupère l'état (volume) et le contrôleur
+    final volume = ref.watch(backgroundMusicProvider);
+    final musicController = ref.read(backgroundMusicProvider.notifier);
+
     return SpeLayout(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -74,7 +79,36 @@ class SettingsScreen extends ConsumerWidget {
               leading: Icon(Icons.collections_bookmark_rounded),
             ),
             const SizedBox(height: 12),
-            const Text("Sons",
+
+            ListTile(
+              leading: Icon(volume > 0 ? Icons.volume_up : Icons.volume_off),
+              title: const Text(
+                "Musique de fond",
+                style: TextStyle(fontFamily: 'Mulish'),
+              ),
+              subtitle: Slider(
+                value: volume,
+                min: 0,
+                max: 1,
+                divisions: 10,
+                label: (volume * 100).toInt().toString(),
+                onChanged: (val) => musicController.setVolume(val),
+              ),
+              trailing: IconButton(
+                icon: Icon(volume > 0 ? Icons.volume_mute : Icons.volume_up),
+                onPressed: () {
+                  if (volume > 0) {
+                    // mute total → slider se met à 0
+                    musicController.setVolume(0);
+                  } else {
+                    // si déjà à 0 → remet à un volume par défaut (ex : 0.5)
+                    musicController.setVolume(0.5);
+                  }
+                },
+              ),
+            ),
+
+            const Text("Help & Support",
                 style: TextStyle(
                     fontSize: 24,
                     color: AppColors.primary,
