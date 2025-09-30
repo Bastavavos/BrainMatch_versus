@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../service/api_service.dart';
 import '../../../provider/user_provider.dart';
 import '../../theme.dart';
+import '../../widgets/user_profile/score_progress_bar.dart';
 import '../../widgets/user_profile/user_profile_card.dart';
 import '../../widgets/user_profile/profile_friend.dart';
 
@@ -21,6 +22,28 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   bool _isLoading = true;
   String? _error;
   List<Map<String, dynamic>> _friendsData = [];
+
+  Widget _getFriendScoreImage(int score) {
+    if (score < 50) {
+      return Image.asset(
+        'assets/images/bronze_rank.png',
+        width: 24,
+        height: 24,
+      );
+    } else if (score < 100) {
+      return Image.asset(
+        'assets/images/plat_rank.png',
+        width: 24,
+        height: 24,
+      );
+    } else {
+      return Image.asset(
+        'assets/images/gold_rank.png',
+        width: 24,
+        height: 24,
+      );
+    }
+  }
 
   Future<void> _fetchFriendsData(List<String> friendIds, String? token) async {
     List<Map<String, dynamic>> friends = [];
@@ -76,6 +99,9 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final token = ref.watch(tokenProvider);
+    final sortedFriends =
+        _friendsData.where((friend) => friend['username'] != null).toList()
+          ..sort((a, b) => (b['score'] ?? 0).compareTo(a['score'] ?? 0));
 
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -104,6 +130,10 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
         child: Column(
           children: [
             const SizedBox(height: 24),
+            ScoreProgressBar(
+              score: user.score ?? 0,
+            ),
+            const SizedBox(height: 28),
             UserProfileCard(
               user: user,
               token: token,
@@ -111,7 +141,6 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                 // Ajoute ici la logique de déconnexion si nécessaire
               },
             ),
-
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -119,17 +148,17 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                 const SizedBox(height: 24),
 
                 Card(
-                  elevation: 4,
+                  elevation: 1,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const Text(
-                          "Mes amis :",
+                          "Mes amis",
                           style: TextStyle(
                             fontFamily: 'Mulish',
                             fontSize: 20,
@@ -141,44 +170,69 @@ class _UserProfilePageState extends ConsumerState<UserProfilePage> {
                         if (_friendsData.isEmpty)
                           const Text("Aucun ami trouvé.")
                         else
-                          ..._friendsData.map((friend) {
-                            return Column(
-                              children: [
-                                ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  leading: CircleAvatar(
-                                    backgroundColor: Colors.deepPurple.shade100,
-                                    backgroundImage: (friend['picture'] != null && friend['picture'] != '')
-                                        ? NetworkImage(friend['picture'])
-                                        : null,
-                                    child: (friend['picture'] == null || friend['picture'] == '')
-                                        ? const Icon(Icons.person, color: Colors.deepPurple)
-                                        : null,
-                                  ),
-                                  title: Text(
-                                    friend['username'] ?? '',
+                          ...sortedFriends.map(
+                            (friend) => ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.deepPurple.shade100,
+                                backgroundImage:
+                                    (friend['picture'] != null &&
+                                        friend['picture'] != '')
+                                    ? NetworkImage(friend['picture'])
+                                    : null,
+                                child:
+                                    (friend['picture'] == null ||
+                                        friend['picture'] == '')
+                                    ? const Icon(
+                                        Icons.person,
+                                        color: Colors.deepPurple,
+                                      )
+                                    : null,
+                              ),
+                              title: Text(
+                                friend['username'] ?? '',
+                                style: const TextStyle(
+                                  fontFamily: 'Mulish',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "${friend['score'] ?? 0}",
                                     style: const TextStyle(
                                       fontFamily: 'Mulish',
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
+                                      color: Colors.black,
                                     ),
                                   ),
-                                ),
-                              ],
-                            );
-                          }),
+                                  const SizedBox(width: 4),
+                                  Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      // contour noir
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.black,
+                                        size:
+                                            20, // légèrement plus grand que l'icône jaune
+                                      ),
+                                      _getFriendScoreImage(friend['score'] ?? 0),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
                 ),
               ],
-            )
-
-
-
-
-
+            ),
           ],
         ),
       ),
