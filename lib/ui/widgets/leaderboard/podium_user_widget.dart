@@ -12,9 +12,9 @@ class PodiumUserWidget extends ConsumerWidget {
   final User currentUser;
   final int rank; // 0-based (0 => 1er au centre, 1 => 2ème à gauche, 2 => 3ème à droite)
   final double height; // hauteur totale fournie par le parent (incluant avatar)
-  final Color color; // accent (pas utilisé pour fond, mais conservé)
+  final Color color;
   final IconData? trophyIcon;
-  final Color? trophyColor; // couleur optionnelle pour le trophée
+  final Color? trophyColor;
 
   const PodiumUserWidget({
     super.key,
@@ -64,8 +64,6 @@ class PodiumUserWidget extends ConsumerWidget {
     final BorderRadiusGeometry borderRadius = const BorderRadius.only(
       topLeft: Radius.circular(12),
       topRight: Radius.circular(12),
-      bottomLeft: Radius.circular(0),
-      bottomRight: Radius.circular(0),
     );
 
     Color blockColor;
@@ -91,17 +89,16 @@ class PodiumUserWidget extends ConsumerWidget {
       final isRequestReceived = currentUser.friendRequestId.contains(user.id);
 
       if (isFriend) {
-        // déjà ami, pas d'action
+        // déjà ami
       } else if (isRequestSent) {
         actionWidget = const Icon(Icons.hourglass_top, color: Colors.white70, size: 18);
       } else if (isRequestReceived) {
         actionWidget = const Icon(Icons.mail, color: Colors.white70, size: 18);
       } else {
-        actionWidget = IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: const Icon(Icons.person_add, color: Colors.white, size: 20),
-          onPressed: _handleAddFriend,
+        // Utilisation de GestureDetector pour avoir la même taille que les autres icônes
+        actionWidget = GestureDetector(
+          onTap: _handleAddFriend,
+          child: const Icon(Icons.person_add, color: Colors.white, size: 18),
         );
       }
     }
@@ -127,34 +124,30 @@ class PodiumUserWidget extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Icone d'action juste au-dessus du username
-                    if (actionWidget != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: actionWidget,
-                      ),
-
-                    Text(
-                      user.username,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user.username,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.star,
-                          size: 16,
-                          color: Colors.amber,
-                        ),
+                        const Icon(Icons.star, size: 16, color: Colors.amber),
                         const SizedBox(width: 6),
                         Text(
                           '${user.score ?? 0}',
@@ -181,9 +174,7 @@ class PodiumUserWidget extends ConsumerWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: [
-                    BoxShadow(color: AppColors.primary, blurRadius: 4),
-                  ],
+                  boxShadow: [BoxShadow(color: AppColors.primary, blurRadius: 4)],
                 ),
                 child: ClipOval(
                   child: user.picture != null && user.picture!.isNotEmpty
@@ -194,9 +185,7 @@ class PodiumUserWidget extends ConsumerWidget {
                       color: Colors.white12,
                       child: Center(
                         child: Text(
-                          user.username.isNotEmpty
-                              ? user.username[0].toUpperCase()
-                              : '?',
+                          user.username.isNotEmpty ? user.username[0].toUpperCase() : '?',
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18),
                         ),
@@ -228,6 +217,17 @@ class PodiumUserWidget extends ConsumerWidget {
                   trophyIcon,
                   color: trophyColor ?? Colors.white.withOpacity(0.9),
                   size: 18,
+                ),
+              ),
+
+            // Icône action alignée à droite
+            if (actionWidget != null)
+              Positioned(
+                right: 8, // symétrique du trophée
+                top: avatarRadius + 6, // même hauteur
+                child: SizedBox(
+                  height: 18,
+                  child: Center(child: actionWidget),
                 ),
               ),
           ],
