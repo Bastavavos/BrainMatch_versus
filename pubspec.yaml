@@ -45,6 +45,7 @@ dependencies:
   hooks_riverpod: ^2.6.1
   flutter_dotenv: ^5.2.1
   flutter_riverpod: ^2.3.6
+  just_audio: ^0.10.5
   cached_network_image: ^3.3.1
   lucide_icons: ^0.257.0
   image_picker: ^1.0.4
@@ -96,6 +97,7 @@ flutter:
     - assets/images/himmel_lose.webp
     - assets/images/himmel_ia.png
     - assets/images/launcher_icon.png
+    - assets/audios/music.mp3
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

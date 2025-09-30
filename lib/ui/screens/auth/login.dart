@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../provider/background_music_provider.dart';
 import '../../../provider/user_provider.dart';
 import '../../widgets/button/form_button.dart';
 
@@ -21,6 +22,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // --- STOP MUSIQUE AU CHARGEMENT DE LA PAGE LOGIN ---
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final musicController = ref.read(backgroundMusicProvider.notifier);
+      musicController.stop();
+    });
+  }
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
