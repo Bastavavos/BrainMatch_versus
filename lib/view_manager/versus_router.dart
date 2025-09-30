@@ -323,6 +323,7 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
           case VersusState.beforeMatch:
             return BeforeMatchView(
               opponent: event.data['opponent'],
+              categoryName: widget.categoryName,
             );
 
           case VersusState.question:

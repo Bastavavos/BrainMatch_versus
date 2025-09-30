@@ -79,13 +79,15 @@ class SettingsScreen extends ConsumerWidget {
               leading: Icon(Icons.collections_bookmark_rounded),
             ),
             const SizedBox(height: 12),
+            const Text("Sons",
+                style: TextStyle(
+                    fontSize: 24,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Luckiest Guy')),
 
             ListTile(
               leading: Icon(volume > 0 ? Icons.volume_up : Icons.volume_off),
-              title: const Text(
-                "Musique de fond",
-                style: TextStyle(fontFamily: 'Mulish'),
-              ),
               subtitle: Slider(
                 value: volume,
                 min: 0,
@@ -107,13 +109,6 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
             ),
-
-            const Text("Help & Support",
-                style: TextStyle(
-                    fontSize: 24,
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Luckiest Guy')),
             const SizedBox(height: 12),
             const Text("Aide & Support",
                 style: TextStyle(

@@ -158,7 +158,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -232,6 +232,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 validator: (value) =>
                                 value == null || value.isEmpty ? 'Veuillez entrer un mot de passe' : null,
                                 style: TextStyle(color: primary),
+                                onFieldSubmitted: (_) => _login(),
                               ),
                             ),
 

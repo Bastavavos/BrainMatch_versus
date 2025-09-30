@@ -18,7 +18,7 @@ class SpeLayout extends StatelessWidget {
         ),
         title: titleWidget ??
             Image.asset(
-          'assets/images/title.png',
+          'assets/images/new_logo.png',
           height: 70,
           fit: BoxFit.contain,
         ),

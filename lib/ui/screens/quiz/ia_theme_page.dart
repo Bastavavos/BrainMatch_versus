@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../view_manager/ia_router.dart';
 import '../../layout/special_layout.dart';
+import '../../theme.dart';
 
 
 class QuizIaThemePage extends StatefulWidget {
@@ -75,10 +76,11 @@ class _QuizIaThemePageState extends State<QuizIaThemePage> {
                           Text(
                             'Quel thème veux-tu explorer ?',
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontFamily: 'Mulish',
+                              color: AppColors.background,
+                              height: 1.4,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -91,6 +93,7 @@ class _QuizIaThemePageState extends State<QuizIaThemePage> {
                             decoration: InputDecoration(
                               hintText: 'Ex : mythologie, sport, cinéma...',
                               hintStyle: const TextStyle(
+                                  fontFamily: 'Mulish',
                                   color: Colors.white70,
                                   fontSize: 20),
                               filled: true,
@@ -132,18 +135,20 @@ class _QuizIaThemePageState extends State<QuizIaThemePage> {
                             ),
                           ],
                         ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Lancer le quiz',
-                          style: TextStyle(
-                            fontFamily: 'Luckiest Guy',
-                            color: Colors.white,
-                            fontSize: 20,
+                        child: const Center(
+                          child: Text(
+                            'Lancer le quiz',
+                            style: TextStyle(
+                              fontFamily: 'Luckiest Guy',
+                              color: Colors.white,
+                              fontSize: 20,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
+
 
                   const SizedBox(height: 32),
                 ],

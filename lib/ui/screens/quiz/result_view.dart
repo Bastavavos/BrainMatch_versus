@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../service/api_service.dart';
 import '../../layout/special_layout.dart';
+import '../../theme.dart';
 
 class ResultView extends StatelessWidget {
   final Map<String, dynamic> resultData;
@@ -12,32 +14,173 @@ class ResultView extends StatelessWidget {
     return 'assets/images/himmel_win.png';
   }
 
-  Widget buildPlayerCard(Map<String, dynamic> player, int totalQuestions) {
+  Widget buildPlayerCard(Map<String, dynamic> player, Map<String, dynamic> opponent) {
     final username = player['username'] ?? 'Joueur';
-    final image = player['image'] ?? '';
-    final score = player['score'] ?? 0;
+    final picturePath = player['picture'] ?? player['image'] ?? '';
+    final imageUrl = (picturePath.isNotEmpty)
+        ? Uri.parse(ApiService.baseUrl).resolve(picturePath).toString()
+        : null;
+
+    final int score = player['score'] ?? 0;
+    final int opponentScore = opponent['score'] ?? 0;
+
+    // Déterminer les points selon les règles
+    String pointsText;
+    Color pointsColor;
+    if (score > opponentScore) {
+      pointsText = '+10';
+      pointsColor = Colors.greenAccent;
+    } else if (score < opponentScore) {
+      pointsText = '-10';
+      pointsColor = Colors.redAccent;
+    } else {
+      pointsText = '+5';
+      pointsColor = Colors.yellowAccent;
+    }
 
     return Column(
       children: [
         CircleAvatar(
-          backgroundImage: image.isNotEmpty ? NetworkImage(image) : null,
-          radius: 40,
-          child: image.isEmpty ? const Icon(Icons.person, size: 40) : null,
+          radius: 50,
+          backgroundColor: AppColors.light,
+          backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
+              ? NetworkImage(imageUrl)
+              : null,
+          child: (imageUrl == null || imageUrl.isEmpty)
+              ? const Icon(Icons.person, size: 50, color: AppColors.primary)
+              : null,
         ),
         const SizedBox(height: 8),
         Text(
           username,
           style: const TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            fontFamily: 'Luckiest Guy',
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
-          '$score / $totalQuestions',
-          style: const TextStyle(fontSize: 16, color: Colors.white),
+          pointsText,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: pointsColor,
+          ),
         ),
       ],
     );
   }
+
+
+  // Widget buildPlayerCard(Map<String, dynamic> player, int opponentScore) {
+  //   final username = player['username'] ?? 'Joueur';
+  //   final picturePath = player['picture'] ?? player['image'] ?? '';
+  //
+  //   final imageUrl = (picturePath.isNotEmpty)
+  //       ? Uri.parse(ApiService.baseUrl).resolve(picturePath).toString()
+  //       : null;
+  //
+  //   final score = player['score'] ?? 0;
+  //
+  //   // Calcul des points à afficher
+  //   String pointsText = '';
+  //   if (score > opponentScore) {
+  //     pointsText = '+10';
+  //   } else if (score < opponentScore) {
+  //     pointsText = '-10';
+  //   } else {
+  //     pointsText = '+5';
+  //   }
+  //
+  //   return Column(
+  //     children: [
+  //       CircleAvatar(
+  //         radius: 50,
+  //         backgroundColor: AppColors.light,
+  //         backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
+  //             ? NetworkImage(imageUrl)
+  //             : null,
+  //         child: (imageUrl == null || imageUrl.isEmpty)
+  //             ? const Icon(Icons.person, size: 50, color: AppColors.primary)
+  //             : null,
+  //       ),
+  //       const SizedBox(height: 8),
+  //       Text(
+  //         username,
+  //         style: const TextStyle(
+  //           fontFamily: 'Luckiest Guy',
+  //           fontSize: 22,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.white,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 4),
+  //       Text(
+  //         pointsText,
+  //         style: TextStyle(
+  //           fontSize: 20,
+  //           fontWeight: FontWeight.bold,
+  //           color: (score >= opponentScore) ? Colors.greenAccent : Colors.redAccent,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+
+  // Widget buildPlayerCard(Map<String, dynamic> player, int opponentScore) {
+  //   final username = player['username'] ?? 'Joueur';
+  //   final picturePath = player['picture'] ?? player['image'] ?? '';
+  //
+  //   final imageUrl = (picturePath.isNotEmpty)
+  //       ? Uri.parse(ApiService.baseUrl).resolve(picturePath).toString()
+  //       : null;
+  //
+  //   final score = player['score'] ?? 0;
+  //
+  //   // Calcul des points à afficher
+  //   String pointsText = '';
+  //   if (score > opponentScore) {
+  //     pointsText = '+10';
+  //   } else if (score < opponentScore) {
+  //     pointsText = '-10';
+  //   } else {
+  //     pointsText = '+5';
+  //   }
+  //
+  //   return Column(
+  //     children: [
+  //       CircleAvatar(
+  //         radius: 50,
+  //         backgroundColor: AppColors.light,
+  //         backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
+  //             ? NetworkImage(imageUrl)
+  //             : null,
+  //         child: (imageUrl == null || imageUrl.isEmpty)
+  //             ? const Icon(Icons.person, size: 50, color: AppColors.primary)
+  //             : null,
+  //       ),
+  //       const SizedBox(height: 8),
+  //       Text(
+  //         username,
+  //         style: const TextStyle(
+  //           fontFamily: 'Luckiest Guy',
+  //           fontSize: 22,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.white,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 4),
+  //       Text(
+  //         '$score / $totalQuestions',
+  //         style: const TextStyle(fontSize: 18, color: Colors.white70),
+  //       ),
+  //     ],
+  //   );
+  // }
+
 
   Widget buildQuestionHistory(List<dynamic>? questions) {
     if (questions == null || questions.isEmpty) {
@@ -142,10 +285,19 @@ class ResultView extends StatelessWidget {
                 if (isVersus) ...[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: normalizedPlayers
-                        .map((p) => buildPlayerCard(p, totalQuestions))
-                        .toList(),
+                    children: [
+                      buildPlayerCard(normalizedPlayers[0], normalizedPlayers[1]),
+                      buildPlayerCard(normalizedPlayers[1], normalizedPlayers[0]),
+                    ],
                   ),
+
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //   children: [
+                  //     buildPlayerCard(normalizedPlayers[0], normalizedPlayers[1]['score'] ?? 0),
+                  //     buildPlayerCard(normalizedPlayers[1], normalizedPlayers[0]['score'] ?? 0),
+                  //   ],
+                  // ),
                   const SizedBox(height: 30),
                 ],
 

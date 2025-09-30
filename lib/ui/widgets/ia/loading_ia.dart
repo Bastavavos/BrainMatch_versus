@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../layout/special_layout.dart';
+import '../../theme.dart';
 
 class LoadingContent extends StatelessWidget {
   const LoadingContent({super.key});
@@ -32,7 +33,7 @@ class LoadingContent extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: const [
                     CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.background),
                     ),
                     SizedBox(height: 16),
                     Padding(
@@ -42,12 +43,9 @@ class LoadingContent extends StatelessWidget {
                         textAlign: TextAlign.justify,
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontFamily: 'Luckiest Guy',
+                          color: AppColors.background,
                           height: 1.4,
-                          shadows: [
-                            Shadow(color: Colors.black54, blurRadius: 4),
-                          ],
                         ),
                       ),
                     ),

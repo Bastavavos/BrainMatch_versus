@@ -8,8 +8,9 @@ import '../../theme.dart';
 
 class BeforeMatchView extends ConsumerStatefulWidget {
   final Map<String, dynamic> opponent;
+  final String categoryName;
 
-  const BeforeMatchView({super.key, required this.opponent});
+  const BeforeMatchView({super.key, required this.opponent, required this.categoryName});
 
   @override
   ConsumerState<BeforeMatchView> createState() => _BeforeMatchViewState();
@@ -126,6 +127,16 @@ class _BeforeMatchViewState extends ConsumerState<BeforeMatchView>
                   ),
                   textAlign: TextAlign.center,
                 ),
+              ),
+
+              Text(
+                widget.categoryName,
+                style: const TextStyle(
+                  fontFamily: 'Luckiest Guy',
+                  fontSize: 36,
+                  color: AppColors.accent,
+                ),
+                textAlign: TextAlign.center,
               ),
 
               const Spacer(flex: 1),

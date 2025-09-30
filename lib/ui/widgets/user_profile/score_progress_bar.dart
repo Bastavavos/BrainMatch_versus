@@ -107,6 +107,8 @@ class ScoreProgressBar extends StatelessWidget {
             children: [
               Column(
                 children: [
+                  _getMilestoneImage(currentMilestone),
+                  const SizedBox(height: 1),
                   Text(
                     "$currentMilestone",
                     style: const TextStyle(
@@ -116,8 +118,7 @@ class ScoreProgressBar extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 1),
-                  _getMilestoneImage(currentMilestone),
+
                 ],
               ),
               // Texte au milieu
@@ -131,6 +132,8 @@ class ScoreProgressBar extends StatelessWidget {
               ),
               Column(
                 children: [
+                  _getMilestoneImage(nextMilestone),
+                  const SizedBox(height: 1),
                   Text(
                     "$nextMilestone",
                     style: const TextStyle(
@@ -139,8 +142,6 @@ class ScoreProgressBar extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(height: 1),
-                  _getMilestoneImage(nextMilestone),
                 ],
               ),
             ],
