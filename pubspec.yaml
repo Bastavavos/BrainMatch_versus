@@ -97,6 +97,8 @@ flutter:
     - assets/images/himmel_ia.png
     - assets/images/ia_logo.png
     - assets/images/launcher_icon.png
+    - assets/images/fond-1.webp
+    - assets/images/fond-2.webp
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

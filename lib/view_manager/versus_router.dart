@@ -56,6 +56,13 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
 
   bool questionTimerStarted = false;
 
+  // --- Nouveaux champs pour garder l'historique comme en Solo/Ia ---
+  final List<Map<String, dynamic>> playerQuestions = [];
+  Map<String, dynamic>? currentQuestion;
+
+  // --- On conserve l'adversaire reçu dans onPrepareGame ---
+  Map<String, dynamic>? opponentPlayer;
+
   @override
   void initState() {
     super.initState();
@@ -81,8 +88,8 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
         },
 
         onPrepareGame: (data) {
+          // Extract opponent and save it locally for later (onGameOver)
           final opponent = extractOpponent(data['players']);
-
           if (opponent == null) {
             _controller.add(VersusEvent(
               state: VersusState.error,
@@ -91,33 +98,136 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
             return;
           }
 
+          // sauvegarde l'adversaire pour usage ultérieur
+          opponentPlayer = opponent;
+
           _controller.add(VersusEvent(state: VersusState.beforeMatch, data: {
             'opponent': opponent,
           }));
         },
 
-        onGameStart: handleGameStart,
+        onGameStart: (data) {
+          // Réinitialisations au démarrage de la partie
+          if (!mounted) return;
+          roomId = data['roomId'];
+          totalQuestions = data['totalQuestions'] ?? totalQuestions;
+
+          setState(() {
+            timeLeft = 120;
+            selectedAnswer = null;
+            correctAnswer = null;
+            playerQuestions.clear();
+            currentQuestion = null;
+            questionTimerStarted = false;
+          });
+
+          _controller.add(VersusEvent(
+            state: VersusState.question,
+            data: {
+              ...data,
+              'totalQuestions': totalQuestions,
+            },
+          ));
+        },
 
         onNewQuestion: (data) {
           if (!mounted) return;
+
           questionTimerStarted = false;
+
+          // mémorise la question courante et reset la réponse sélectionnée
+          currentQuestion = data['question'] as Map<String, dynamic>?;
+          selectedAnswer = null;
+          correctAnswer = null;
 
           _controller.add(VersusEvent(state: VersusState.question, data: {
             ...data,
             'totalQuestions': totalQuestions,
           }));
         },
+
         onAnswerFeedback: (data) {
           if (!mounted) return;
+
           setState(() {
             correctAnswer = data['correctAnswer'];
           });
+
+          // stocke la réponse du joueur courant (si on a bien une question et une réponse sélectionnée)
+          if (currentQuestion != null && selectedAnswer != null) {
+            playerQuestions.add({
+              "question": currentQuestion,
+              "answer": selectedAnswer,
+              "correct": selectedAnswer == data['correctAnswer'],
+            });
+
+            // évite d'ajouter plusieurs fois la même réponse si on reçoit plusieurs feedbacks :
+            selectedAnswer = null;
+          }
         },
+
         onGameOver: (data) {
+          // Le backend n'envoie rien : on reconstruit le résultat localement
+          debugPrint('onGameOver payload from server: $data');
           countdownTimer?.cancel();
           if (!mounted) return;
-          _controller.add(VersusEvent(state: VersusState.result, data: data));
+
+          final user = ref.read(currentUserProvider);
+          if (user == null) {
+            _controller.add(VersusEvent(
+              state: VersusState.error,
+              data: "Utilisateur non authentifié.",
+            ));
+            return;
+          }
+
+          if (opponentPlayer == null) {
+            _controller.add(VersusEvent(
+              state: VersusState.error,
+              data: "Adversaire non sauvegardé.",
+            ));
+            return;
+          }
+
+          // Calcul du score du joueur courant :
+          // priorité : score renvoyé par le backend (data['score']), sinon calcul local (nombres de correct)
+          final int myScoreFromBackend = (data['score'] is int) ? data['score'] as int : -1;
+          final int myLocalCorrectCount =
+              playerQuestions.where((q) => q['correct'] == true).length;
+          final int computedMyScore = myScoreFromBackend >= 0 ? myScoreFromBackend : myLocalCorrectCount;
+
+          // Essaie de récupérer le score de l'adversaire si disponible dans opponentPlayer ou payload
+          final int opponentScoreFromOpponentObject =
+          (opponentPlayer!['score'] is int) ? opponentPlayer!['score'] as int : -1;
+          final int opponentScoreFromBackend =
+          (data['opponentScore'] is int) ? data['opponentScore'] as int : -1;
+          final int computedOpponentScore = opponentScoreFromOpponentObject >= 0
+              ? opponentScoreFromOpponentObject
+              : (opponentScoreFromBackend >= 0 ? opponentScoreFromBackend : 0);
+
+          // --- Mon joueur (current) ---
+          final Map<String, dynamic> currentPlayer = {
+            'username': user.username ,
+            'image': user.picture ,
+            'score': computedMyScore,
+            'questions': List<Map<String, dynamic>>.from(playerQuestions),
+          };
+
+          // --- L’adversaire (conservé depuis onPrepareGame) ---
+          final Map<String, dynamic> opponent = {
+            'username': opponentPlayer!['username'] ?? opponentPlayer!['name'] ?? 'Adversaire',
+            'image': opponentPlayer!['image'] ?? opponentPlayer!['picture'] ?? '',
+            'score': computedOpponentScore,
+          };
+
+          final resultPayload = {
+            'players': [currentPlayer, opponent],
+            'totalQuestions': totalQuestions,
+          };
+
+          _controller.add(VersusEvent(state: VersusState.result, data: resultPayload));
         },
+
         onOpponentLeft: (data) {
           countdownTimer?.cancel();
           if (!mounted) return;
@@ -130,37 +240,29 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
     });
   }
 
-  Map<String, dynamic>? extractOpponent(List<dynamic>? players) {
+  /// Extrait l'adversaire depuis un payload qui peut être List ou Map
+  Map<String, dynamic>? extractOpponent(dynamic players) {
     if (players == null) return null;
 
-    return players.firstWhere(
-          (p) => p['_id'] != currentUserId,
-      orElse: () => null,
-    );
-  }
-
-  void handleGameStart(dynamic data) {
-    if (!mounted) return;
-
-    roomId = data['roomId'];
-    totalQuestions = data['totalQuestions'];
-
-    final opponent = extractOpponent(data['players']);
-    if (opponent == null) {
-      _controller.add(VersusEvent(
-        state: VersusState.error,
-        data: "Adversaire non trouvé.",
-      ));
-      return;
+    try {
+      if (players is List) {
+        for (final p in players) {
+          if (p is Map && p['_id'] != currentUserId) {
+            return Map<String, dynamic>.from(p);
+          }
+        }
+      } else if (players is Map) {
+        for (final v in players.values) {
+          if (v is Map && v['_id'] != currentUserId) {
+            return Map<String, dynamic>.from(v);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('extractOpponent error: $e');
     }
 
-    _controller.add(VersusEvent(
-      state: VersusState.question,
-      data: {
-        ...data,
-        'totalQuestions': totalQuestions,
-      },
-    ));
+    return null;
   }
 
   void startTimer() {
@@ -256,7 +358,9 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
             );
 
           case VersusState.result:
-            return ResultView(resultData: event.data);
+            return ResultView(
+              resultData: event.data, // players: [currentPlayer, opponentPlayer], totalQuestions
+            );
 
           case VersusState.opponentLeft:
             return OpponentLeftView(message: event.data['message']);
@@ -268,4 +372,3 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
     );
   }
 }
-

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:brain_match/provider/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../network/socket_manager.dart';
 import '../ui/widgets/error_view.dart';
@@ -20,7 +22,7 @@ class IaEvent {
   IaEvent({required this.state, this.data});
 }
 
-class IaRouter extends StatefulWidget {
+class IaRouter extends ConsumerStatefulWidget {
   final String token;
   final String theme;
 
@@ -31,10 +33,10 @@ class IaRouter extends StatefulWidget {
   });
 
   @override
-  State<IaRouter> createState() => _IaRouterState();
+  ConsumerState<IaRouter> createState() => _IaRouterState();
 }
 
-class _IaRouterState extends State<IaRouter> {
+class _IaRouterState extends ConsumerState<IaRouter> {
   final _controller = StreamController<IaEvent>.broadcast();
   late final SocketClient _socket;
 
@@ -46,6 +48,9 @@ class _IaRouterState extends State<IaRouter> {
 
   String? selectedAnswer;
   String? correctAnswer;
+  Map<String, dynamic>? currentQuestion;
+
+  List<Map<String, dynamic>> playerQuestions = [];
 
   @override
   void initState() {
@@ -68,6 +73,8 @@ class _IaRouterState extends State<IaRouter> {
           timeLeft = 120;
           selectedAnswer = null;
           correctAnswer = null;
+          playerQuestions = [];
+          currentQuestion = null;
         });
         startTimer();
 
@@ -83,6 +90,7 @@ class _IaRouterState extends State<IaRouter> {
           timeLeft = 120;
           selectedAnswer = null;
           correctAnswer = null;
+          currentQuestion = data['question'] as Map<String, dynamic>?;
         });
         startTimer();
 
@@ -97,12 +105,37 @@ class _IaRouterState extends State<IaRouter> {
         setState(() {
           correctAnswer = data['correctAnswer'];
         });
+
+        if (currentQuestion != null && selectedAnswer != null) {
+          playerQuestions.add({
+            "question": currentQuestion,
+            "answer": selectedAnswer,
+            "correct": selectedAnswer == data['correctAnswer'],
+          });
+        }
       },
       onGameOver: (data) {
         countdownTimer?.cancel();
         if (!mounted) return;
 
-        _controller.add(IaEvent(state: IaState.result, data: data));
+        // On récupère les infos utilisateur depuis Riverpod
+        final user = ref.read(currentUserProvider);
+        final username = user?.username ?? '';
+        final imageUrl = user?.picture ?? '';
+
+        final resultData = {
+          "score": data['score'],
+          "totalQuestions": totalQuestions,
+          "players": [
+            {
+              "username": username,
+              "image": imageUrl,
+              "questions": playerQuestions,
+            }
+          ]
+        };
+
+        _controller.add(IaEvent(state: IaState.result, data: resultData));
       },
       onOpponentLeft: (_) {},
     );
@@ -124,14 +157,10 @@ class _IaRouterState extends State<IaRouter> {
       if (remaining <= Duration.zero) {
         timer.cancel();
         if (!mounted) return;
-        setState(() {
-          timeLeft = 0;
-        });
+        setState(() => timeLeft = 0);
       } else {
         if (!mounted) return;
-        setState(() {
-          timeLeft = remaining.inMilliseconds.toDouble();
-        });
+        setState(() => timeLeft = remaining.inMilliseconds.toDouble());
       }
     });
   }
@@ -146,6 +175,11 @@ class _IaRouterState extends State<IaRouter> {
 
   @override
   Widget build(BuildContext context) {
+    // On récupère le user **en direct** depuis le provider
+    final user = ref.watch(currentUserProvider);
+    final username = user?.username ?? '';
+    final imageUrl = user?.picture ?? '';
+
     return StreamBuilder<IaEvent>(
       stream: _controller.stream,
       builder: (context, snapshot) {
@@ -166,6 +200,8 @@ class _IaRouterState extends State<IaRouter> {
               correctAnswer: correctAnswer,
               onAnswer: (answer) {
                 if (!mounted) return;
+                selectedAnswer = answer;
+
                 setState(() {
                   selectedAnswer = answer;
                 });
@@ -179,7 +215,14 @@ class _IaRouterState extends State<IaRouter> {
             );
 
           case IaState.result:
-            return ResultView(resultData: event.data);
+          // On s'assure que les infos user sont mises à jour
+            final resultData = Map<String, dynamic>.from(event.data);
+            if (resultData['players'] != null && resultData['players'] is List) {
+              resultData['players'][0]['username'] = username;
+              resultData['players'][0]['image'] = imageUrl;
+            }
+
+            return ResultView(resultData: resultData);
 
           case IaState.error:
             return ErrorView(message: event.data);
