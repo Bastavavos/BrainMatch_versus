@@ -15,7 +15,7 @@ class BackgroundMusicController extends StateNotifier<double> {
   Future<void> playMusic() async {
     if (!_player.playing) { // ✅ Ne joue que si ce n'est pas déjà en train de jouer
       try {
-        await _player.setAsset('assets/audios/music2.mp3'); // ton fichier
+        await _player.setAsset('assets/audios/music3.mp3'); // ton fichier
         _player.setLoopMode(LoopMode.all);                 // boucle infinie
         _player.setVolume(state);
         await _player.play();

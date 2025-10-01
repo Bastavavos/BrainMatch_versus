@@ -105,6 +105,7 @@ flutter:
     - assets/images/fond-2.webp
     - assets/audios/music.mp3
     - assets/audios/music2.mp3
+    - assets/audios/music3.mp3
 
     - .env
 
