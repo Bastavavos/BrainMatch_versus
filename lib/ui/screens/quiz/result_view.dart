@@ -21,22 +21,10 @@ class ResultView extends StatelessWidget {
         ? Uri.parse(ApiService.baseUrl).resolve(picturePath).toString()
         : null;
 
-    final int score = player['score'] ?? 0;
-    final int opponentScore = opponent['score'] ?? 0;
+    final int gain = player['gain'] ?? 0;
 
-    // Déterminer les points selon les règles
-    String pointsText;
-    Color pointsColor;
-    if (score > opponentScore) {
-      pointsText = '+10';
-      pointsColor = Colors.greenAccent;
-    } else if (score < opponentScore) {
-      pointsText = '-10';
-      pointsColor = Colors.redAccent;
-    } else {
-      pointsText = '+5';
-      pointsColor = Colors.yellowAccent;
-    }
+    // Utiliser directement le gain envoyé par le backend
+    String pointsText = (gain > 0) ? '+$gain' : '$gain';
 
     return Column(
       children: [
@@ -56,130 +44,21 @@ class ResultView extends StatelessWidget {
           style: const TextStyle(
             fontFamily: 'Luckiest Guy',
             fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.background,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           pointsText,
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: pointsColor,
+            fontSize: 24,
+            fontFamily: 'Luckiest Guy',
+            color: AppColors.accent
           ),
         ),
       ],
     );
   }
-
-
-  // Widget buildPlayerCard(Map<String, dynamic> player, int opponentScore) {
-  //   final username = player['username'] ?? 'Joueur';
-  //   final picturePath = player['picture'] ?? player['image'] ?? '';
-  //
-  //   final imageUrl = (picturePath.isNotEmpty)
-  //       ? Uri.parse(ApiService.baseUrl).resolve(picturePath).toString()
-  //       : null;
-  //
-  //   final score = player['score'] ?? 0;
-  //
-  //   // Calcul des points à afficher
-  //   String pointsText = '';
-  //   if (score > opponentScore) {
-  //     pointsText = '+10';
-  //   } else if (score < opponentScore) {
-  //     pointsText = '-10';
-  //   } else {
-  //     pointsText = '+5';
-  //   }
-  //
-  //   return Column(
-  //     children: [
-  //       CircleAvatar(
-  //         radius: 50,
-  //         backgroundColor: AppColors.light,
-  //         backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
-  //             ? NetworkImage(imageUrl)
-  //             : null,
-  //         child: (imageUrl == null || imageUrl.isEmpty)
-  //             ? const Icon(Icons.person, size: 50, color: AppColors.primary)
-  //             : null,
-  //       ),
-  //       const SizedBox(height: 8),
-  //       Text(
-  //         username,
-  //         style: const TextStyle(
-  //           fontFamily: 'Luckiest Guy',
-  //           fontSize: 22,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.white,
-  //         ),
-  //       ),
-  //       const SizedBox(height: 4),
-  //       Text(
-  //         pointsText,
-  //         style: TextStyle(
-  //           fontSize: 20,
-  //           fontWeight: FontWeight.bold,
-  //           color: (score >= opponentScore) ? Colors.greenAccent : Colors.redAccent,
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-
-  // Widget buildPlayerCard(Map<String, dynamic> player, int opponentScore) {
-  //   final username = player['username'] ?? 'Joueur';
-  //   final picturePath = player['picture'] ?? player['image'] ?? '';
-  //
-  //   final imageUrl = (picturePath.isNotEmpty)
-  //       ? Uri.parse(ApiService.baseUrl).resolve(picturePath).toString()
-  //       : null;
-  //
-  //   final score = player['score'] ?? 0;
-  //
-  //   // Calcul des points à afficher
-  //   String pointsText = '';
-  //   if (score > opponentScore) {
-  //     pointsText = '+10';
-  //   } else if (score < opponentScore) {
-  //     pointsText = '-10';
-  //   } else {
-  //     pointsText = '+5';
-  //   }
-  //
-  //   return Column(
-  //     children: [
-  //       CircleAvatar(
-  //         radius: 50,
-  //         backgroundColor: AppColors.light,
-  //         backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
-  //             ? NetworkImage(imageUrl)
-  //             : null,
-  //         child: (imageUrl == null || imageUrl.isEmpty)
-  //             ? const Icon(Icons.person, size: 50, color: AppColors.primary)
-  //             : null,
-  //       ),
-  //       const SizedBox(height: 8),
-  //       Text(
-  //         username,
-  //         style: const TextStyle(
-  //           fontFamily: 'Luckiest Guy',
-  //           fontSize: 22,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.white,
-  //         ),
-  //       ),
-  //       const SizedBox(height: 4),
-  //       Text(
-  //         '$score / $totalQuestions',
-  //         style: const TextStyle(fontSize: 18, color: Colors.white70),
-  //       ),
-  //     ],
-  //   );
-  // }
 
 
   Widget buildQuestionHistory(List<dynamic>? questions) {
@@ -290,18 +169,9 @@ class ResultView extends StatelessWidget {
                       buildPlayerCard(normalizedPlayers[1], normalizedPlayers[0]),
                     ],
                   ),
-
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //   children: [
-                  //     buildPlayerCard(normalizedPlayers[0], normalizedPlayers[1]['score'] ?? 0),
-                  //     buildPlayerCard(normalizedPlayers[1], normalizedPlayers[0]['score'] ?? 0),
-                  //   ],
-                  // ),
                   const SizedBox(height: 30),
                 ],
 
-                // Historique de ton joueur courant (toujours premier dans la liste)
                 buildQuestionHistory(
                   (normalizedPlayers.isNotEmpty
                       ? normalizedPlayers.first['questions']

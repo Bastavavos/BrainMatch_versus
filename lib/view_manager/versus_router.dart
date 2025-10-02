@@ -207,11 +207,15 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
               ? opponentScoreFromOpponentObject
               : (opponentScoreFromBackend >= 0 ? opponentScoreFromBackend : 0);
 
+          final int myGain = data['gains']?[user.username] ?? 0;
+          final int opponentGain = data['gains']?[opponentPlayer!['username']] ?? 0;
+
           // --- Mon joueur (current) ---
           final Map<String, dynamic> currentPlayer = {
             'username': user.username ,
             'image': user.picture ,
             'score': computedMyScore,
+            'gain': myGain,
             'questions': List<Map<String, dynamic>>.from(playerQuestions),
           };
 
@@ -220,6 +224,7 @@ class _VersusRouterState extends ConsumerState<VersusRouter> {
             'username': opponentPlayer!['username'] ?? opponentPlayer!['name'] ?? 'Adversaire',
             'image': opponentPlayer!['image'] ?? opponentPlayer!['picture'] ?? '',
             'score': computedOpponentScore,
+            'gain': opponentGain,
           };
 
           final resultPayload = {
